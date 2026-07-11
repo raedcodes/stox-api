@@ -24,5 +24,15 @@ class UserSeeder extends Seeder
 
         $admin->assignRole('super-admin');
 
+        //create Owner
+        $owner = User::create([
+            'name' => 'Owner Owner',
+            'email' => 'owner@business-suite.com',
+            'password' => Hash::make(env('OWNER_PASSWORD')),
+            'email_verified_at' => now()
+        ]);
+        
+        $owner->assignRole('owner');
+
     }
 }
