@@ -26,15 +26,7 @@ class UsersTable
                 IconColumn::make('is_active')
                     ->label('Active') 
                     ->boolean(),
-                //if toggled, set to date now, else null
-                ToggleColumn::make('email_verified_at')
-                    ->label('Verified')
-                    ->getStateUsing(fn (User $record): bool => $record->email_verified_at !== null)
-                    ->updateStateUsing(function (User $record, bool $state): void {
-                        $record->email_verified_at = $state ? now() : null;
-                        $record->save();
-                    }),
-                TextColumn::make('verified_at_display')
+                TextColumn::make('email_verified_at')
                     ->label('Email Verified at')
                     ->state(fn (User $record) => $record->email_verified_at)
                     ->dateTime()

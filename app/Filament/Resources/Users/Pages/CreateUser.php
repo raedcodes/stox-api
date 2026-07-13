@@ -14,4 +14,12 @@ class CreateUser extends CreateRecord
         // Runs after the form fields are saved to the database.
         $this->record->assignRole('owner');
     }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['email_verified_at'] = now(); 
+    
+        return $data;
+    }
+
 }
