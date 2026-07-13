@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -22,8 +23,10 @@ class UserForm
                 // DateTimePicker::make('email_verified_at'),
                 TextInput::make('password')
                     ->password()
-                    ->required()
+                    ->autocomplete('new-password')
+                    ->required(fn (string $operation): bool => $operation === 'create')
                     ->confirmed()
+                    ->dehydrated(fn (?string $state): bool => filled($state))
                     ->rules([
                         Password::min(8)
                             ->letters()
@@ -35,8 +38,10 @@ class UserForm
                 TextInput::make('password_confirmation')
                     ->label('Confirmed Password')
                     ->password()
-                    ->required()
+                    ->autocomplete('new-password')
+                    ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(false),
+                Checkbox::make('is_active')
             ]);
     }
 }
