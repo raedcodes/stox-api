@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
+use App\UserRole;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord
@@ -12,7 +13,7 @@ class CreateUser extends CreateRecord
     protected function afterCreate(): void
     {
         // Runs after the form fields are saved to the database.
-        $this->record->assignRole('owner');
+        $this->record->assignRole(UserRole::Owner);
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

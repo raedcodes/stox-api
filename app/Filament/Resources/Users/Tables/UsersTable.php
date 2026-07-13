@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Tables;
 
 use App\Models\User;
+use App\UserRole;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -13,8 +14,6 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
 
 class UsersTable
 {
@@ -48,11 +47,7 @@ class UsersTable
             ])
             ->filters([
                 SelectFilter::make('role')
-                    ->options(fn () => Role::query()
-                        ->where('name', '!=', 'super-admin')
-                        ->pluck('name')
-                        ->mapWithKeys(fn (string $name) => [$name => Str::headline($name)])
-                        ->toArray())
+                    ->options(UserRole::options())
                     ->query(fn (Builder $query, array $data) => filled($data['value'] ?? null)
                         ? $query->whereHas('roles', fn (Builder $query) => $query->where('name', $data['value']))
                         : $query),

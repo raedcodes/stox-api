@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\UserRole;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -22,7 +23,7 @@ class UserSeeder extends Seeder
             'email_verified_at' => now()
         ]);
 
-        $admin->assignRole('super-admin');
+        $admin->assignRole(UserRole::SuperAdmin);
 
         //create Owner
         $owner = User::create([
@@ -32,7 +33,7 @@ class UserSeeder extends Seeder
             'email_verified_at' => now()
         ]);
         
-        $owner->assignRole('owner');
+        $owner->assignRole(UserRole::Owner);
 
     }
 }

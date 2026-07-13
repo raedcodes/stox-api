@@ -3,13 +3,12 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Models\User;
+use App\UserRole;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
-use Spatie\Permission\Models\Role;
 
 class UserForm
 {
@@ -47,12 +46,8 @@ class UserForm
                 Select::make('role')
                     ->label('Role')
                     ->visibleOn('edit')
-                    ->default(fn (?User $record) => $record?->getRoleNames()->first() ?? 'owner')
-                    ->options(fn () => Role::query()
-                        ->where('name', '!=', 'super-admin')
-                        ->pluck('name')
-                        ->mapWithKeys(fn (string $name) => [$name => Str::headline($name)])
-                        ->toArray()),
+                    ->default(fn (?User $record) => $record?->getRoleNames()->first() ?? UserRole::Owner)
+                    ->options(UserRole::options()),
                 Checkbox::make('is_active')
             ]);
     }
