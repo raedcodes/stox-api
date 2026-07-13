@@ -10,7 +10,11 @@ use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class UsersTable
 {
@@ -26,6 +30,9 @@ class UsersTable
                 IconColumn::make('is_active')
                     ->label('Active') 
                     ->boolean(),
+                TextColumn::make('role')
+                    ->label('Role')
+                    ->state(fn (User $record) => $record->getRoleNames()->first()),
                 TextColumn::make('email_verified_at')
                     ->label('Email Verified at')
                     ->state(fn (User $record) => $record->email_verified_at)
@@ -40,7 +47,15 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('role')
+                    ->options(fn () => Role::query()
+                        ->where('name', '!=', 'super-admin')
+                        ->pluck('name')
+                        ->mapWithKeys(fn (string $name) => [$name => Str::headline($name)])
+                        ->toArray())
+                    ->query(fn (Builder $query, array $data) => filled($data['value'] ?? null)
+                        ? $query->whereHas('roles', fn (Builder $query) => $query->where('name', $data['value']))
+                        : $query),
             ])
             ->recordActions([
                 EditAction::make(),

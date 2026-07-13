@@ -19,9 +19,16 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        unset($data['password']);
+        unset($data['password'], $data['role']);
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        if (isset($this->data['role'])) {
+            $this->record->syncRoles($this->data['role']);
+        }
     }
 
 }

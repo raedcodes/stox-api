@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Models\User;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Permission\Models\Role;
 
 class UserForm
 {
@@ -42,6 +44,15 @@ class UserForm
                     ->autocomplete('new-password')
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(false),
+                Select::make('role')
+                    ->label('Role')
+                    ->visibleOn('edit')
+                    ->default(fn (?User $record) => $record?->getRoleNames()->first() ?? 'owner')
+                    ->options(fn () => Role::query()
+                        ->where('name', '!=', 'super-admin')
+                        ->pluck('name')
+                        ->mapWithKeys(fn (string $name) => [$name => Str::headline($name)])
+                        ->toArray()),
                 Checkbox::make('is_active')
             ]);
     }

@@ -52,7 +52,6 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        //only owners
-        return parent::getEloquentQuery()->role('owner');
+        return parent::getEloquentQuery()->role(['owner', 'manager', 'cashier', 'storekeeper']);
     }
 }
