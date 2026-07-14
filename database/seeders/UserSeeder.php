@@ -16,22 +16,27 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         //create Admin
-        $admin = User::create([
-            'name' => 'Admin Admin',
-            'email' => 'admin@business-suite.com',
-            'password' => Hash::make(env('ADMIN_PASSWORD')),
-            'email_verified_at' => now()
-        ]);
+        $admin = User::firstorCreate(
+            ['email' => 'admin@business-suite.com'],
+            [
+                'name' => 'Admin Admin', 
+                'password' => Hash::make(env('ADMIN_PASSWORD')), 
+                'email_verified_at' => now()
+            ],
+        );
 
         $admin->assignRole(UserRole::SuperAdmin);
 
         //create Owner
-        $owner = User::create([
-            'name' => 'Owner Owner',
-            'email' => 'owner@business-suite.com',
-            'password' => Hash::make(env('OWNER_PASSWORD')),
-            'email_verified_at' => now()
-        ]);
+
+        $owner = User::firstorCreate(
+            ['email' => 'owner@business-suite.com'],
+            [
+                'name' => 'Owner Owner',
+                'password' => Hash::make(env('OWNER_PASSWORD')),
+                'email_verified_at' => now()
+            ]
+        );
         
         $owner->assignRole(UserRole::Owner);
 

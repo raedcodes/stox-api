@@ -19,10 +19,10 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // create roles and assign created permissions
-        Role::create(['name' => UserRole::SuperAdmin]);
-        Role::create(['name' => UserRole::Owner]);
-        Role::create(['name' => UserRole::Manager]);
-        Role::create(['name' => UserRole::Cashier]);
-        Role::create(['name' => UserRole::StoreKeeper]);
+        Role::firstOrCreate(['name' => UserRole::SuperAdmin]);
+        Role::firstOrCreate(['name' => UserRole::Owner]);
+        Role::firstOrCreate(['name' => UserRole::Manager]);
+        Role::firstOrCreate(['name' => UserRole::Cashier]);
+        Role::firstOrCreate(['name' => UserRole::StoreKeeper]);
     }
 }
