@@ -23,6 +23,9 @@ class UsersTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('tenant.name')
+                    ->label('Business')
+                    ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),

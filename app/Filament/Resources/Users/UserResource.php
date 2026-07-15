@@ -53,6 +53,6 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->role(array_keys(UserRole::options()));
+        return parent::getEloquentQuery()->with('tenant')->role(array_keys(UserRole::options()));
     }
 }
