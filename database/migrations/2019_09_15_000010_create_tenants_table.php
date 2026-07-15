@@ -17,11 +17,14 @@ class CreateTenantsTable extends Migration
     {
         Schema::create('tenants', function (Blueprint $table) {
             $table->string('id')->primary();
-
-            // your custom columns may go here
+            $table->string('name');
 
             $table->timestamps();
             $table->json('data')->nullable();
+        });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('tenant_id')->references('id')->on('tenants')->nullOnDelete();
         });
     }
 
@@ -32,6 +35,10 @@ class CreateTenantsTable extends Migration
      */
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['tenant_id']);
+        });
+
         Schema::dropIfExists('tenants');
     }
 }
