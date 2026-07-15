@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\BusinessType;
+use App\Currency;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Tenant;
 use App\Models\User;
@@ -11,9 +12,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Wizard\Step;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class CreateUser extends CreateRecord
@@ -29,7 +33,13 @@ class CreateUser extends CreateRecord
                 ->schema([
                     TextInput::make('business_name')
                         ->label('Business name')
-                        ->required(),
+                        ->required()
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
+                            if (blank($get('subdomain'))) {
+                                $set('subdomain', Str::slug($state));
+                            }
+                        }),
                     TextInput::make('subdomain')
                         ->required()
                         ->regex('/^[a-z0-9]+(-[a-z0-9]+)*$/')
@@ -46,20 +56,9 @@ class CreateUser extends CreateRecord
                         ->options(BusinessType::options())
                         ->required(),
                     Select::make('currency')
-                        ->options([
-                            'USD' => 'USD - US Dollar',
-                            'EUR' => 'EUR - Euro',
-                            'GBP' => 'GBP - British Pound',
-                            'AED' => 'AED - UAE Dirham',
-                            'SAR' => 'SAR - Saudi Riyal',
-                            'EGP' => 'EGP - Egyptian Pound',
-                            'JOD' => 'JOD - Jordanian Dinar',
-                            'LBP' => 'LBP - Lebanese Pound',
-                            'CAD' => 'CAD - Canadian Dollar',
-                            'AUD' => 'AUD - Australian Dollar',
-                        ])
+                        ->options(Currency::options())
                         ->required()
-                        ->default('USD'),
+                        ->default(Currency::USD),
                     Select::make('timezone')
                         ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
                         ->searchable()

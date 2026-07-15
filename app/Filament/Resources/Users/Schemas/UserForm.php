@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\BusinessType;
+use App\Currency;
 use App\Models\User;
 use App\UserRole;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 
@@ -48,7 +51,38 @@ class UserForm
                     ->visibleOn('edit')
                     ->default(fn (?User $record) => $record?->getRoleNames()->first() ?? UserRole::Owner)
                     ->options(UserRole::options()),
-                Checkbox::make('is_active')
+                Checkbox::make('is_active'),
+                Section::make('Business')
+                    ->relationship('tenant')
+                    ->visibleOn('edit')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Business name')
+                            ->required(),
+                        Select::make('business_type')
+                            ->label('Business type')
+                            ->options(BusinessType::options())
+                            ->required(),
+                        Select::make('currency')
+                            ->options(Currency::options())
+                            ->required(),
+                        Select::make('timezone')
+                            ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
+                            ->searchable()
+                            ->required(),
+                        Section::make('Domain')
+                            ->relationship('domain')
+                            ->schema([
+                                TextInput::make('domain')
+                                    ->label('Subdomain')
+                                    ->required()
+                                    ->regex('/^[a-z0-9]+(-[a-z0-9]+)*$/')
+                                    ->validationMessages([
+                                        'regex' => 'Only lowercase letters, numbers, and single hyphens are allowed.',
+                                    ])
+                                    ->unique(table: 'domains', column: 'domain', ignoreRecord: true),
+                            ]),
+                    ]),
             ]);
     }
 }
