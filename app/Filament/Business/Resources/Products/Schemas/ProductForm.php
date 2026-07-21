@@ -37,6 +37,17 @@ class ProductForm
                     ->searchable()
                     ->preload()
                     ->required(),
+                TextInput::make('min_stock_level')
+                    ->label('Minimum stock level')
+                    ->numeric()
+                    ->minValue(0)
+                    ->helperText('The safety floor — below this, you risk running out.'),
+                TextInput::make('reorder_level')
+                    ->label('Reorder level')
+                    ->numeric()
+                    ->minValue(0)
+                    ->gte('min_stock_level')
+                    ->helperText('When stock drops to this level, it\'s time to reorder. Should be at or above the minimum.'),
                 Checkbox::make('is_active')
                     ->default(true),
             ]);

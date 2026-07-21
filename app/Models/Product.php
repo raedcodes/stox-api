@@ -15,12 +15,16 @@ class Product extends Model
         'category_id',
         'brand_id',
         'unit_of_measure_id',
+        'min_stock_level',
+        'reorder_level',
         'is_active',
     ];
 
     protected function casts(): array
     {
         return [
+            'min_stock_level' => 'decimal:2',
+            'reorder_level' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

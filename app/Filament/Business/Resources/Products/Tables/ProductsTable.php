@@ -38,6 +38,14 @@ class ProductsTable
                     ->placeholder('—'),
                 TextColumn::make('unit.abbreviation')
                     ->label('Unit'),
+                TextColumn::make('min_stock_level')
+                    ->label('Min')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('reorder_level')
+                    ->label('Reorder at')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
