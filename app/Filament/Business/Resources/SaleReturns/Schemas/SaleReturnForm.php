@@ -2,9 +2,9 @@
 
 namespace App\Filament\Business\Resources\SaleReturns\Schemas;
 
+use App\Enums\SaleStatus;
 use App\Models\Product;
 use App\Models\Sale;
-use App\SaleStatus;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -53,7 +53,7 @@ class SaleReturnForm
                             ->numeric()
                             ->minValue(0)
                             ->required()
-                            ->prefix(fn () => tenant('currency')),
+                            ->prefix(fn () => tenant('currency')?->value),
                     ])
                     ->columns(3)
                     ->addActionLabel('Add product')

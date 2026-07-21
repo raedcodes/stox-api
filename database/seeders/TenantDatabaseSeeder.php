@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\BarcodeFormat;
-use App\LocationType;
+use App\Enums\BarcodeFormat;
+use App\Enums\LocationType;
 use App\Models\BarcodeSetting;
 use App\Models\Customer;
 use App\Models\Location;

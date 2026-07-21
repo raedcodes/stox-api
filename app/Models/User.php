@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\UserRole;
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -18,7 +18,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use CentralConnection, HasFactory, Notifiable, HasRoles;
+    use CentralConnection, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.

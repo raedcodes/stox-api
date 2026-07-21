@@ -16,7 +16,7 @@ class SaleInvoiceController extends Controller
         $pdf = Pdf::loadView('pdf.sale-invoice', [
             'sale' => $sale,
             'tenant' => Tenant::findOrFail(tenant('id')),
-            'currency' => tenant('currency'),
+            'currency' => tenant('currency')?->value,
         ]);
 
         return $pdf->stream("{$sale->sale_number}.pdf");

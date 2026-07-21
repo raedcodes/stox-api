@@ -2,11 +2,11 @@
 
 namespace App\Filament\Business\Resources\PurchaseOrders\Tables;
 
+use App\Enums\PurchaseOrderStatus;
 use App\Filament\Business\Resources\PurchaseOrders\Actions\ReceiveStockAction;
 use App\Models\Location;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
-use App\PurchaseOrderStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -31,9 +31,7 @@ class PurchaseOrdersTable
                 TextColumn::make('location.name')
                     ->label('Deliver to'),
                 TextColumn::make('status')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state) => PurchaseOrderStatus::options()[$state] ?? $state)
-                    ->color(fn (string $state) => PurchaseOrderStatus::colors()[$state] ?? 'gray'),
+                    ->badge(),
                 TextColumn::make('order_date')
                     ->date()
                     ->sortable(),
@@ -43,7 +41,7 @@ class PurchaseOrdersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total')
                     ->state(fn (PurchaseOrder $record) => $record->total())
-                    ->money(fn () => tenant('currency')),
+                    ->money(fn () => tenant('currency')?->value),
             ])
             ->defaultSort('order_date', 'desc')
             ->filters([

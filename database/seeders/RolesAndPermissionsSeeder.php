@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\Role;
-use App\UserRole;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -15,13 +15,13 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // create roles and assign created permissions
-        Role::firstOrCreate(['name' => UserRole::SuperAdmin]);
-        Role::firstOrCreate(['name' => UserRole::Owner]);
-        Role::firstOrCreate(['name' => UserRole::Manager]);
-        Role::firstOrCreate(['name' => UserRole::Cashier]);
-        Role::firstOrCreate(['name' => UserRole::StoreKeeper]);
+        Role::firstOrCreate(['name' => UserRole::SuperAdmin->value]);
+        Role::firstOrCreate(['name' => UserRole::Owner->value]);
+        Role::firstOrCreate(['name' => UserRole::Manager->value]);
+        Role::firstOrCreate(['name' => UserRole::Cashier->value]);
+        Role::firstOrCreate(['name' => UserRole::StoreKeeper->value]);
     }
 }

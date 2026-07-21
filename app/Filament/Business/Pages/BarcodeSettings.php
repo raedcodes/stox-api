@@ -2,7 +2,7 @@
 
 namespace App\Filament\Business\Pages;
 
-use App\BarcodeFormat;
+use App\Enums\BarcodeFormat;
 use App\Models\BarcodeSetting;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;

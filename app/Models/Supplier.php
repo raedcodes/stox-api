@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\SupplierTransactionType;
+use App\Enums\PaymentTerms;
+use App\Enums\SupplierTransactionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -21,6 +22,7 @@ class Supplier extends Model
     protected function casts(): array
     {
         return [
+            'payment_terms' => PaymentTerms::class,
             'is_active' => 'boolean',
         ];
     }
@@ -40,7 +42,7 @@ class Supplier extends Model
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        return (float) ($totals[SupplierTransactionType::Charge] ?? 0)
-            - (float) ($totals[SupplierTransactionType::Payment] ?? 0);
+        return (float) ($totals[SupplierTransactionType::Charge->value] ?? 0)
+            - (float) ($totals[SupplierTransactionType::Payment->value] ?? 0);
     }
 }

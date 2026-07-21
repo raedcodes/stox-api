@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\CustomerTransactionType;
-use App\PaymentMethod;
+use App\Enums\CustomerTransactionType;
+use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\BarcodeFormat;
+use App\Enums\BarcodeFormat;
 use Illuminate\Database\Eloquent\Model;
 
 class BarcodeSetting extends Model
@@ -16,6 +16,7 @@ class BarcodeSetting extends Model
     protected function casts(): array
     {
         return [
+            'format' => BarcodeFormat::class,
             'next_number' => 'integer',
         ];
     }

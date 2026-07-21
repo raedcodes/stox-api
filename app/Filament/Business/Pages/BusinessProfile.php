@@ -2,8 +2,8 @@
 
 namespace App\Filament\Business\Pages;
 
-use App\BusinessType;
-use App\Currency;
+use App\Enums\BusinessType;
+use App\Enums\Currency;
 use App\Models\Tenant;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -13,7 +13,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
-use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
@@ -62,7 +61,7 @@ class BusinessProfile extends Page
                     ->required(),
                 FileUpload::make('logo')
                     ->image()
-                    ->directory(fn () => 'tenant-logos/' . tenant('id'))
+                    ->directory(fn () => 'tenant-logos/'.tenant('id'))
                     ->visibility('public'),
                 Textarea::make('address')
                     ->rows(2),
@@ -87,7 +86,7 @@ class BusinessProfile extends Page
                         'regex' => 'Only lowercase letters, numbers, and single hyphens are allowed.',
                     ])
                     ->unique(
-                        table: config('tenancy.database.central_connection') . '.domains',
+                        table: config('tenancy.database.central_connection').'.domains',
                         column: 'domain',
                         ignorable: fn () => $this->getBusinessTenant()->domain,
                     ),

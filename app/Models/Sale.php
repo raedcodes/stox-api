@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\CustomerTransactionType;
-use App\DiscountType;
-use App\PaymentMethod;
-use App\SaleStatus;
+use App\Enums\CustomerTransactionType;
+use App\Enums\DiscountType;
+use App\Enums\PaymentMethod;
+use App\Enums\SaleStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,6 +29,9 @@ class Sale extends Model
     protected function casts(): array
     {
         return [
+            'status' => SaleStatus::class,
+            'payment_method' => PaymentMethod::class,
+            'discount_type' => DiscountType::class,
             'discount_value' => 'decimal:2',
             'sale_date' => 'date',
         ];
@@ -47,7 +50,7 @@ class Sale extends Model
     {
         $next = (int) (static::query()->max('id')) + 1;
 
-        return 'INV-' . str_pad((string) $next, 5, '0', STR_PAD_LEFT);
+        return 'INV-'.str_pad((string) $next, 5, '0', STR_PAD_LEFT);
     }
 
     public function customer(): BelongsTo
@@ -129,7 +132,7 @@ class Sale extends Model
         $short = $this->insufficientStockProducts();
 
         if ($short !== []) {
-            throw new RuntimeException('Insufficient stock: ' . implode(', ', $short));
+            throw new RuntimeException('Insufficient stock: '.implode(', ', $short));
         }
 
         DB::transaction(function () {

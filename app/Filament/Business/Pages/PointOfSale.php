@@ -2,13 +2,13 @@
 
 namespace App\Filament\Business\Pages;
 
-use App\DiscountType;
+use App\Enums\DiscountType;
+use App\Enums\PaymentMethod;
+use App\Enums\SaleStatus;
 use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\Sale;
-use App\PaymentMethod;
-use App\SaleStatus;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -39,7 +39,7 @@ class PointOfSale extends Page
         $this->form->fill([
             'customer_id' => Customer::walkIn()->id,
             'location_id' => Location::query()->where('is_active', true)->first()?->id,
-            'payment_method' => PaymentMethod::Cash,
+            'payment_method' => PaymentMethod::Cash->value,
             'discount_type' => null,
             'discount_value' => null,
             'items' => [],
@@ -93,7 +93,7 @@ class PointOfSale extends Page
                             ->numeric()
                             ->minValue(0)
                             ->required()
-                            ->prefix(fn () => tenant('currency')),
+                            ->prefix(fn () => tenant('currency')?->value),
                         Select::make('discount_type')
                             ->label('Discount type')
                             ->options(DiscountType::options()),

@@ -52,12 +52,12 @@ class ProductForm
                 TextInput::make('cost_price')
                     ->numeric()
                     ->minValue(0)
-                    ->prefix(fn () => tenant('currency')),
+                    ->prefix(fn () => tenant('currency')?->value),
                 TextInput::make('selling_price')
                     ->required()
                     ->numeric()
                     ->minValue(0)
-                    ->prefix(fn () => tenant('currency')),
+                    ->prefix(fn () => tenant('currency')?->value),
                 Checkbox::make('tax_inclusive')
                     ->label('Selling price already includes tax')
                     ->default(false),

@@ -52,11 +52,11 @@ class ProductsTable
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cost_price')
-                    ->money(fn () => tenant('currency'))
+                    ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('selling_price')
-                    ->money(fn () => tenant('currency'))
+                    ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—'),
                 IconColumn::make('tax_inclusive')
                     ->label('Tax incl.')

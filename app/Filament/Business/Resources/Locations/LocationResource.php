@@ -2,8 +2,8 @@
 
 namespace App\Filament\Business\Resources\Locations;
 
+use App\Enums\LocationType;
 use App\Filament\Business\Resources\Locations\Pages\ManageLocations;
-use App\LocationType;
 use App\Models\Location;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -46,8 +46,7 @@ class LocationResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('type')
-                    ->formatStateUsing(fn (string $state) => LocationType::options()[$state] ?? $state),
+                TextColumn::make('type'),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])

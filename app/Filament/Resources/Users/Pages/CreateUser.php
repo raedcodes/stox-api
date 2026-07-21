@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\BusinessType;
-use App\Currency;
+use App\Enums\BusinessType;
+use App\Enums\Currency;
+use App\Enums\UserRole;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Tenant;
 use App\Models\User;
-use App\UserRole;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -58,7 +58,7 @@ class CreateUser extends CreateRecord
                     Select::make('currency')
                         ->options(Currency::options())
                         ->required()
-                        ->default(Currency::USD),
+                        ->default(Currency::USD->value),
                     Select::make('timezone')
                         ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
                         ->searchable()

@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\BusinessType;
-use App\Currency;
+use App\Enums\BusinessType;
+use App\Enums\Currency;
+use App\Enums\UserRole;
 use App\Models\Tenant;
 use App\Models\User;
-use App\UserRole;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,19 +17,19 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        //create Admin
+        // create Admin
         $admin = User::firstOrCreate(
             ['email' => 'admin@business-suite.com'],
             [
                 'name' => 'Admin Admin',
                 'password' => Hash::make(env('ADMIN_PASSWORD')),
-                'email_verified_at' => now()
+                'email_verified_at' => now(),
             ],
         );
 
         $admin->assignRole(UserRole::SuperAdmin);
 
-        //create Owner, with a business of their own — every Owner belongs to a tenant
+        // create Owner, with a business of their own — every Owner belongs to a tenant
 
         $tenant = Tenant::firstOrCreate(
             ['name' => 'Demo Business'],
@@ -51,7 +50,7 @@ class UserSeeder extends Seeder
                 'tenant_id' => $tenant->id,
                 'name' => 'Owner Owner',
                 'password' => Hash::make(env('OWNER_PASSWORD')),
-                'email_verified_at' => now()
+                'email_verified_at' => now(),
             ]
         );
 

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\CustomerTransactionType;
+use App\Enums\CustomerTransactionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -61,7 +61,7 @@ class Customer extends Model
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        return (float) ($totals[CustomerTransactionType::CreditSale] ?? 0)
-            - (float) ($totals[CustomerTransactionType::Payment] ?? 0);
+        return (float) ($totals[CustomerTransactionType::CreditSale->value] ?? 0)
+            - (float) ($totals[CustomerTransactionType::Payment->value] ?? 0);
     }
 }

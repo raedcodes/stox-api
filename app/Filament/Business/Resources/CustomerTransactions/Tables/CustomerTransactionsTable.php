@@ -2,7 +2,7 @@
 
 namespace App\Filament\Business\Resources\CustomerTransactions\Tables;
 
-use App\CustomerTransactionType;
+use App\Enums\CustomerTransactionType;
 use App\Models\Customer;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -22,11 +22,9 @@ class CustomerTransactionsTable
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('type')
-                    ->formatStateUsing(fn (string $state) => CustomerTransactionType::options()[$state] ?? $state)
-                    ->color(fn (string $state) => $state === CustomerTransactionType::CreditSale ? 'danger' : 'success'),
+                TextColumn::make('type'),
                 TextColumn::make('amount')
-                    ->money(fn () => tenant('currency')),
+                    ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('description')
                     ->placeholder('—')
                     ->limit(40),

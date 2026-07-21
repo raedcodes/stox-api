@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CustomerTransactionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,6 +19,7 @@ class CustomerTransaction extends Model
     protected function casts(): array
     {
         return [
+            'type' => CustomerTransactionType::class,
             'amount' => 'decimal:2',
             'transaction_date' => 'date',
         ];

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Business\Resources\Sales\Tables;
 
+use App\Enums\SaleStatus;
 use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Sale;
-use App\SaleStatus;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -33,9 +33,7 @@ class SalesTable
                 TextColumn::make('location.name')
                     ->label('Location'),
                 TextColumn::make('status')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state) => SaleStatus::options()[$state] ?? $state)
-                    ->color(fn (string $state) => SaleStatus::colors()[$state] ?? 'gray'),
+                    ->badge(),
                 TextColumn::make('payment_method')
                     ->placeholder('—'),
                 TextColumn::make('sale_date')
@@ -43,7 +41,7 @@ class SalesTable
                     ->sortable(),
                 TextColumn::make('total')
                     ->state(fn (Sale $record) => $record->total())
-                    ->money(fn () => tenant('currency')),
+                    ->money(fn () => tenant('currency')?->value),
             ])
             ->defaultSort('sale_date', 'desc')
             ->filters([

@@ -43,7 +43,7 @@ class PurchaseReturnForm
                             ->numeric()
                             ->minValue(0)
                             ->required()
-                            ->prefix(fn () => tenant('currency')),
+                            ->prefix(fn () => tenant('currency')?->value),
                     ])
                     ->columns(3)
                     ->addActionLabel('Add product')

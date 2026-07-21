@@ -2,11 +2,11 @@
 
 namespace App\Filament\Business\Resources\Sales\Schemas;
 
-use App\DiscountType;
+use App\Enums\DiscountType;
+use App\Enums\PaymentMethod;
+use App\Enums\SaleStatus;
 use App\Models\Customer;
 use App\Models\Product;
-use App\PaymentMethod;
-use App\SaleStatus;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -36,7 +36,7 @@ class SaleForm
                     ->required(),
                 Select::make('status')
                     ->options(SaleStatus::options())
-                    ->default(SaleStatus::Draft)
+                    ->default(SaleStatus::Draft->value)
                     ->required(),
                 Select::make('payment_method')
                     ->options(PaymentMethod::options())
@@ -74,7 +74,7 @@ class SaleForm
                             ->numeric()
                             ->minValue(0)
                             ->required()
-                            ->prefix(fn () => tenant('currency')),
+                            ->prefix(fn () => tenant('currency')?->value),
                         Select::make('discount_type')
                             ->label('Discount type')
                             ->options(DiscountType::options()),

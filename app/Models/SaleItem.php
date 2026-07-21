@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DiscountType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,6 +20,7 @@ class SaleItem extends Model
     protected function casts(): array
     {
         return [
+            'discount_type' => DiscountType::class,
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:2',
             'discount_value' => 'decimal:2',
@@ -42,7 +44,7 @@ class SaleItem extends Model
 
     public function discountAmount(): float
     {
-        return \App\DiscountType::amount($this->discount_type, $this->discount_value ? (float) $this->discount_value : null, $this->grossAmount());
+        return DiscountType::amount($this->discount_type, $this->discount_value ? (float) $this->discount_value : null, $this->grossAmount());
     }
 
     /**

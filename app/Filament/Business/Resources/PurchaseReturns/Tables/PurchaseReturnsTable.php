@@ -32,7 +32,7 @@ class PurchaseReturnsTable
                     ->limit(40),
                 TextColumn::make('total')
                     ->state(fn (PurchaseReturn $record) => $record->total())
-                    ->money(fn () => tenant('currency')),
+                    ->money(fn () => tenant('currency')?->value),
             ])
             ->defaultSort('return_date', 'desc')
             ->filters([

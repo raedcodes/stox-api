@@ -2,7 +2,7 @@
 
 namespace App\Filament\Business\Resources\CustomerTransactions\Schemas;
 
-use App\CustomerTransactionType;
+use App\Enums\CustomerTransactionType;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -27,7 +27,7 @@ class CustomerTransactionForm
                     ->numeric()
                     ->minValue(0.01)
                     ->required()
-                    ->prefix(fn () => tenant('currency')),
+                    ->prefix(fn () => tenant('currency')?->value),
                 TextInput::make('description')
                     ->helperText('e.g. invoice number or payment reference.'),
                 DatePicker::make('transaction_date')

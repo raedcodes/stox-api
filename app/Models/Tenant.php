@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\BusinessType;
+use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
@@ -21,6 +23,14 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         return array_merge(parent::getCustomColumns(), [
             'name',
         ]);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'business_type' => BusinessType::class,
+            'currency' => Currency::class,
+        ];
     }
 
     public function users(): HasMany

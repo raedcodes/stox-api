@@ -2,7 +2,7 @@
 
 namespace App\Filament\Business\Resources\PurchaseOrders\Schemas;
 
-use App\PurchaseOrderStatus;
+use App\Enums\PurchaseOrderStatus;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -30,7 +30,7 @@ class PurchaseOrderForm
                     ->required(),
                 Select::make('status')
                     ->options(PurchaseOrderStatus::options())
-                    ->default(PurchaseOrderStatus::Draft)
+                    ->default(PurchaseOrderStatus::Draft->value)
                     ->required(),
                 DatePicker::make('order_date')
                     ->required()
@@ -57,7 +57,7 @@ class PurchaseOrderForm
                             ->numeric()
                             ->minValue(0)
                             ->required()
-                            ->prefix(fn () => tenant('currency')),
+                            ->prefix(fn () => tenant('currency')?->value),
                     ])
                     ->columns(3)
                     ->addActionLabel('Add product')
@@ -73,7 +73,7 @@ class PurchaseOrderForm
                             ->numeric()
                             ->minValue(0)
                             ->required()
-                            ->prefix(fn () => tenant('currency')),
+                            ->prefix(fn () => tenant('currency')?->value),
                     ])
                     ->columns(2)
                     ->addActionLabel('Add charge')

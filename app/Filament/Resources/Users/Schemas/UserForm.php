@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Enums\UserRole;
 use App\Models\User;
-use App\UserRole;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -46,7 +46,7 @@ class UserForm
                 Select::make('role')
                     ->label('Role')
                     ->visibleOn('edit')
-                    ->default(fn (?User $record) => $record?->getRoleNames()->first() ?? UserRole::Owner)
+                    ->default(fn (?User $record) => $record?->getRoleNames()->first() ?? UserRole::Owner->value)
                     ->options(UserRole::options()),
                 Checkbox::make('is_active'),
             ]);

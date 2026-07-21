@@ -36,7 +36,7 @@ class SaleReturnsTable
                     ->limit(40),
                 TextColumn::make('total')
                     ->state(fn (SaleReturn $record) => $record->total())
-                    ->money(fn () => tenant('currency')),
+                    ->money(fn () => tenant('currency')?->value),
                 IconColumn::make('processed_at')
                     ->label('Processed')
                     ->boolean()

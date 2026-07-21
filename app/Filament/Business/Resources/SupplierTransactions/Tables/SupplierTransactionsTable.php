@@ -2,8 +2,8 @@
 
 namespace App\Filament\Business\Resources\SupplierTransactions\Tables;
 
+use App\Enums\SupplierTransactionType;
 use App\Models\Supplier;
-use App\SupplierTransactionType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -22,11 +22,9 @@ class SupplierTransactionsTable
                     ->label('Supplier')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('type')
-                    ->formatStateUsing(fn (string $state) => SupplierTransactionType::options()[$state] ?? $state)
-                    ->color(fn (string $state) => $state === SupplierTransactionType::Charge ? 'danger' : 'success'),
+                TextColumn::make('type'),
                 TextColumn::make('amount')
-                    ->money(fn () => tenant('currency')),
+                    ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('description')
                     ->placeholder('—')
                     ->limit(40),

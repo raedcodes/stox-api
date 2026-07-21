@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\PurchaseOrderStatus;
+use App\Enums\PurchaseOrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,6 +22,7 @@ class PurchaseOrder extends Model
     protected function casts(): array
     {
         return [
+            'status' => PurchaseOrderStatus::class,
             'order_date' => 'date',
             'expected_date' => 'date',
         ];
@@ -40,7 +41,7 @@ class PurchaseOrder extends Model
     {
         $next = (int) (static::query()->max('id')) + 1;
 
-        return 'PO-' . str_pad((string) $next, 5, '0', STR_PAD_LEFT);
+        return 'PO-'.str_pad((string) $next, 5, '0', STR_PAD_LEFT);
     }
 
     public function supplier(): BelongsTo
