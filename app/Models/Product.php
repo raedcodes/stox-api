@@ -20,6 +20,7 @@ class Product extends Model
         'cost_price',
         'selling_price',
         'tax_inclusive',
+        'images',
         'is_active',
     ];
 
@@ -31,6 +32,7 @@ class Product extends Model
             'cost_price' => 'decimal:2',
             'selling_price' => 'decimal:2',
             'tax_inclusive' => 'boolean',
+            'images' => 'array',
             'is_active' => 'boolean',
         ];
     }

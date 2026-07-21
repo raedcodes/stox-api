@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Resources\Products\Schemas;
 
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -60,6 +61,13 @@ class ProductForm
                 Checkbox::make('tax_inclusive')
                     ->label('Selling price already includes tax')
                     ->default(false),
+                FileUpload::make('images')
+                    ->image()
+                    ->multiple()
+                    ->reorderable()
+                    ->directory(fn () => 'product-images/' . tenant('id'))
+                    ->visibility('public')
+                    ->helperText('The first image is used as the product\'s main photo.'),
                 Checkbox::make('is_active')
                     ->default(true),
             ]);

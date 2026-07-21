@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -21,6 +22,10 @@ class ProductsTable
     {
         return $table
             ->columns([
+                ImageColumn::make('images')
+                    ->label('')
+                    ->limit(1)
+                    ->circular(false),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
