@@ -53,6 +53,10 @@ class BusinessPanelProvider extends PanelProvider
                 InitializeTenancyBySubdomain::class,
                 PreventAccessFromCentralDomains::class,
             ])
+            ->persistentMiddleware([
+                InitializeTenancyBySubdomain::class,
+                PreventAccessFromCentralDomains::class,
+            ])
             ->authMiddleware([
                 Authenticate::class,
             ]);
