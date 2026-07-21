@@ -14,6 +14,6 @@ class BusinessLogin extends Login
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Stox — inventory management, simplified.';
+        return 'Stox — clarity for every shelf.';
     }
 }
