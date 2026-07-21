@@ -70,6 +70,11 @@ class SupplierResource extends Resource
                     ->color(fn (Supplier $record) => $record->balance() > 0 ? 'danger' : 'success'),
                 IconColumn::make('is_active')
                     ->boolean(),
+                TextColumn::make('created_at')
+                    ->label('Since')
+                    ->since()
+                    ->dateTooltip()
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('payment_terms')

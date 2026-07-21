@@ -60,6 +60,11 @@ class CategoryResource extends Resource
                     ->placeholder('—'),
                 IconColumn::make('is_active')
                     ->boolean(),
+                TextColumn::make('created_at')
+                    ->label('Since')
+                    ->since()
+                    ->dateTooltip()
+                    ->sortable(),
             ])
             ->groups([
                 Group::make('parent.name')

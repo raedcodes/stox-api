@@ -60,6 +60,11 @@ class CustomerResource extends Resource
                     ->color(fn (Customer $record) => $record->balance() > 0 ? 'danger' : 'success'),
                 IconColumn::make('is_active')
                     ->boolean(),
+                TextColumn::make('created_at')
+                    ->label('Since')
+                    ->since()
+                    ->dateTooltip()
+                    ->sortable(),
             ])
             ->filters([
                 TernaryFilter::make('is_active'),

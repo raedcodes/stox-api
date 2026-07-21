@@ -49,6 +49,11 @@ class LocationResource extends Resource
                 TextColumn::make('type'),
                 IconColumn::make('is_active')
                     ->boolean(),
+                TextColumn::make('created_at')
+                    ->label('Since')
+                    ->since()
+                    ->dateTooltip()
+                    ->sortable(),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -66,6 +66,12 @@ class ProductsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
                     ->boolean(),
+                TextColumn::make('created_at')
+                    ->label('Since')
+                    ->since()
+                    ->dateTooltip()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordUrl(fn (Product $record) => ProductResource::getUrl('view', ['record' => $record]))
             ->filters([
