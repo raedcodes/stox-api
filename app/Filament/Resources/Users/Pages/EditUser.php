@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
 use App\Models\BarcodeSetting;
+use App\Models\Category;
 use App\Models\Location;
 use App\Models\TaxSetting;
 use Filament\Actions\DeleteAction;
@@ -38,6 +39,19 @@ class EditUser extends EditRecord
                 $data['locations'] = Location::query()
                     ->get(['id', 'name', 'type', 'is_active'])
                     ->map(fn (Location $location) => $location->only(['id', 'name', 'type', 'is_active']))
+                    ->all();
+
+                $data['categories'] = Category::query()
+                    ->whereNull('parent_id')
+                    ->with('children')
+                    ->get()
+                    ->map(fn (Category $category) => [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'subcategories' => $category->children
+                            ->map(fn (Category $child) => $child->only(['id', 'name']))
+                            ->all(),
+                    ])
                     ->all();
             } finally {
                 tenancy()->end();
@@ -86,6 +100,30 @@ class EditUser extends EditRecord
                     }
 
                     Location::query()->whereNotIn('id', $keptIds)->delete();
+                }
+
+                if (isset($this->data['categories'])) {
+                    $keptIds = [];
+
+                    foreach ($this->data['categories'] as $categoryItem) {
+                        $category = Category::updateOrCreate(
+                            ['id' => $categoryItem['id'] ?? null],
+                            ['name' => $categoryItem['name'], 'parent_id' => null]
+                        );
+
+                        $keptIds[] = $category->id;
+
+                        foreach ($categoryItem['subcategories'] ?? [] as $subcategoryItem) {
+                            $subcategory = Category::updateOrCreate(
+                                ['id' => $subcategoryItem['id'] ?? null],
+                                ['name' => $subcategoryItem['name'], 'parent_id' => $category->id]
+                            );
+
+                            $keptIds[] = $subcategory->id;
+                        }
+                    }
+
+                    Category::query()->whereNotIn('id', $keptIds)->delete();
                 }
             } finally {
                 tenancy()->end();

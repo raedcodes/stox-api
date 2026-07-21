@@ -144,6 +144,28 @@ class UserForm
                                     ->default(true),
                             ]),
                     ]),
+                Section::make('Categories')
+                    ->visibleOn('edit')
+                    ->schema([
+                        Repeater::make('categories')
+                            ->label('')
+                            ->addActionLabel('Add category')
+                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                            ->schema([
+                                Hidden::make('id'),
+                                TextInput::make('name')
+                                    ->required(),
+                                Repeater::make('subcategories')
+                                    ->label('Subcategories')
+                                    ->addActionLabel('Add subcategory')
+                                    ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                                    ->schema([
+                                        Hidden::make('id'),
+                                        TextInput::make('name')
+                                            ->required(),
+                                    ]),
+                            ]),
+                    ]),
             ]);
     }
 }
