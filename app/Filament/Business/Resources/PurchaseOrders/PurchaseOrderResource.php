@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Schemas\PurchaseOrderForm;
+use App\Filament\Business\Resources\PurchaseOrders\Schemas\PurchaseOrderInfolist;
 use App\Filament\Business\Resources\PurchaseOrders\Tables\PurchaseOrdersTable;
 use App\Models\PurchaseOrder;
 use BackedEnum;
@@ -24,6 +25,11 @@ class PurchaseOrderResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return PurchaseOrderForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return PurchaseOrderInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

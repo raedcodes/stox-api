@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\Products\Pages\EditProduct;
 use App\Filament\Business\Resources\Products\Pages\ListProducts;
 use App\Filament\Business\Resources\Products\Pages\ViewProduct;
 use App\Filament\Business\Resources\Products\Schemas\ProductForm;
+use App\Filament\Business\Resources\Products\Schemas\ProductInfolist;
 use App\Filament\Business\Resources\Products\Tables\ProductsTable;
 use App\Models\Product;
 use BackedEnum;
@@ -24,6 +25,11 @@ class ProductResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return ProductForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return ProductInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\PurchaseReturns\Pages\EditPurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\ListPurchaseReturns;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\ViewPurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Schemas\PurchaseReturnForm;
+use App\Filament\Business\Resources\PurchaseReturns\Schemas\PurchaseReturnInfolist;
 use App\Filament\Business\Resources\PurchaseReturns\Tables\PurchaseReturnsTable;
 use App\Models\PurchaseReturn;
 use BackedEnum;
@@ -24,6 +25,11 @@ class PurchaseReturnResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return PurchaseReturnForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return PurchaseReturnInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

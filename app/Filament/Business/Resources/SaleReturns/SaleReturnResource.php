@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\SaleReturns\Pages\EditSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Pages\ListSaleReturns;
 use App\Filament\Business\Resources\SaleReturns\Pages\ViewSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Schemas\SaleReturnForm;
+use App\Filament\Business\Resources\SaleReturns\Schemas\SaleReturnInfolist;
 use App\Filament\Business\Resources\SaleReturns\Tables\SaleReturnsTable;
 use App\Models\SaleReturn;
 use BackedEnum;
@@ -24,6 +25,11 @@ class SaleReturnResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return SaleReturnForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return SaleReturnInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

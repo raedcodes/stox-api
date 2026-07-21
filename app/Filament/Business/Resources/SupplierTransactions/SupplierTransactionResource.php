@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\SupplierTransactions\Pages\EditSupplierTrans
 use App\Filament\Business\Resources\SupplierTransactions\Pages\ListSupplierTransactions;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\ViewSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Schemas\SupplierTransactionForm;
+use App\Filament\Business\Resources\SupplierTransactions\Schemas\SupplierTransactionInfolist;
 use App\Filament\Business\Resources\SupplierTransactions\Tables\SupplierTransactionsTable;
 use App\Models\SupplierTransaction;
 use BackedEnum;
@@ -24,6 +25,11 @@ class SupplierTransactionResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return SupplierTransactionForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return SupplierTransactionInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

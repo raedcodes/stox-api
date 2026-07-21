@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\ProductBatches\Pages\EditProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Pages\ListProductBatches;
 use App\Filament\Business\Resources\ProductBatches\Pages\ViewProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Schemas\ProductBatchForm;
+use App\Filament\Business\Resources\ProductBatches\Schemas\ProductBatchInfolist;
 use App\Filament\Business\Resources\ProductBatches\Tables\ProductBatchesTable;
 use App\Models\ProductBatch;
 use BackedEnum;
@@ -24,6 +25,11 @@ class ProductBatchResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return ProductBatchForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return ProductBatchInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

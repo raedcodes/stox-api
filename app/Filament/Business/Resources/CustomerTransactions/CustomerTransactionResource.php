@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\CustomerTransactions\Pages\EditCustomerTrans
 use App\Filament\Business\Resources\CustomerTransactions\Pages\ListCustomerTransactions;
 use App\Filament\Business\Resources\CustomerTransactions\Pages\ViewCustomerTransaction;
 use App\Filament\Business\Resources\CustomerTransactions\Schemas\CustomerTransactionForm;
+use App\Filament\Business\Resources\CustomerTransactions\Schemas\CustomerTransactionInfolist;
 use App\Filament\Business\Resources\CustomerTransactions\Tables\CustomerTransactionsTable;
 use App\Models\CustomerTransaction;
 use BackedEnum;
@@ -24,6 +25,11 @@ class CustomerTransactionResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return CustomerTransactionForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return CustomerTransactionInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

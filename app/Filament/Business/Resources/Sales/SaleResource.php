@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\Sales\Pages\EditSale;
 use App\Filament\Business\Resources\Sales\Pages\ListSales;
 use App\Filament\Business\Resources\Sales\Pages\ViewSale;
 use App\Filament\Business\Resources\Sales\Schemas\SaleForm;
+use App\Filament\Business\Resources\Sales\Schemas\SaleInfolist;
 use App\Filament\Business\Resources\Sales\Tables\SalesTable;
 use App\Models\Sale;
 use BackedEnum;
@@ -24,6 +25,11 @@ class SaleResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return SaleForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return SaleInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

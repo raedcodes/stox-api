@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Filament\Business\Resources\PurchaseReturns\Schemas;
+
+use App\Models\PurchaseReturn;
+use App\Models\PurchaseReturnItem;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class PurchaseReturnInfolist
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Return details')
+                    ->columns(3)
+                    ->schema([
+                        TextEntry::make('purchaseOrder.po_number')
+                            ->label('PO #'),
+                        TextEntry::make('purchaseOrder.supplier.name')
+                            ->label('Supplier'),
+                        TextEntry::make('return_date')
+                            ->date(),
+                        TextEntry::make('reason')
+                            ->placeholder('—')
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Items')
+                    ->schema([
+                        RepeatableEntry::make('items')
+                            ->hiddenLabel()
+                            ->table([
+                                TableColumn::make('Product'),
+                                TableColumn::make('Qty'),
+                                TableColumn::make('Unit cost'),
+                                TableColumn::make('Line total'),
+                            ])
+                            ->schema([
+                                TextEntry::make('product.name')
+                                    ->hiddenLabel(),
+                                TextEntry::make('quantity')
+                                    ->hiddenLabel(),
+                                TextEntry::make('unit_cost')
+                                    ->hiddenLabel()
+                                    ->money(fn () => tenant('currency')?->value),
+                                TextEntry::make('lineTotal')
+                                    ->hiddenLabel()
+                                    ->state(fn (PurchaseReturnItem $record) => $record->quantity * $record->unit_cost)
+                                    ->money(fn () => tenant('currency')?->value),
+                            ]),
+                    ]),
+                Section::make('Total')
+                    ->schema([
+                        TextEntry::make('total')
+                            ->label('Total')
+                            ->weight('bold')
+                            ->state(fn (PurchaseReturn $record) => $record->total())
+                            ->money(fn () => tenant('currency')?->value),
+                    ]),
+            ]);
+    }
+}
