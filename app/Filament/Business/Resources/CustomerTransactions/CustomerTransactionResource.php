@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\CustomerTransactions;
 use App\Filament\Business\Resources\CustomerTransactions\Pages\CreateCustomerTransaction;
 use App\Filament\Business\Resources\CustomerTransactions\Pages\EditCustomerTransaction;
 use App\Filament\Business\Resources\CustomerTransactions\Pages\ListCustomerTransactions;
+use App\Filament\Business\Resources\CustomerTransactions\Pages\ViewCustomerTransaction;
 use App\Filament\Business\Resources\CustomerTransactions\Schemas\CustomerTransactionForm;
 use App\Filament\Business\Resources\CustomerTransactions\Tables\CustomerTransactionsTable;
 use App\Models\CustomerTransaction;
@@ -42,6 +43,7 @@ class CustomerTransactionResource extends Resource
         return [
             'index' => ListCustomerTransactions::route('/'),
             'create' => CreateCustomerTransaction::route('/create'),
+            'view' => ViewCustomerTransaction::route('/{record}'),
             'edit' => EditCustomerTransaction::route('/{record}/edit'),
         ];
     }

@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\SaleReturns;
 use App\Filament\Business\Resources\SaleReturns\Pages\CreateSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Pages\EditSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Pages\ListSaleReturns;
+use App\Filament\Business\Resources\SaleReturns\Pages\ViewSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Schemas\SaleReturnForm;
 use App\Filament\Business\Resources\SaleReturns\Tables\SaleReturnsTable;
 use App\Models\SaleReturn;
@@ -42,6 +43,7 @@ class SaleReturnResource extends Resource
         return [
             'index' => ListSaleReturns::route('/'),
             'create' => CreateSaleReturn::route('/create'),
+            'view' => ViewSaleReturn::route('/{record}'),
             'edit' => EditSaleReturn::route('/{record}/edit'),
         ];
     }

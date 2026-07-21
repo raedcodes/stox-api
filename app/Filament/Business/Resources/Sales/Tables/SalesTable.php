@@ -11,6 +11,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -55,6 +56,7 @@ class SalesTable
                     ->options(SaleStatus::options()),
             ])
             ->recordActions([
+                ViewAction::make(),
                 Action::make('complete')
                     ->label('Complete Sale')
                     ->icon('heroicon-o-check-circle')

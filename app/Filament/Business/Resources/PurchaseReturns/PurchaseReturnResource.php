@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\PurchaseReturns;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\CreatePurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\EditPurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\ListPurchaseReturns;
+use App\Filament\Business\Resources\PurchaseReturns\Pages\ViewPurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Schemas\PurchaseReturnForm;
 use App\Filament\Business\Resources\PurchaseReturns\Tables\PurchaseReturnsTable;
 use App\Models\PurchaseReturn;
@@ -42,6 +43,7 @@ class PurchaseReturnResource extends Resource
         return [
             'index' => ListPurchaseReturns::route('/'),
             'create' => CreatePurchaseReturn::route('/create'),
+            'view' => ViewPurchaseReturn::route('/{record}'),
             'edit' => EditPurchaseReturn::route('/{record}/edit'),
         ];
     }

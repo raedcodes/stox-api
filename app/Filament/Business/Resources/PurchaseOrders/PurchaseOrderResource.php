@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\PurchaseOrders;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
+use App\Filament\Business\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Schemas\PurchaseOrderForm;
 use App\Filament\Business\Resources\PurchaseOrders\Tables\PurchaseOrdersTable;
 use App\Models\PurchaseOrder;
@@ -42,6 +43,7 @@ class PurchaseOrderResource extends Resource
         return [
             'index' => ListPurchaseOrders::route('/'),
             'create' => CreatePurchaseOrder::route('/create'),
+            'view' => ViewPurchaseOrder::route('/{record}'),
             'edit' => EditPurchaseOrder::route('/{record}/edit'),
         ];
     }

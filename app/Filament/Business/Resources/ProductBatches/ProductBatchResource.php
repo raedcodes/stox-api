@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\ProductBatches;
 use App\Filament\Business\Resources\ProductBatches\Pages\CreateProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Pages\EditProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Pages\ListProductBatches;
+use App\Filament\Business\Resources\ProductBatches\Pages\ViewProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Schemas\ProductBatchForm;
 use App\Filament\Business\Resources\ProductBatches\Tables\ProductBatchesTable;
 use App\Models\ProductBatch;
@@ -42,6 +43,7 @@ class ProductBatchResource extends Resource
         return [
             'index' => ListProductBatches::route('/'),
             'create' => CreateProductBatch::route('/create'),
+            'view' => ViewProductBatch::route('/{record}'),
             'edit' => EditProductBatch::route('/{record}/edit'),
         ];
     }

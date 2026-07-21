@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\Sales;
 use App\Filament\Business\Resources\Sales\Pages\CreateSale;
 use App\Filament\Business\Resources\Sales\Pages\EditSale;
 use App\Filament\Business\Resources\Sales\Pages\ListSales;
+use App\Filament\Business\Resources\Sales\Pages\ViewSale;
 use App\Filament\Business\Resources\Sales\Schemas\SaleForm;
 use App\Filament\Business\Resources\Sales\Tables\SalesTable;
 use App\Models\Sale;
@@ -42,6 +43,7 @@ class SaleResource extends Resource
         return [
             'index' => ListSales::route('/'),
             'create' => CreateSale::route('/create'),
+            'view' => ViewSale::route('/{record}'),
             'edit' => EditSale::route('/{record}/edit'),
         ];
     }

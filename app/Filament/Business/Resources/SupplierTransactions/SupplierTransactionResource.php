@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\SupplierTransactions;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\CreateSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\EditSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\ListSupplierTransactions;
+use App\Filament\Business\Resources\SupplierTransactions\Pages\ViewSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Schemas\SupplierTransactionForm;
 use App\Filament\Business\Resources\SupplierTransactions\Tables\SupplierTransactionsTable;
 use App\Models\SupplierTransaction;
@@ -42,6 +43,7 @@ class SupplierTransactionResource extends Resource
         return [
             'index' => ListSupplierTransactions::route('/'),
             'create' => CreateSupplierTransaction::route('/create'),
+            'view' => ViewSupplierTransaction::route('/{record}'),
             'edit' => EditSupplierTransaction::route('/{record}/edit'),
         ];
     }
