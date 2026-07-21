@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Business\Auth\BusinessLogin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -27,7 +28,8 @@ class BusinessPanelProvider extends PanelProvider
         return $panel
             ->id('business')
             ->path('app')
-            ->login()
+            ->brandName(fn () => tenant('name') ?? 'Business Suite')
+            ->login(BusinessLogin::class)
             ->profile()
             ->colors([
                 'primary' => Color::Amber,
