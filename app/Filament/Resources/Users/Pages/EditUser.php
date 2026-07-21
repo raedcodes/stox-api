@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Models\BarcodeSetting;
 use App\Models\TaxSetting;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -27,6 +28,11 @@ class EditUser extends EditRecord
 
             try {
                 $data['tax_rate'] = TaxSetting::current()->rate;
+
+                $barcode = BarcodeSetting::current();
+                $data['barcode_format'] = $barcode->format;
+                $data['barcode_prefix'] = $barcode->prefix;
+                $data['barcode_next_number'] = $barcode->next_number;
             } finally {
                 tenancy()->end();
             }
@@ -41,11 +47,21 @@ class EditUser extends EditRecord
             $this->record->syncRoles($this->data['role']);
         }
 
-        if (($tenant = $this->record->tenant) && isset($this->data['tax_rate'])) {
+        if ($tenant = $this->record->tenant) {
             tenancy()->initialize($tenant);
 
             try {
-                TaxSetting::current()->update(['rate' => $this->data['tax_rate']]);
+                if (isset($this->data['tax_rate'])) {
+                    TaxSetting::current()->update(['rate' => $this->data['tax_rate']]);
+                }
+
+                if (isset($this->data['barcode_format'])) {
+                    BarcodeSetting::current()->update([
+                        'format' => $this->data['barcode_format'],
+                        'prefix' => $this->data['barcode_prefix'] ?? null,
+                        'next_number' => $this->data['barcode_next_number'],
+                    ]);
+                }
             } finally {
                 tenancy()->end();
             }

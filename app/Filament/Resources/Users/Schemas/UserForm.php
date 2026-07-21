@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\BarcodeFormat;
 use App\BusinessType;
 use App\Currency;
 use App\Models\User;
@@ -103,6 +104,24 @@ class UserForm
                             ->maxValue(100)
                             ->suffix('%')
                             ->required(),
+                    ]),
+                Section::make('Barcode')
+                    ->visibleOn('edit')
+                    ->schema([
+                        Select::make('barcode_format')
+                            ->label('Barcode format')
+                            ->options(BarcodeFormat::options())
+                            ->required(),
+                        TextInput::make('barcode_prefix')
+                            ->label('Prefix')
+                            ->maxLength(20)
+                            ->helperText('Optional prefix included at the start of every generated barcode.'),
+                        TextInput::make('barcode_next_number')
+                            ->label('Next number')
+                            ->numeric()
+                            ->minValue(1)
+                            ->required()
+                            ->helperText('The sequence number the next generated barcode will use.'),
                     ]),
             ]);
     }
