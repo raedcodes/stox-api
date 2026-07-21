@@ -46,6 +46,17 @@ class ProductsTable
                     ->label('Reorder at')
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('cost_price')
+                    ->money(fn () => tenant('currency'))
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('selling_price')
+                    ->money(fn () => tenant('currency'))
+                    ->placeholder('—'),
+                IconColumn::make('tax_inclusive')
+                    ->label('Tax incl.')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])

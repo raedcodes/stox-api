@@ -48,6 +48,18 @@ class ProductForm
                     ->minValue(0)
                     ->gte('min_stock_level')
                     ->helperText('When stock drops to this level, it\'s time to reorder. Should be at or above the minimum.'),
+                TextInput::make('cost_price')
+                    ->numeric()
+                    ->minValue(0)
+                    ->prefix(fn () => tenant('currency')),
+                TextInput::make('selling_price')
+                    ->required()
+                    ->numeric()
+                    ->minValue(0)
+                    ->prefix(fn () => tenant('currency')),
+                Checkbox::make('tax_inclusive')
+                    ->label('Selling price already includes tax')
+                    ->default(false),
                 Checkbox::make('is_active')
                     ->default(true),
             ]);

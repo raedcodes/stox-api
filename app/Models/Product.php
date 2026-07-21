@@ -17,6 +17,9 @@ class Product extends Model
         'unit_of_measure_id',
         'min_stock_level',
         'reorder_level',
+        'cost_price',
+        'selling_price',
+        'tax_inclusive',
         'is_active',
     ];
 
@@ -25,6 +28,9 @@ class Product extends Model
         return [
             'min_stock_level' => 'decimal:2',
             'reorder_level' => 'decimal:2',
+            'cost_price' => 'decimal:2',
+            'selling_price' => 'decimal:2',
+            'tax_inclusive' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
