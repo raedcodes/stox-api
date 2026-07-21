@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\TaxSetting;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,6 +15,6 @@ class TenantDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        TaxSetting::firstOrCreate([], ['rate' => 0]);
     }
 }

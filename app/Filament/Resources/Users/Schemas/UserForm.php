@@ -93,6 +93,17 @@ class UserForm
                                     ->unique(table: 'domains', column: 'domain', ignoreRecord: true),
                             ]),
                     ]),
+                Section::make('Tax')
+                    ->visibleOn('edit')
+                    ->schema([
+                        TextInput::make('tax_rate')
+                            ->label('Tax / VAT rate')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->suffix('%')
+                            ->required(),
+                    ]),
             ]);
     }
 }
