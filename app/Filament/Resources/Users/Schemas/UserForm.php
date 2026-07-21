@@ -5,10 +5,13 @@ namespace App\Filament\Resources\Users\Schemas;
 use App\BarcodeFormat;
 use App\BusinessType;
 use App\Currency;
+use App\LocationType;
 use App\Models\User;
 use App\UserRole;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -122,6 +125,24 @@ class UserForm
                             ->minValue(1)
                             ->required()
                             ->helperText('The sequence number the next generated barcode will use.'),
+                    ]),
+                Section::make('Locations')
+                    ->visibleOn('edit')
+                    ->schema([
+                        Repeater::make('locations')
+                            ->label('')
+                            ->addActionLabel('Add location')
+                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                            ->schema([
+                                Hidden::make('id'),
+                                TextInput::make('name')
+                                    ->required(),
+                                Select::make('type')
+                                    ->options(LocationType::options())
+                                    ->required(),
+                                Checkbox::make('is_active')
+                                    ->default(true),
+                            ]),
                     ]),
             ]);
     }

@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\BarcodeFormat;
+use App\LocationType;
 use App\Models\BarcodeSetting;
+use App\Models\Location;
 use App\Models\TaxSetting;
 use App\Models\UnitOfMeasure;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -34,5 +36,10 @@ class TenantDatabaseSeeder extends Seeder
         ] as $unit) {
             UnitOfMeasure::firstOrCreate(['abbreviation' => $unit['abbreviation']], $unit);
         }
+
+        Location::firstOrCreate(['name' => 'Main Location'], [
+            'type' => LocationType::Store,
+            'is_active' => true,
+        ]);
     }
 }
