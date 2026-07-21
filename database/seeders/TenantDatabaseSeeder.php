@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\BarcodeFormat;
 use App\LocationType;
 use App\Models\BarcodeSetting;
+use App\Models\Customer;
 use App\Models\Location;
 use App\Models\TaxSetting;
 use App\Models\UnitOfMeasure;
@@ -41,5 +42,7 @@ class TenantDatabaseSeeder extends Seeder
             'type' => LocationType::Store,
             'is_active' => true,
         ]);
+
+        Customer::walkIn();
     }
 }

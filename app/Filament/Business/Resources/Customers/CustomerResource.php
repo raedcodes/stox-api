@@ -48,7 +48,8 @@ class CustomerResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn (Customer $record) => $record->is_walk_in ? "{$record->name} (default)" : $record->name),
                 TextColumn::make('email')
                     ->placeholder('—'),
                 TextColumn::make('phone')
@@ -61,11 +62,13 @@ class CustomerResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (Customer $record) => ! $record->is_walk_in),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->fetchSelectedRecords(),
                 ]),
             ]);
     }
