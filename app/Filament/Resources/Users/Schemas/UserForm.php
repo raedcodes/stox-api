@@ -7,7 +7,9 @@ use App\Currency;
 use App\Models\User;
 use App\UserRole;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -59,6 +61,14 @@ class UserForm
                         TextInput::make('name')
                             ->label('Business name')
                             ->required(),
+                        FileUpload::make('logo')
+                            ->image()
+                            ->directory('tenant-logos')
+                            ->visibility('public'),
+                        Textarea::make('address')
+                            ->rows(2),
+                        TextInput::make('tax_number')
+                            ->label('Tax number'),
                         Select::make('business_type')
                             ->label('Business type')
                             ->options(BusinessType::options())
