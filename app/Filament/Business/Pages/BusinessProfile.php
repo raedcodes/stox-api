@@ -62,7 +62,7 @@ class BusinessProfile extends Page
                     ->required(),
                 FileUpload::make('logo')
                     ->image()
-                    ->directory('tenant-logos')
+                    ->directory(fn () => 'tenant-logos/' . tenant('id'))
                     ->visibility('public'),
                 Textarea::make('address')
                     ->rows(2),
@@ -86,7 +86,11 @@ class BusinessProfile extends Page
                     ->validationMessages([
                         'regex' => 'Only lowercase letters, numbers, and single hyphens are allowed.',
                     ])
-                    ->unique(table: 'domains', column: 'domain', ignoreRecord: true),
+                    ->unique(
+                        table: config('tenancy.database.central_connection') . '.domains',
+                        column: 'domain',
+                        ignorable: fn () => $this->getBusinessTenant()->domain,
+                    ),
             ]);
     }
 

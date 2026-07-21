@@ -101,9 +101,16 @@ return [
          * Each disk listed in the 'disks' array will be suffixed by the suffix_base, followed by the tenant_id.
          */
         'suffix_base' => 'tenant',
+
+        /**
+         * Deliberately empty: 'local' backs Livewire's temporary file uploads,
+         * which go through a route with no tenancy middleware, so suffixing it
+         * causes uploaded files to be written under one path and looked up
+         * under another. Tenant-specific files (e.g. the business logo) bake
+         * the tenant id into the stored path explicitly instead — see
+         * BusinessProfile's FileUpload directory().
+         */
         'disks' => [
-            'local',
-            'public',
             // 's3',
         ],
 
