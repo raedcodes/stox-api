@@ -9,14 +9,20 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CategoryResource extends Resource
 {
@@ -32,11 +38,14 @@ class CategoryResource extends Resource
                     ->required(),
                 Select::make('parent_id')
                     ->label('Parent category')
+                    ->searchable()
                     ->options(fn (?Category $record) => Category::query()
                         ->whereNull('parent_id')
                         ->when($record, fn ($query) => $query->whereKeyNot($record->id))
                         ->pluck('name', 'id'))
                     ->helperText('Leave empty for a top-level category.'),
+                Checkbox::make('is_active')
+                    ->default(true),
             ]);
     }
 
@@ -49,6 +58,8 @@ class CategoryResource extends Resource
                 TextColumn::make('parent.name')
                     ->label('Parent')
                     ->placeholder('—'),
+                IconColumn::make('is_active')
+                    ->boolean(),
             ])
             ->groups([
                 Group::make('parent.name')
@@ -56,6 +67,15 @@ class CategoryResource extends Resource
                     ->collapsible(),
             ])
             ->defaultGroup('parent.name')
+            ->filters([
+                Filter::make('top_level')
+                    ->label('Top-level only')
+                    ->query(fn (Builder $query) => $query->whereNull('parent_id')),
+                SelectFilter::make('parent_id')
+                    ->label('Parent category')
+                    ->options(fn () => Category::query()->whereNull('parent_id')->pluck('name', 'id')),
+                TernaryFilter::make('is_active'),
+            ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

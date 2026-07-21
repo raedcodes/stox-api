@@ -11,7 +11,15 @@ class Category extends Model
     protected $fillable = [
         'parent_id',
         'name',
+        'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function parent(): BelongsTo
     {
