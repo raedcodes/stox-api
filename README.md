@@ -1,60 +1,51 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Business Suite API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Multi-tenant inventory management system. Built on Laravel + Filament + `stancl/tenancy` — each business (tenant) gets its own isolated database, identified by subdomain.
 
-## About Laravel
+## Setup
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```
+composer install
+php artisan storage:link
+php artisan migrate:fresh --seed
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+That last command does everything: sets up the central database, seeds roles, creates the SuperAdmin, and creates a demo business ("Demo Business", subdomain `demo`) with its own provisioned database, tax/barcode settings, units of measure, and a default location — all in one go.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Accessing the app
 
-## Learning Laravel
+There are two separate panels, for two different kinds of users.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Admin panel — super admin only
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **URL:** `http://localhost:8000/admin` (central domain — not any tenant subdomain)
+- **Login:** `admin@business-suite.com` / value of `ADMIN_PASSWORD` in `.env`
+- **Purpose:** the super admin's *only* job here is creating business accounts (the "Businesses" wizard: business name, subdomain, business type, currency, timezone, owner account). Businesses manage everything else about their own operation themselves, through their own panel below.
 
-## Laravel Sponsors
+### Business panel — self-service, per business
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **URL:** `http://{subdomain}.localhost:8000/app/login` — each business is reached at its own subdomain
+- **Example:** the seeded demo business → `http://demo.localhost:8000/app/login`
+- **Login:** `owner@business-suite.com` / value of `OWNER_PASSWORD` in `.env` (for the demo business)
+- **Purpose:** the business owner manages their own business profile, tax rate, barcode settings, locations, categories, and brands — end to end, without the super admin's involvement.
 
-### Premium Partners
+**Important:** `localhost`/`127.0.0.1` are registered as *central* domains (see `config/tenancy.php`) — the business panel is deliberately blocked there (404). You must use the business's actual subdomain to reach `/app`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Local subdomain routing
 
-## Contributing
+- `*.localhost` subdomains (e.g. `demo.localhost`) resolve to `127.0.0.1` automatically in modern browsers and on Linux — no `/etc/hosts` changes needed when running via `php artisan serve`.
+- If serving through Apache/XAMPP instead, you'll need a VirtualHost with a wildcard `ServerAlias` (e.g. `*.business-suite.test`) pointing at `public/` — there currently isn't one configured for this project, so a bare XAMPP setup without one **cannot** reach tenant subdomains at all.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Tenant management commands
 
-## Code of Conduct
+- `php artisan tenants:list` — list all tenants
+- `php artisan tenants:migrate` — run any pending tenant-database migrations across **all** tenants (needed after adding a new migration under `database/migrations/tenant/`, since existing tenants aren't migrated automatically — only newly-created ones are)
+- `php artisan tenants:seed` — re-run `TenantDatabaseSeeder` across all tenants (for backfilling new defaults into existing tenants)
+- `php artisan tenants:migrate-fresh` — ⚠️ drops and rebuilds every tenant database; destructive
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Note: `migrate:fresh` only resets the **central** database. It does not drop physical tenant databases from previous runs — those accumulate in MySQL until a tenant is properly deleted through the app (or removed by hand).
 
-## Security Vulnerabilities
+## Environment notes
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# business-suite-api
+- `SESSION_CONNECTION`, `DB_CACHE_CONNECTION`, and `DB_QUEUE_CONNECTION` in `.env` are pinned to the central database connection (`mysql`). This is required — without it, sessions/cache/queue would silently follow whichever database connection is currently active, and break the moment a request switches into tenant context. These three lines live in `.env` (gitignored), so they need to be set again on every environment this project runs in.
+- `config/tenancy.php`'s `central_domains` list needs your production domain(s) added before deploying.
