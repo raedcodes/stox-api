@@ -4,11 +4,13 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
 use App\Models\BarcodeSetting;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\TaxSetting;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class EditUser extends EditRecord
 {
@@ -39,6 +41,11 @@ class EditUser extends EditRecord
                 $data['locations'] = Location::query()
                     ->get(['id', 'name', 'type', 'is_active'])
                     ->map(fn (Location $location) => $location->only(['id', 'name', 'type', 'is_active']))
+                    ->all();
+
+                $data['brands'] = Brand::query()
+                    ->get(['id', 'name', 'is_active'])
+                    ->map(fn (Brand $brand) => $brand->only(['id', 'name', 'is_active']))
                     ->all();
 
                 $data['categories'] = Category::query()
@@ -84,22 +91,11 @@ class EditUser extends EditRecord
                 }
 
                 if (isset($this->data['locations'])) {
-                    $keptIds = [];
+                    $this->syncFlatList(Location::class, $this->data['locations']);
+                }
 
-                    foreach ($this->data['locations'] as $item) {
-                        $location = Location::updateOrCreate(
-                            ['id' => $item['id'] ?? null],
-                            [
-                                'name' => $item['name'],
-                                'type' => $item['type'],
-                                'is_active' => $item['is_active'] ?? true,
-                            ]
-                        );
-
-                        $keptIds[] = $location->id;
-                    }
-
-                    Location::query()->whereNotIn('id', $keptIds)->delete();
+                if (isset($this->data['brands'])) {
+                    $this->syncFlatList(Brand::class, $this->data['brands']);
                 }
 
                 if (isset($this->data['categories'])) {
@@ -129,6 +125,29 @@ class EditUser extends EditRecord
                 tenancy()->end();
             }
         }
+    }
+
+    /**
+     * Sync a flat repeater (id + arbitrary fields, no hierarchy) against a model:
+     * update rows that have an id, create rows that don't, and delete anything
+     * not present in $items.
+     *
+     * @param  class-string<Model>  $modelClass
+     */
+    private function syncFlatList(string $modelClass, array $items): void
+    {
+        $keptIds = [];
+
+        foreach ($items as $item) {
+            $record = $modelClass::updateOrCreate(
+                ['id' => $item['id'] ?? null],
+                collect($item)->except('id')->all()
+            );
+
+            $keptIds[] = $record->id;
+        }
+
+        $modelClass::query()->whereNotIn('id', $keptIds)->delete();
     }
 
 }

@@ -166,6 +166,21 @@ class UserForm
                                     ]),
                             ]),
                     ]),
+                Section::make('Brands')
+                    ->visibleOn('edit')
+                    ->schema([
+                        Repeater::make('brands')
+                            ->label('')
+                            ->addActionLabel('Add brand')
+                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                            ->schema([
+                                Hidden::make('id'),
+                                TextInput::make('name')
+                                    ->required(),
+                                Checkbox::make('is_active')
+                                    ->default(true),
+                            ]),
+                    ]),
             ]);
     }
 }
