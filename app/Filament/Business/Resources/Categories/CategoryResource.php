@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 
 class CategoryResource extends Resource
@@ -49,6 +50,12 @@ class CategoryResource extends Resource
                     ->label('Parent')
                     ->placeholder('—'),
             ])
+            ->groups([
+                Group::make('parent.name')
+                    ->label('Category')
+                    ->collapsible(),
+            ])
+            ->defaultGroup('parent.name')
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
