@@ -65,6 +65,10 @@ class SupplierResource extends Resource
                     ->label('Payment terms')
                     ->formatStateUsing(fn (?string $state) => $state ? (PaymentTerms::options()[$state] ?? $state) : null)
                     ->placeholder('—'),
+                TextColumn::make('balance')
+                    ->state(fn (Supplier $record) => $record->balance())
+                    ->money(fn () => tenant('currency'))
+                    ->color(fn (Supplier $record) => $record->balance() > 0 ? 'danger' : 'success'),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
