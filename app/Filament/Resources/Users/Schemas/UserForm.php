@@ -2,20 +2,11 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use App\BarcodeFormat;
-use App\BusinessType;
-use App\Currency;
-use App\LocationType;
 use App\Models\User;
 use App\UserRole;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 
@@ -58,129 +49,6 @@ class UserForm
                     ->default(fn (?User $record) => $record?->getRoleNames()->first() ?? UserRole::Owner)
                     ->options(UserRole::options()),
                 Checkbox::make('is_active'),
-                Section::make('Business')
-                    ->relationship('tenant')
-                    ->visibleOn('edit')
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Business name')
-                            ->required(),
-                        FileUpload::make('logo')
-                            ->image()
-                            ->directory('tenant-logos')
-                            ->visibility('public'),
-                        Textarea::make('address')
-                            ->rows(2),
-                        TextInput::make('tax_number')
-                            ->label('Tax number'),
-                        Select::make('business_type')
-                            ->label('Business type')
-                            ->options(BusinessType::options())
-                            ->required(),
-                        Select::make('currency')
-                            ->options(Currency::options())
-                            ->required(),
-                        Select::make('timezone')
-                            ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
-                            ->searchable()
-                            ->required(),
-                        Section::make('Domain')
-                            ->relationship('domain')
-                            ->schema([
-                                TextInput::make('domain')
-                                    ->label('Subdomain')
-                                    ->required()
-                                    ->regex('/^[a-z0-9]+(-[a-z0-9]+)*$/')
-                                    ->validationMessages([
-                                        'regex' => 'Only lowercase letters, numbers, and single hyphens are allowed.',
-                                    ])
-                                    ->unique(table: 'domains', column: 'domain', ignoreRecord: true),
-                            ]),
-                    ]),
-                Section::make('Tax')
-                    ->visibleOn('edit')
-                    ->schema([
-                        TextInput::make('tax_rate')
-                            ->label('Tax / VAT rate')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->suffix('%')
-                            ->required(),
-                    ]),
-                Section::make('Barcode')
-                    ->visibleOn('edit')
-                    ->schema([
-                        Select::make('barcode_format')
-                            ->label('Barcode format')
-                            ->options(BarcodeFormat::options())
-                            ->required(),
-                        TextInput::make('barcode_prefix')
-                            ->label('Prefix')
-                            ->maxLength(20)
-                            ->helperText('Optional prefix included at the start of every generated barcode.'),
-                        TextInput::make('barcode_next_number')
-                            ->label('Next number')
-                            ->numeric()
-                            ->minValue(1)
-                            ->required()
-                            ->helperText('The sequence number the next generated barcode will use.'),
-                    ]),
-                Section::make('Locations')
-                    ->visibleOn('edit')
-                    ->schema([
-                        Repeater::make('locations')
-                            ->label('')
-                            ->addActionLabel('Add location')
-                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-                            ->schema([
-                                Hidden::make('id'),
-                                TextInput::make('name')
-                                    ->required(),
-                                Select::make('type')
-                                    ->options(LocationType::options())
-                                    ->required(),
-                                Checkbox::make('is_active')
-                                    ->default(true),
-                            ]),
-                    ]),
-                Section::make('Categories')
-                    ->visibleOn('edit')
-                    ->schema([
-                        Repeater::make('categories')
-                            ->label('')
-                            ->addActionLabel('Add category')
-                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-                            ->schema([
-                                Hidden::make('id'),
-                                TextInput::make('name')
-                                    ->required(),
-                                Repeater::make('subcategories')
-                                    ->label('Subcategories')
-                                    ->addActionLabel('Add subcategory')
-                                    ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-                                    ->schema([
-                                        Hidden::make('id'),
-                                        TextInput::make('name')
-                                            ->required(),
-                                    ]),
-                            ]),
-                    ]),
-                Section::make('Brands')
-                    ->visibleOn('edit')
-                    ->schema([
-                        Repeater::make('brands')
-                            ->label('')
-                            ->addActionLabel('Add brand')
-                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-                            ->schema([
-                                Hidden::make('id'),
-                                TextInput::make('name')
-                                    ->required(),
-                                Checkbox::make('is_active')
-                                    ->default(true),
-                            ]),
-                    ]),
             ]);
     }
 }
