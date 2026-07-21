@@ -2,14 +2,15 @@
 
 namespace App\Filament\Business\Resources\Products\Tables;
 
+use App\Filament\Business\Resources\Products\ProductResource;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\UnitOfMeasure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -66,6 +67,7 @@ class ProductsTable
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
+            ->recordUrl(fn (Product $record) => ProductResource::getUrl('view', ['record' => $record]))
             ->filters([
                 SelectFilter::make('category_id')
                     ->label('Category')
@@ -79,7 +81,6 @@ class ProductsTable
                 TernaryFilter::make('is_active'),
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\ProductBatches\Tables;
 
+use App\Filament\Business\Resources\ProductBatches\ProductBatchResource;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
@@ -9,7 +10,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -47,6 +47,7 @@ class ProductBatchesTable
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
+            ->recordUrl(fn (ProductBatch $record) => ProductBatchResource::getUrl('view', ['record' => $record]))
             ->defaultSort('expiry_date', 'asc')
             ->filters([
                 Filter::make('expired')
@@ -63,7 +64,6 @@ class ProductBatchesTable
                 TernaryFilter::make('is_active'),
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

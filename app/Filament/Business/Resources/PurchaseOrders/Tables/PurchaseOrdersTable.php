@@ -4,6 +4,7 @@ namespace App\Filament\Business\Resources\PurchaseOrders\Tables;
 
 use App\Enums\PurchaseOrderStatus;
 use App\Filament\Business\Resources\PurchaseOrders\Actions\ReceiveStockAction;
+use App\Filament\Business\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\Location;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
@@ -11,7 +12,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -44,6 +44,7 @@ class PurchaseOrdersTable
                     ->state(fn (PurchaseOrder $record) => $record->total())
                     ->money(fn () => tenant('currency')?->value),
             ])
+            ->recordUrl(fn (PurchaseOrder $record) => PurchaseOrderResource::getUrl('view', ['record' => $record]))
             ->defaultSort('order_date', 'desc')
             ->filters([
                 SelectFilter::make('supplier_id')
@@ -56,7 +57,6 @@ class PurchaseOrdersTable
                     ->options(PurchaseOrderStatus::options()),
             ])
             ->recordActions([
-                ViewAction::make(),
                 ReceiveStockAction::make(),
                 EditAction::make(),
                 DeleteAction::make()

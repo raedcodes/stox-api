@@ -2,13 +2,13 @@
 
 namespace App\Filament\Business\Resources\PurchaseReturns\Tables;
 
+use App\Filament\Business\Resources\PurchaseReturns\PurchaseReturnResource;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseReturn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -35,6 +35,7 @@ class PurchaseReturnsTable
                     ->state(fn (PurchaseReturn $record) => $record->total())
                     ->money(fn () => tenant('currency')?->value),
             ])
+            ->recordUrl(fn (PurchaseReturn $record) => PurchaseReturnResource::getUrl('view', ['record' => $record]))
             ->defaultSort('return_date', 'desc')
             ->filters([
                 SelectFilter::make('purchase_order_id')
@@ -42,7 +43,6 @@ class PurchaseReturnsTable
                     ->options(fn () => PurchaseOrder::query()->pluck('po_number', 'id')),
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

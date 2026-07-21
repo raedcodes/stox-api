@@ -3,12 +3,13 @@
 namespace App\Filament\Business\Resources\CustomerTransactions\Tables;
 
 use App\Enums\CustomerTransactionType;
+use App\Filament\Business\Resources\CustomerTransactions\CustomerTransactionResource;
 use App\Models\Customer;
+use App\Models\CustomerTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -33,6 +34,7 @@ class CustomerTransactionsTable
                     ->date()
                     ->sortable(),
             ])
+            ->recordUrl(fn (CustomerTransaction $record) => CustomerTransactionResource::getUrl('view', ['record' => $record]))
             ->defaultSort('transaction_date', 'desc')
             ->filters([
                 SelectFilter::make('customer_id')
@@ -42,7 +44,6 @@ class CustomerTransactionsTable
                     ->options(CustomerTransactionType::options()),
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

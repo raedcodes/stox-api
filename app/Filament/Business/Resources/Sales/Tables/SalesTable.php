@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Resources\Sales\Tables;
 
 use App\Enums\SaleStatus;
+use App\Filament\Business\Resources\Sales\SaleResource;
 use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Sale;
@@ -11,7 +12,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -44,6 +44,7 @@ class SalesTable
                     ->state(fn (Sale $record) => $record->total())
                     ->money(fn () => tenant('currency')?->value),
             ])
+            ->recordUrl(fn (Sale $record) => SaleResource::getUrl('view', ['record' => $record]))
             ->defaultSort('sale_date', 'desc')
             ->filters([
                 SelectFilter::make('customer_id')
@@ -56,7 +57,6 @@ class SalesTable
                     ->options(SaleStatus::options()),
             ])
             ->recordActions([
-                ViewAction::make(),
                 Action::make('complete')
                     ->label('Complete Sale')
                     ->icon('heroicon-o-check-circle')

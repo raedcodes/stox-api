@@ -3,12 +3,13 @@
 namespace App\Filament\Business\Resources\SupplierTransactions\Tables;
 
 use App\Enums\SupplierTransactionType;
+use App\Filament\Business\Resources\SupplierTransactions\SupplierTransactionResource;
 use App\Models\Supplier;
+use App\Models\SupplierTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -33,6 +34,7 @@ class SupplierTransactionsTable
                     ->date()
                     ->sortable(),
             ])
+            ->recordUrl(fn (SupplierTransaction $record) => SupplierTransactionResource::getUrl('view', ['record' => $record]))
             ->defaultSort('transaction_date', 'desc')
             ->filters([
                 SelectFilter::make('supplier_id')
@@ -42,7 +44,6 @@ class SupplierTransactionsTable
                     ->options(SupplierTransactionType::options()),
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
