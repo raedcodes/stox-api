@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\CustomerTransactionType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
@@ -42,5 +44,24 @@ class Customer extends Model
                 return false;
             }
         });
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(CustomerTransaction::class);
+    }
+
+    /**
+     * Current balance owed by this customer: total credit sales minus total payments.
+     */
+    public function balance(): float
+    {
+        $totals = $this->transactions()
+            ->selectRaw('type, SUM(amount) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        return (float) ($totals[CustomerTransactionType::CreditSale] ?? 0)
+            - (float) ($totals[CustomerTransactionType::Payment] ?? 0);
     }
 }

@@ -54,6 +54,10 @@ class CustomerResource extends Resource
                     ->placeholder('—'),
                 TextColumn::make('phone')
                     ->placeholder('—'),
+                TextColumn::make('balance')
+                    ->state(fn (Customer $record) => $record->balance())
+                    ->money(fn () => tenant('currency'))
+                    ->color(fn (Customer $record) => $record->balance() > 0 ? 'danger' : 'success'),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
