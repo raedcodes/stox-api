@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\BarcodeFormat;
 use App\Models\BarcodeSetting;
 use App\Models\TaxSetting;
+use App\Models\UnitOfMeasure;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -23,5 +24,15 @@ class TenantDatabaseSeeder extends Seeder
             'format' => BarcodeFormat::CODE128,
             'next_number' => 1,
         ]);
+
+        foreach ([
+            ['name' => 'Piece', 'abbreviation' => 'pc'],
+            ['name' => 'Kilogram', 'abbreviation' => 'kg'],
+            ['name' => 'Liter', 'abbreviation' => 'L'],
+            ['name' => 'Box', 'abbreviation' => 'box'],
+            ['name' => 'Pack', 'abbreviation' => 'pack'],
+        ] as $unit) {
+            UnitOfMeasure::firstOrCreate(['abbreviation' => $unit['abbreviation']], $unit);
+        }
     }
 }
