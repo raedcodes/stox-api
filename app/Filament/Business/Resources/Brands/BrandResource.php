@@ -44,10 +44,15 @@ class BrandResource extends Resource
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Created at')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('created_at_since')
                     ->label('Since')
+                    ->state(fn (Brand $record) => $record->created_at)
                     ->since()
                     ->dateTooltip()
-                    ->sortable(),
+                    ->sortable(query: fn ($query, $direction) => $query->orderBy('created_at', $direction)),
             ])
             ->recordActions([
                 EditAction::make(),

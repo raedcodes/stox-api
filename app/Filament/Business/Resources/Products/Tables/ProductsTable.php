@@ -67,10 +67,16 @@ class ProductsTable
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Created at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at_since')
                     ->label('Since')
+                    ->state(fn (Product $record) => $record->created_at)
                     ->since()
                     ->dateTooltip()
-                    ->sortable()
+                    ->sortable(query: fn ($query, $direction) => $query->orderBy('created_at', $direction))
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordUrl(fn (Product $record) => ProductResource::getUrl('view', ['record' => $record]))
