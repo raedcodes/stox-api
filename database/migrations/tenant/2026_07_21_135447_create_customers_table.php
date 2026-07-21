@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->boolean('is_walk_in')->default(false);
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();

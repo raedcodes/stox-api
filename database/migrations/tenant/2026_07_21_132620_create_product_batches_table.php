@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->foreignId('location_id')->constrained('locations')->restrictOnDelete();
-            $table->string('batch_number');
+            $table->string('batch_number')->nullable();
             $table->decimal('quantity', 12, 2);
             $table->date('expiry_date')->nullable();
             $table->boolean('is_active')->default(true);
