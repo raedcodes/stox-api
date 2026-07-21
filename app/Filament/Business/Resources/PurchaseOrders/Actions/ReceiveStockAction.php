@@ -93,17 +93,16 @@ class ReceiveStockAction
                         $poItem = PurchaseOrderItem::findOrFail($line['purchase_order_item_id']);
                         $quantity = (float) $line['quantity_received'];
 
-                        $productBatch = null;
-
-                        if (filled($line['batch_number'] ?? null)) {
-                            $productBatch = ProductBatch::create([
-                                'product_id' => $poItem->product_id,
-                                'location_id' => $record->location_id,
-                                'batch_number' => $line['batch_number'],
-                                'quantity' => $quantity,
-                                'expiry_date' => $line['expiry_date'] ?? null,
-                            ]);
-                        }
+                        // Always tracked as a batch, even without a real batch number/expiry —
+                        // this is the only record of on-hand stock, so every receipt needs one
+                        // for sales to have anything to deduct from later.
+                        $productBatch = ProductBatch::create([
+                            'product_id' => $poItem->product_id,
+                            'location_id' => $record->location_id,
+                            'batch_number' => $line['batch_number'] ?? null,
+                            'quantity' => $quantity,
+                            'expiry_date' => $line['expiry_date'] ?? null,
+                        ]);
 
                         $receipt->items()->create([
                             'purchase_order_item_id' => $poItem->id,

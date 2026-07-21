@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\SaleInvoiceController;
+use App\Http\Middleware\AuthenticateBusinessUser;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -25,5 +27,10 @@ Route::middleware([
 ])->group(function () {
     Route::get('/tenant-check', function () {
         return 'The id of the current tenant is ' . tenant('id');
+    });
+
+    Route::middleware([AuthenticateBusinessUser::class])->group(function () {
+        Route::get('/sales/{sale}/invoice', [SaleInvoiceController::class, 'show'])
+            ->name('business.sales.invoice');
     });
 });

@@ -61,4 +61,16 @@ class Product extends Model
     {
         return $this->hasMany(ProductBatch::class);
     }
+
+    /**
+     * Current on-hand quantity, optionally scoped to a location. Sourced
+     * entirely from active batches — the only place stock quantity lives.
+     */
+    public function stockOnHand(?int $locationId = null): float
+    {
+        return (float) $this->batches()
+            ->where('is_active', true)
+            ->when($locationId, fn ($query) => $query->where('location_id', $locationId))
+            ->sum('quantity');
+    }
 }

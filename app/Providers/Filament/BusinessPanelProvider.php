@@ -28,7 +28,7 @@ class BusinessPanelProvider extends PanelProvider
         return $panel
             ->id('business')
             ->path('app')
-            ->brandName(fn () => tenant('name') ?? 'Business Suite')
+            ->brandName(fn () => tenant('name') ?? 'Stox')
             ->login(BusinessLogin::class)
             ->profile()
             ->colors([
@@ -59,6 +59,8 @@ class BusinessPanelProvider extends PanelProvider
                 InitializeTenancyBySubdomain::class,
                 PreventAccessFromCentralDomains::class,
             ])
+            ->resourceCreatePageRedirect('index')
+            ->resourceEditPageRedirect('index')
             ->authMiddleware([
                 Authenticate::class,
             ]);
