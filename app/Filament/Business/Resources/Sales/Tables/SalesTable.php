@@ -43,6 +43,10 @@ class SalesTable
                 TextColumn::make('total')
                     ->state(fn (Sale $record) => $record->total())
                     ->money(fn () => tenant('currency')?->value),
+                TextColumn::make('cashier.name')
+                    ->label('Cashier')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordUrl(fn (Sale $record) => SaleResource::getUrl('view', ['record' => $record]))
             ->defaultSort('sale_date', 'desc')

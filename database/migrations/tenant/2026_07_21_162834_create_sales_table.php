@@ -20,6 +20,9 @@ return new class extends Migration
             $table->decimal('discount_value', 12, 2)->nullable();
             $table->date('sale_date');
             $table->text('notes')->nullable();
+            // No FK constraint: users live in the central database, not this
+            // tenant database, so a cross-database constraint isn't possible.
+            $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
         });
     }

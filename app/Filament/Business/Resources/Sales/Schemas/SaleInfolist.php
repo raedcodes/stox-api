@@ -31,6 +31,9 @@ class SaleInfolist
                             ->label('Location'),
                         TextEntry::make('sale_date')
                             ->date(),
+                        TextEntry::make('cashier.name')
+                            ->label('Cashier')
+                            ->placeholder('—'),
                         TextEntry::make('notes')
                             ->placeholder('—')
                             ->columnSpanFull(),

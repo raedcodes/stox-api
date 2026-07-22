@@ -25,6 +25,7 @@ class Sale extends Model
         'discount_value',
         'sale_date',
         'notes',
+        'created_by',
     ];
 
     protected function casts(): array
@@ -43,6 +44,10 @@ class Sale extends Model
         static::creating(function (self $sale) {
             if (blank($sale->sale_number)) {
                 $sale->sale_number = static::generateSaleNumber();
+            }
+
+            if (blank($sale->created_by)) {
+                $sale->created_by = auth()->id();
             }
         });
     }
@@ -72,6 +77,11 @@ class Sale extends Model
     public function returns(): HasMany
     {
         return $this->hasMany(SaleReturn::class);
+    }
+
+    public function cashier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function subtotal(): float
