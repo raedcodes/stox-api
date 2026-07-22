@@ -10,27 +10,13 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+class DemoBusinessSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // create Admin
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@business-suite.com'],
-            [
-                'name' => 'Admin Admin',
-                'password' => Hash::make(env('ADMIN_PASSWORD')),
-                'email_verified_at' => now(),
-            ],
-        );
-
-        $admin->assignRole(UserRole::SuperAdmin);
-
-        // create Owner, with a business of their own — every Owner belongs to a tenant
-
         $tenant = Tenant::firstOrCreate(
             ['name' => 'Demo Business'],
             [
@@ -55,6 +41,5 @@ class UserSeeder extends Seeder
         );
 
         $owner->assignRole(UserRole::Owner);
-
     }
 }

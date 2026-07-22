@@ -2,26 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Seed only what any environment needs to be usable: roles and the
+     * SuperAdmin. Deliberately excludes DemoBusinessSeeder — that's local-dev
+     * only and is run separately, on purpose, so this stays production-safe.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
         $this->call([
             RolesAndPermissionsSeeder::class,
-            UserSeeder::class
+            SuperAdminSeeder::class,
         ]);
     }
 }

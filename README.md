@@ -8,9 +8,10 @@ Multi-tenant inventory management system. Built on Laravel + Filament + `stancl/
 composer install
 php artisan storage:link
 php artisan migrate:fresh --seed
+php artisan db:seed --class=DemoBusinessSeeder
 ```
 
-That last command does everything: sets up the central database, seeds roles, creates the SuperAdmin, and creates a demo business ("Demo Business", subdomain `demo`) with its own provisioned database, tax/barcode settings, units of measure, and a default location — all in one go.
+`migrate:fresh --seed` sets up the central database, seeds roles, and creates the SuperAdmin — that part is the same seeding used in production. The last line is local-only: it creates a demo business ("Demo Business", subdomain `demo`) with its own provisioned database, tax/barcode settings, units of measure, and a default location, so you have a tenant to log into straight away.
 
 ## Accessing the app
 
@@ -48,6 +49,23 @@ There are two separate panels, for two different kinds of users.
 - `php artisan tenants:migrate-fresh` — ⚠️ drops and rebuilds every tenant database; destructive
 
 Note: `migrate:fresh` only resets the **central** database. It does not drop physical tenant databases from previous runs — those accumulate in MySQL until a tenant is properly deleted through the app (or removed by hand).
+
+## First production deploy
+
+Seeding is deliberately split so production never gets local/demo data:
+
+- **`DatabaseSeeder`** (the default — what plain `db:seed` runs) — `RolesAndPermissionsSeeder` + `SuperAdminSeeder` only: the 5 roles and the SuperAdmin (`admin@business-suite.com` / `ADMIN_PASSWORD` from `.env`). Production-safe as-is.
+- **`DemoBusinessSeeder`** — its own separate file, only ever run explicitly by name (`--class=DemoBusinessSeeder`). Creates the local-only "Demo Business" tenant + owner. **Never run this in production.**
+
+After the very first deploy only, run these manually (via Forge's SSH/"Run command", **not** added to the automated deploy script — neither needs to run on every deploy):
+
+```bash
+php artisan storage:link
+php artisan db:seed --force
+```
+
+- `storage:link` — creates the `public/storage` symlink so uploaded files (product images, tenant logos) are actually reachable. Nothing in the automated deploy script creates this.
+- `db:seed` — a fresh production database has no roles and no SuperAdmin; `migrate --force` and `tenants:migrate --force` alone won't create either, so `/admin` is unreachable until this runs once.
 
 ## Deploying (Forge)
 
