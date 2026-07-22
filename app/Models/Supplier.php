@@ -6,9 +6,12 @@ use App\Enums\PaymentTerms;
 use App\Enums\SupplierTransactionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'contact_person',

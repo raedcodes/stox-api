@@ -47,12 +47,12 @@ class StockTransfer extends Model
 
     public function fromLocation(): BelongsTo
     {
-        return $this->belongsTo(Location::class, 'from_location_id');
+        return $this->belongsTo(Location::class, 'from_location_id')->withTrashed();
     }
 
     public function toLocation(): BelongsTo
     {
-        return $this->belongsTo(Location::class, 'to_location_id');
+        return $this->belongsTo(Location::class, 'to_location_id')->withTrashed();
     }
 
     public function items(): HasMany
