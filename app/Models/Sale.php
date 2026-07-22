@@ -6,6 +6,7 @@ use App\Enums\CustomerTransactionType;
 use App\Enums\DiscountType;
 use App\Enums\PaymentMethod;
 use App\Enums\SaleStatus;
+use App\Enums\StockMovementType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -155,23 +156,15 @@ class Sale extends Model
 
     protected function deductStock(SaleItem $item): void
     {
-        $remaining = (float) $item->quantity;
+        $consumed = ProductBatch::deductFefo($item->product_id, $this->location_id, (float) $item->quantity);
 
-        $batches = ProductBatch::where('product_id', $item->product_id)
-            ->where('location_id', $this->location_id)
-            ->where('is_active', true)
-            ->where('quantity', '>', 0)
-            ->orderByRaw('expiry_date IS NULL, expiry_date ASC')
-            ->get();
-
-        foreach ($batches as $batch) {
-            if ($remaining <= 0) {
-                break;
-            }
-
-            $deduct = min($remaining, (float) $batch->quantity);
-            $batch->decrement('quantity', $deduct);
-            $remaining -= $deduct;
+        foreach ($consumed as $entry) {
+            StockMovement::record(
+                batch: $entry['batch'],
+                type: StockMovementType::Sale,
+                quantityChange: -$entry['quantity'],
+                reference: $this,
+            );
         }
     }
 }

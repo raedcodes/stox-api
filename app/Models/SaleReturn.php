@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CustomerTransactionType;
 use App\Enums\PaymentMethod;
+use App\Enums\StockMovementType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,12 +59,19 @@ class SaleReturn extends Model
 
         DB::transaction(function () {
             foreach ($this->items as $item) {
-                ProductBatch::create([
+                $batch = ProductBatch::create([
                     'product_id' => $item->product_id,
                     'location_id' => $this->sale->location_id,
                     'batch_number' => null,
                     'quantity' => $item->quantity,
                 ]);
+
+                StockMovement::record(
+                    batch: $batch,
+                    type: StockMovementType::SaleReturn,
+                    quantityChange: (float) $item->quantity,
+                    reference: $this,
+                );
             }
 
             if ($this->sale->payment_method === PaymentMethod::Credit) {

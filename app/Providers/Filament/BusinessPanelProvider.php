@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Business\Auth\BusinessLogin;
+use App\Filament\Business\Widgets\ExpiryAlertsWidget;
+use App\Filament\Business\Widgets\LowStockWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -41,6 +43,8 @@ class BusinessPanelProvider extends PanelProvider
             ])
             ->widgets([
                 AccountWidget::class,
+                LowStockWidget::class,
+                ExpiryAlertsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

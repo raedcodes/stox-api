@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\StockAdjustmentReason;
+use App\Enums\StockMovementType;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use RuntimeException;
+
+class StockAdjustment extends Model
+{
+    protected $fillable = [
+        'product_id',
+        'location_id',
+        'product_batch_id',
+        'quantity_change',
+        'reason',
+        'notes',
+        'adjustment_date',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'reason' => StockAdjustmentReason::class,
+            'quantity_change' => 'decimal:2',
+            'adjustment_date' => 'date',
+        ];
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(ProductBatch::class, 'product_batch_id');
+    }
+
+    /**
+     * Apply the adjustment to its batch and log it. Called explicitly by the
+     * creating page (wrapped in the same transaction as the record's own
+     * creation) rather than from a model event — a failed adjustment must
+     * never leave behind a StockAdjustment row with no matching batch change.
+     * A positive change tops up the batch directly; a negative change can't
+     * take a batch below zero (that's what a full FEFO deduction across
+     * batches is for — an adjustment targets one specific, already-identified
+     * batch).
+     */
+    public function apply(): void
+    {
+        $batch = $this->batch;
+
+        if ($this->quantity_change < 0 && (float) $batch->quantity < abs((float) $this->quantity_change)) {
+            throw new RuntimeException(
+                "Cannot adjust {$batch->product->name} down by ".abs($this->quantity_change).
+                " — batch only has {$batch->quantity} on hand."
+            );
+        }
+
+        $batch->increment('quantity', $this->quantity_change);
+
+        StockMovement::record(
+            batch: $batch,
+            type: StockMovementType::Adjustment,
+            quantityChange: (float) $this->quantity_change,
+            reason: $this->reason->value,
+            notes: $this->notes,
+            reference: $this,
+        );
+    }
+}

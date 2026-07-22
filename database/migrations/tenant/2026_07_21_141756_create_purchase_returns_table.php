@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('purchase_order_id')->constrained('purchase_orders')->restrictOnDelete();
             $table->date('return_date');
             $table->text('reason')->nullable();
+            $table->timestamp('processed_at')->nullable();
             $table->timestamps();
         });
     }

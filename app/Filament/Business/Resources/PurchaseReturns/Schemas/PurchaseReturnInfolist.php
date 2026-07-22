@@ -4,6 +4,7 @@ namespace App\Filament\Business\Resources\PurchaseReturns\Schemas;
 
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
@@ -25,6 +26,10 @@ class PurchaseReturnInfolist
                             ->label('Supplier'),
                         TextEntry::make('return_date')
                             ->date(),
+                        IconEntry::make('processed_at')
+                            ->label('Processed')
+                            ->boolean()
+                            ->state(fn (PurchaseReturn $record) => $record->processed_at !== null),
                         TextEntry::make('reason')
                             ->placeholder('—')
                             ->columnSpanFull(),

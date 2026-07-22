@@ -3,10 +3,12 @@
 namespace App\Filament\Business\Resources\PurchaseOrders\Actions;
 
 use App\Enums\PurchaseOrderStatus;
+use App\Enums\StockMovementType;
 use App\Enums\SupplierTransactionType;
 use App\Models\ProductBatch;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\StockMovement;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -111,6 +113,13 @@ class ReceiveStockAction
                             'expiry_date' => $line['expiry_date'] ?? null,
                             'product_batch_id' => $productBatch?->id,
                         ]);
+
+                        StockMovement::record(
+                            batch: $productBatch,
+                            type: StockMovementType::PurchaseReceipt,
+                            quantityChange: $quantity,
+                            reference: $record,
+                        );
 
                         $poItem->increment('quantity_received', $quantity);
 
