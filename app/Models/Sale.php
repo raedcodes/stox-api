@@ -161,6 +161,12 @@ class Sale extends Model
             }
 
             $this->update(['status' => SaleStatus::Completed]);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties(['sale_number' => $this->sale_number, 'total' => $this->total()])
+                ->log("Sale {$this->sale_number} completed");
         });
     }
 

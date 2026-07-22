@@ -124,6 +124,12 @@ class CreateUser extends CreateRecord
 
                 $owner->assignRole(UserRole::Owner);
 
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($tenant)
+                    ->withProperties(['business_name' => $tenant->name, 'owner_email' => $owner->email])
+                    ->log("Business {$tenant->name} created");
+
                 return $owner;
             });
         } catch (\Throwable $e) {

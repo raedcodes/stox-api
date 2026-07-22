@@ -75,5 +75,15 @@ class StockAdjustment extends Model
             notes: $this->notes,
             reference: $this,
         );
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($this)
+            ->withProperties([
+                'product' => $batch->product->name,
+                'reason' => $this->reason->value,
+                'quantity_change' => (float) $this->quantity_change,
+            ])
+            ->log("Stock adjustment ({$this->reason->getLabel()}) for {$batch->product->name}: {$this->quantity_change}");
     }
 }

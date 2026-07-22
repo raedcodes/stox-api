@@ -137,6 +137,16 @@ class StockTransfer extends Model
             }
 
             $this->update(['status' => StockTransferStatus::Completed]);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties([
+                    'transfer_number' => $this->transfer_number,
+                    'from_location' => $this->fromLocation->name,
+                    'to_location' => $this->toLocation->name,
+                ])
+                ->log("Stock transfer {$this->transfer_number} completed");
         });
     }
 }

@@ -136,6 +136,12 @@ class ReceiveStockAction
                     }
 
                     $record->recomputeStatus();
+
+                    activity()
+                        ->causedBy(auth()->user())
+                        ->performedOn($record)
+                        ->withProperties(['po_number' => $record->po_number, 'total_value' => $totalValue])
+                        ->log("Stock received against PO {$record->po_number}");
                 });
 
                 Notification::make()

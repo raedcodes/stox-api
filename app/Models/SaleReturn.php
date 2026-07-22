@@ -84,6 +84,12 @@ class SaleReturn extends Model
             }
 
             $this->update(['processed_at' => now()]);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties(['sale_number' => $this->sale->sale_number])
+                ->log("Sale return processed against {$this->sale->sale_number}");
         });
     }
 }

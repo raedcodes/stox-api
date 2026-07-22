@@ -100,6 +100,12 @@ class PurchaseReturn extends Model
             }
 
             $this->update(['processed_at' => now()]);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties(['po_number' => $this->purchaseOrder->po_number])
+                ->log("Purchase return processed against {$this->purchaseOrder->po_number}");
         });
     }
 }
