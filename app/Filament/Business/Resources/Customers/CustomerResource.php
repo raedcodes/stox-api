@@ -19,12 +19,28 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'phone', 'email'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Phone' => $record->phone,
+            'Email' => $record->email,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -15,12 +15,34 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class SaleResource extends Resource
 {
     protected static ?string $model = Sale::class;
 
+    protected static ?string $recordTitleAttribute = 'sale_number';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['sale_number', 'customer.name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Customer' => $record->customer?->name,
+            'Status' => $record->status->getLabel(),
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['customer']);
+    }
 
     public static function form(Schema $schema): Schema
     {
