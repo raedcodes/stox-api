@@ -22,6 +22,8 @@ There are two separate panels, for two different kinds of users.
 - **Login:** `admin@business-suite.com` / value of `ADMIN_PASSWORD` in `.env`
 - **Purpose:** the super admin's *only* job here is creating business accounts (the "Businesses" wizard: business name, subdomain, business type, currency, timezone, owner account). Businesses manage everything else about their own operation themselves, through their own panel below.
 
+
+
 ### Business panel — self-service, per business
 
 - **URL:** `http://{subdomain}.localhost:8000/app/login` — each business is reached at its own subdomain
@@ -36,6 +38,8 @@ There are two separate panels, for two different kinds of users.
 - `*.localhost` subdomains (e.g. `demo.localhost`) resolve to `127.0.0.1` automatically in modern browsers and on Linux — no `/etc/hosts` changes needed when running via `php artisan serve`.
 - If serving through Apache/XAMPP instead, you'll need a VirtualHost with a wildcard `ServerAlias` (e.g. `*.business-suite.test`) pointing at `public/` — there currently isn't one configured for this project, so a bare XAMPP setup without one **cannot** reach tenant subdomains at all.
 
+
+
 ## Tenant management commands
 
 - `php artisan tenants:list` — list all tenants
@@ -45,7 +49,28 @@ There are two separate panels, for two different kinds of users.
 
 Note: `migrate:fresh` only resets the **central** database. It does not drop physical tenant databases from previous runs — those accumulate in MySQL until a tenant is properly deleted through the app (or removed by hand).
 
-## Environment notes
+## Deploying (Forge)
 
-- `SESSION_CONNECTION`, `DB_CACHE_CONNECTION`, and `DB_QUEUE_CONNECTION` in `.env` are pinned to the central database connection (`mysql`). This is required — without it, sessions/cache/queue would silently follow whichever database connection is currently active, and break the moment a request switches into tenant context. These three lines live in `.env` (gitignored), so they need to be set again on every environment this project runs in.
-- `config/tenancy.php`'s `central_domains` list needs your production domain(s) added before deploying.
+Forge's default deploy script only runs `php artisan migrate --force`, which — per above — only ever touches the **central** database. Add `tenants:migrate` as its own explicit step, or new tenant-table columns will silently never reach existing businesses after a deploy.
+
+Deploy script:
+
+```bash
+cd /home/forge/your-site.com
+git pull origin $FORGE_SITE_BRANCH
+
+$FORGE_COMPOSER install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+( flock -w 10 9 || exit 1
+    echo 'Restarting FPM...'; sudo -S service $FORGE_PHP_FPM reload ) 9>/tmp/fpmlock
+
+if [ -f artisan ]; then
+    $FORGE_PHP artisan migrate --force
+    $FORGE_PHP artisan tenants:migrate --force
+fi
+```
+
+- `migrate --force` runs first (central), `tenants:migrate --force` second (loops every tenant and applies pending `database/migrations/tenant/` migrations to each). Both need `--force` — Forge runs in production, and both commands refuse destructive-looking operations without it.
+- Never put `migrate:fresh` or `tenants:migrate-fresh` in this script — both are destructive (drop-and-rebuild) and are for local/manual use only.
+- Once a migration has actually run against production (central or any tenant), don't edit that migration file afterward — ship schema changes as new migrations from then on.
+
