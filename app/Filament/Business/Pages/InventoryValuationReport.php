@@ -16,8 +16,8 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InventoryValuationReport extends Page implements HasTable
 {
@@ -80,7 +80,7 @@ class InventoryValuationReport extends Page implements HasTable
         ];
     }
 
-    protected function exportPdf(): Response
+    protected function exportPdf(): StreamedResponse
     {
         $rows = $this->getFilteredTableQuery()->with(['product', 'location'])->get();
 
@@ -92,6 +92,6 @@ class InventoryValuationReport extends Page implements HasTable
             'rows' => $rows,
         ]);
 
-        return $pdf->stream('inventory-valuation-report.pdf');
+        return response()->streamDownload(fn () => print ($pdf->output()), 'inventory-valuation-report.pdf');
     }
 }

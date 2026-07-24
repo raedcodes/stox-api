@@ -13,8 +13,8 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
-use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerStatement extends Page
 {
@@ -129,7 +129,7 @@ class CustomerStatement extends Page
         ];
     }
 
-    protected function exportPdf(): ?Response
+    protected function exportPdf(): ?StreamedResponse
     {
         $customer = $this->customer();
 
@@ -153,6 +153,6 @@ class CustomerStatement extends Page
             'closingBalance' => $this->closingBalance(),
         ]);
 
-        return $pdf->stream('customer-statement.pdf');
+        return response()->streamDownload(fn () => print ($pdf->output()), 'customer-statement.pdf');
     }
 }
