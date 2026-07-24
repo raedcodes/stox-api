@@ -3,9 +3,11 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\CustomerTransactionType;
+use App\Enums\NavigationGroup;
 use App\Models\Customer;
 use App\Models\CustomerTransaction;
 use App\Models\Tenant;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -13,11 +15,19 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use UnitEnum;
 
 class CustomerStatement extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;
+
+    protected static ?int $navigationSort = 55;
+
     protected string $view = 'filament.business.pages.customer-statement';
 
     /**

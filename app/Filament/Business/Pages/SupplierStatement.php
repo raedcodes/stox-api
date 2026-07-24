@@ -2,10 +2,12 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Enums\SupplierTransactionType;
 use App\Models\Supplier;
 use App\Models\SupplierTransaction;
 use App\Models\Tenant;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -13,11 +15,19 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use UnitEnum;
 
 class SupplierStatement extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;
+
+    protected static ?int $navigationSort = 56;
+
     protected string $view = 'filament.business.pages.supplier-statement';
 
     /**

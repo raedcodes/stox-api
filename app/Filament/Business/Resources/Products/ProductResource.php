@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Products;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\Products\Pages\CreateProduct;
 use App\Filament\Business\Resources\Products\Pages\EditProduct;
 use App\Filament\Business\Resources\Products\Pages\ListProducts;
@@ -18,6 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ProductResource extends Resource
 {
@@ -25,7 +27,11 @@ class ProductResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Catalog;
+
+    protected static ?int $navigationSort = 30;
 
     public static function getGloballySearchableAttributes(): array
     {

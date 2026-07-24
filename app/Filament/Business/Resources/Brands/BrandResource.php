@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Brands;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\Brands\Pages\ManageBrands;
 use App\Models\Brand;
 use BackedEnum;
@@ -24,12 +25,17 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookmark;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Catalog;
+
+    protected static ?int $navigationSort = 32;
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {

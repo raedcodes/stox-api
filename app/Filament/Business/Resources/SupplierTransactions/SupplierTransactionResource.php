@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\SupplierTransactions;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\CreateSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\EditSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\ListSupplierTransactions;
@@ -15,12 +16,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class SupplierTransactionResource extends Resource
 {
     protected static ?string $model = SupplierTransaction::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Purchasing;
+
+    protected static ?int $navigationSort = 23;
 
     public static function form(Schema $schema): Schema
     {

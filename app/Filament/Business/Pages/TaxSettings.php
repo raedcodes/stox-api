@@ -2,7 +2,9 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Models\TaxSetting;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -11,9 +13,17 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class TaxSettings extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Settings;
+
+    protected static ?int $navigationSort = 61;
+
     protected string $view = 'filament.business.pages.tax-settings';
 
     /**

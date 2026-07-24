@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Customers;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\Customers\Pages\ManageCustomers;
 use App\Models\Customer;
 use BackedEnum;
@@ -27,6 +28,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class CustomerResource extends Resource
 {
@@ -34,7 +36,11 @@ class CustomerResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Sales;
+
+    protected static ?int $navigationSort = 12;
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {

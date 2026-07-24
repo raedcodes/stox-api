@@ -2,11 +2,13 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Enums\StockMovementType;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\StockMovement;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
@@ -18,10 +20,18 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
+use UnitEnum;
 
 class OpeningStockEntry extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Inventory;
+
+    protected static ?int $navigationSort = 44;
+
     protected string $view = 'filament.business.pages.opening-stock-entry';
 
     /**

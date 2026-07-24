@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\PurchaseReturns;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\CreatePurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\EditPurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\ListPurchaseReturns;
@@ -15,12 +16,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class PurchaseReturnResource extends Resource
 {
     protected static ?string $model = PurchaseReturn::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUturnLeft;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Purchasing;
+
+    protected static ?int $navigationSort = 21;
 
     public static function form(Schema $schema): Schema
     {

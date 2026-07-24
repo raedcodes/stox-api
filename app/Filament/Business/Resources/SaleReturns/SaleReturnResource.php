@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\SaleReturns;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\SaleReturns\Pages\CreateSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Pages\EditSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Pages\ListSaleReturns;
@@ -15,12 +16,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class SaleReturnResource extends Resource
 {
     protected static ?string $model = SaleReturn::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptRefund;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Sales;
+
+    protected static ?int $navigationSort = 11;
 
     public static function form(Schema $schema): Schema
     {

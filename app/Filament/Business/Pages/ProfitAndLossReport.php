@@ -2,19 +2,29 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
 use App\Models\SaleItem;
 use App\Models\Tenant;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
+use UnitEnum;
 
 class ProfitAndLossReport extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartPie;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;
+
+    protected static ?int $navigationSort = 52;
+
     protected string $view = 'filament.business.pages.profit-and-loss-report';
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Auth\BusinessLogin;
 use App\Filament\Business\Widgets\DashboardKpisWidget;
 use App\Filament\Business\Widgets\ExpiryAlertsWidget;
@@ -43,6 +44,7 @@ class BusinessPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            ->navigationGroups(NavigationGroup::class)
             ->widgets([
                 AccountWidget::class,
                 DashboardKpisWidget::class,

@@ -2,14 +2,17 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Exports\PurchaseReportExport;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\Tenant;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -20,10 +23,17 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
 
 class PurchaseReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPresentationChartLine;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;
+
+    protected static ?int $navigationSort = 51;
 
     protected string $view = 'filament.business.pages.purchase-report';
 

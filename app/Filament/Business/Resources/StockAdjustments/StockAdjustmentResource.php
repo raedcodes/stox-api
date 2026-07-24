@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\StockAdjustments;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\StockAdjustments\Pages\CreateStockAdjustment;
 use App\Filament\Business\Resources\StockAdjustments\Pages\ListStockAdjustments;
 use App\Filament\Business\Resources\StockAdjustments\Pages\ViewStockAdjustment;
@@ -14,12 +15,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class StockAdjustmentResource extends Resource
 {
     protected static ?string $model = StockAdjustment::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Inventory;
+
+    protected static ?int $navigationSort = 41;
 
     public static function form(Schema $schema): Schema
     {

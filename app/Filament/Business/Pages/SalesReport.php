@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
 use App\Exports\SalesReportExport;
 use App\Models\Category;
@@ -9,10 +10,12 @@ use App\Models\Product;
 use App\Models\SaleItem;
 use App\Models\Tenant;
 use App\Models\User;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -23,10 +26,17 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
 
 class SalesReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;
+
+    protected static ?int $navigationSort = 50;
 
     protected string $view = 'filament.business.pages.sales-report';
 

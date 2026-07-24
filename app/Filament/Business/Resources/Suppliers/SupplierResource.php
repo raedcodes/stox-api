@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Suppliers;
 
+use App\Enums\NavigationGroup;
 use App\Enums\PaymentTerms;
 use App\Filament\Business\Resources\Suppliers\Pages\ManageSuppliers;
 use App\Models\Supplier;
@@ -30,6 +31,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class SupplierResource extends Resource
 {
@@ -37,7 +39,11 @@ class SupplierResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Purchasing;
+
+    protected static ?int $navigationSort = 22;
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {

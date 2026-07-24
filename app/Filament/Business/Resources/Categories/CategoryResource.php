@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Categories;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\Categories\Pages\ManageCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -29,12 +30,17 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Catalog;
+
+    protected static ?int $navigationSort = 31;
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {

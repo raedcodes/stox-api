@@ -2,19 +2,29 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
+use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class StockLevels extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Inventory;
+
+    protected static ?int $navigationSort = 40;
 
     protected string $view = 'filament.business.pages.stock-levels';
 

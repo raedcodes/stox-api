@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Sales;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\Sales\Pages\CreateSale;
 use App\Filament\Business\Resources\Sales\Pages\EditSale;
 use App\Filament\Business\Resources\Sales\Pages\ListSales;
@@ -17,6 +18,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class SaleResource extends Resource
 {
@@ -24,7 +26,11 @@ class SaleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'sale_number';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingCart;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Sales;
+
+    protected static ?int $navigationSort = 10;
 
     public static function getGloballySearchableAttributes(): array
     {

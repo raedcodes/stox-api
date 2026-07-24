@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\PurchaseOrders;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
@@ -17,6 +18,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class PurchaseOrderResource extends Resource
 {
@@ -24,7 +26,11 @@ class PurchaseOrderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'po_number';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocument;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Purchasing;
+
+    protected static ?int $navigationSort = 20;
 
     public static function getGloballySearchableAttributes(): array
     {

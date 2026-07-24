@@ -2,15 +2,18 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
 use App\Exports\TaxReportExport;
 use App\Models\SaleItem;
 use App\Models\TaxSetting;
 use App\Models\Tenant;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -20,10 +23,17 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
 
 class TaxReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;
+
+    protected static ?int $navigationSort = 53;
 
     protected string $view = 'filament.business.pages.tax-report';
 

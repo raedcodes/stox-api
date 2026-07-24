@@ -2,13 +2,16 @@
 
 namespace App\Filament\Business\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Exports\InventoryValuationReportExport;
 use App\Models\Location;
 use App\Models\ProductBatch;
 use App\Models\Tenant;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -18,10 +21,17 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use UnitEnum;
 
 class InventoryValuationReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;
+
+    protected static ?int $navigationSort = 54;
 
     protected string $view = 'filament.business.pages.inventory-valuation-report';
 

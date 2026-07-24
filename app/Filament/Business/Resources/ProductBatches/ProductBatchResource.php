@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\ProductBatches;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\ProductBatches\Pages\CreateProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Pages\EditProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Pages\ListProductBatches;
@@ -15,12 +16,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ProductBatchResource extends Resource
 {
     protected static ?string $model = ProductBatch::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBoxArrowDown;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Catalog;
+
+    protected static ?int $navigationSort = 33;
 
     public static function form(Schema $schema): Schema
     {

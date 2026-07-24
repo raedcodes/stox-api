@@ -4,7 +4,9 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\BusinessType;
 use App\Enums\Currency;
+use App\Enums\NavigationGroup;
 use App\Models\Tenant;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -16,9 +18,17 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class BusinessProfile extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Settings;
+
+    protected static ?int $navigationSort = 60;
+
     protected string $view = 'filament.business.pages.business-profile';
 
     /**

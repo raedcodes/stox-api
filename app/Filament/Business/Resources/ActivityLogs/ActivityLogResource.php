@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\ActivityLogs;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\ActivityLogs\Pages\ListActivityLogs;
 use App\Filament\Business\Resources\ActivityLogs\Pages\ViewActivityLog;
 use App\Filament\Business\Resources\ActivityLogs\Schemas\ActivityLogInfolist;
@@ -12,12 +13,17 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Spatie\Activitylog\Models\Activity;
+use UnitEnum;
 
 class ActivityLogResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::System;
+
+    protected static ?int $navigationSort = 70;
 
     protected static ?string $navigationLabel = 'Activity Log';
 

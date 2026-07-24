@@ -3,7 +3,9 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\BarcodeFormat;
+use App\Enums\NavigationGroup;
 use App\Models\BarcodeSetting;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -13,9 +15,17 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class BarcodeSettings extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Settings;
+
+    protected static ?int $navigationSort = 62;
+
     protected string $view = 'filament.business.pages.barcode-settings';
 
     /**

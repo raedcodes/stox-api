@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\StockMovements;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\StockMovements\Pages\ListStockMovements;
 use App\Filament\Business\Resources\StockMovements\Pages\ViewStockMovement;
 use App\Filament\Business\Resources\StockMovements\Schemas\StockMovementInfolist;
@@ -12,12 +13,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class StockMovementResource extends Resource
 {
     protected static ?string $model = StockMovement::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Inventory;
+
+    protected static ?int $navigationSort = 42;
 
     protected static ?string $navigationLabel = 'Stock Movements';
 

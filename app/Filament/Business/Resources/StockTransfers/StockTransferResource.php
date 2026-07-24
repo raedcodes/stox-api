@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\StockTransfers;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\StockTransfers\Pages\CreateStockTransfer;
 use App\Filament\Business\Resources\StockTransfers\Pages\EditStockTransfer;
 use App\Filament\Business\Resources\StockTransfers\Pages\ListStockTransfers;
@@ -15,12 +16,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class StockTransferResource extends Resource
 {
     protected static ?string $model = StockTransfer::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Inventory;
+
+    protected static ?int $navigationSort = 43;
 
     public static function form(Schema $schema): Schema
     {

@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\Sale;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -20,11 +21,16 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class PointOfSale extends Page
 {
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalculator;
+
+    protected static ?int $navigationSort = -1;
+
     protected string $view = 'filament.business.pages.point-of-sale';
 
     /**

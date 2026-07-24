@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Resources\Locations;
 
 use App\Enums\LocationType;
+use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\Locations\Pages\ManageLocations;
 use App\Models\Location;
 use BackedEnum;
@@ -26,12 +27,17 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class LocationResource extends Resource
 {
     protected static ?string $model = Location::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
+
+    protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Inventory;
+
+    protected static ?int $navigationSort = 45;
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
