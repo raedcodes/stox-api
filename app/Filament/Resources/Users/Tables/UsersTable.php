@@ -25,7 +25,7 @@ class UsersTable
                     ->label('Business')
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label('Email address')
+                    ->label('Email')
                     ->searchable(),
                 IconColumn::make('is_active')
                     ->label('Active')
