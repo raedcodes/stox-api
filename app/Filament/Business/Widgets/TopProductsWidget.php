@@ -26,7 +26,8 @@ class TopProductsWidget extends TableWidget
             )
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Product'),
+                    ->label('Product')
+                    ->searchable(),
                 TextColumn::make('total_quantity')
                     ->label('Units sold'),
                 TextColumn::make('gross_revenue')
