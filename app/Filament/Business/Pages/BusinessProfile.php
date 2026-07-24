@@ -80,16 +80,7 @@ class BusinessProfile extends Page
                     ->required(),
                 TextInput::make('domain')
                     ->label('Subdomain')
-                    ->required()
-                    ->regex('/^[a-z0-9]+(-[a-z0-9]+)*$/')
-                    ->validationMessages([
-                        'regex' => 'Only lowercase letters, numbers, and single hyphens are allowed.',
-                    ])
-                    ->unique(
-                        table: config('tenancy.database.central_connection').'.domains',
-                        column: 'domain',
-                        ignorable: fn () => $this->getBusinessTenant()->domain,
-                    ),
+                    ->disabled(),
             ]);
     }
 
@@ -107,10 +98,6 @@ class BusinessProfile extends Page
             'currency' => $data['currency'],
             'timezone' => $data['timezone'],
         ]);
-
-        if ($domain = $tenant->domain) {
-            $domain->update(['domain' => $data['domain']]);
-        }
 
         Notification::make()
             ->title('Business profile saved')

@@ -15,10 +15,6 @@ class ActivityLogsTable
     {
         return $table
             ->columns([
-                TextColumn::make('created_at')
-                    ->label('Date')
-                    ->dateTime()
-                    ->sortable(),
                 TextColumn::make('description')
                     ->wrap(),
                 TextColumn::make('subject_type')
@@ -32,6 +28,10 @@ class ActivityLogsTable
                     ->placeholder('System'),
                 TextColumn::make('log_name')
                     ->badge(),
+                TextColumn::make('created_at')
+                    ->label('Date')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->recordUrl(fn (Activity $record) => ActivityLogResource::getUrl('view', ['record' => $record]))
             ->defaultSort('created_at', 'desc')
