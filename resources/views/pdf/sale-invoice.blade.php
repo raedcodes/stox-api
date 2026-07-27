@@ -41,7 +41,7 @@
             <h1>INVOICE</h1>
             <div><strong>{{ $sale->sale_number }}</strong></div>
             <div class="muted">Date: {{ $sale->sale_date->format('Y-m-d') }}</div>
-            <div class="muted">Payment: {{ ucfirst($sale->payment_method ?? '-') }}</div>
+            <div class="muted">Payment: {{ $sale->payment_method?->getLabel() ?? '-' }}</div>
         </div>
     </div>
 
