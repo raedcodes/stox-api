@@ -38,40 +38,6 @@ class SaleInfolist
                             ->placeholder('—')
                             ->columnSpanFull(),
                     ]),
-                Section::make('Items')
-                    ->schema([
-                        RepeatableEntry::make('items')
-                            ->hiddenLabel()
-                            ->table([
-                                TableColumn::make('Product'),
-                                TableColumn::make('Qty'),
-                                TableColumn::make('Unit price'),
-                                TableColumn::make('Discount'),
-                                TableColumn::make('Tax'),
-                                TableColumn::make('Line total'),
-                            ])
-                            ->schema([
-                                TextEntry::make('product.name')
-                                    ->hiddenLabel(),
-                                TextEntry::make('quantity')
-                                    ->hiddenLabel(),
-                                TextEntry::make('unit_price')
-                                    ->hiddenLabel()
-                                    ->money(fn () => tenant('currency')?->value),
-                                TextEntry::make('discountAmount')
-                                    ->hiddenLabel()
-                                    ->state(fn (SaleItem $record) => $record->discountAmount())
-                                    ->money(fn () => tenant('currency')?->value),
-                                TextEntry::make('taxAmount')
-                                    ->hiddenLabel()
-                                    ->state(fn (SaleItem $record) => $record->taxAmount())
-                                    ->money(fn () => tenant('currency')?->value),
-                                TextEntry::make('total')
-                                    ->hiddenLabel()
-                                    ->state(fn (SaleItem $record) => $record->total())
-                                    ->money(fn () => tenant('currency')?->value),
-                            ]),
-                    ]),
                 Section::make('Totals')
                     ->columns(4)
                     ->schema([
@@ -91,6 +57,41 @@ class SaleInfolist
                             ->weight('bold')
                             ->state(fn (Sale $record) => $record->total())
                             ->money(fn () => tenant('currency')?->value),
+                    ]),
+                Section::make('Items')
+                    ->columnSpanFull()
+                    ->schema([
+                        RepeatableEntry::make('items')
+                            ->hiddenLabel()
+                            ->table([
+                                TableColumn::make('Product'),
+                                TableColumn::make('Qty'),
+                                TableColumn::make('Unit price'),
+                                TableColumn::make('Discount'),
+                                TableColumn::make('Tax'),
+                                TableColumn::make('Line total'),
+                            ])
+                            ->schema([
+                                TextEntry::make('product.name')
+                                    ->label('Product'),
+                                TextEntry::make('quantity')
+                                    ->label('Qty'),
+                                TextEntry::make('unit_price')
+                                    ->label('Unit price')
+                                    ->money(fn () => tenant('currency')?->value),
+                                TextEntry::make('discountAmount')
+                                    ->label('Discount')
+                                    ->state(fn (SaleItem $record) => $record->discountAmount())
+                                    ->money(fn () => tenant('currency')?->value),
+                                TextEntry::make('taxAmount')
+                                    ->label('Tax')
+                                    ->state(fn (SaleItem $record) => $record->taxAmount())
+                                    ->money(fn () => tenant('currency')?->value),
+                                TextEntry::make('total')
+                                    ->label('Line total')
+                                    ->state(fn (SaleItem $record) => $record->total())
+                                    ->money(fn () => tenant('currency')?->value),
+                            ]),
                     ]),
             ]);
     }
