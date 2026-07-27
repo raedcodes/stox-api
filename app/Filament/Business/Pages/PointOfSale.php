@@ -11,7 +11,6 @@ use App\Models\Product;
 use App\Models\Sale;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -20,6 +19,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
@@ -86,11 +86,16 @@ class PointOfSale extends Page
                 Repeater::make('items')
                     ->label('Cart')
                     ->schema([
-                        Hidden::make('product_id'),
-                        TextInput::make('product_name')
+                        Select::make('product_id')
                             ->label('Product')
-                            ->disabled()
-                            ->dehydrated(false),
+                            ->options(fn () => Product::query()->where('is_active', true)->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                $set('unit_price', Product::find($state)?->selling_price);
+                            }),
                         TextInput::make('quantity')
                             ->numeric()
                             ->minValue(0.01)
@@ -154,7 +159,6 @@ class PointOfSale extends Page
 
         $items[] = [
             'product_id' => $product->id,
-            'product_name' => $product->name,
             'quantity' => 1,
             'unit_price' => (float) $product->selling_price,
             'discount_type' => null,
