@@ -14,6 +14,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class StockLevels extends Page implements HasTable
@@ -27,6 +28,11 @@ class StockLevels extends Page implements HasTable
     protected static ?int $navigationSort = 40;
 
     protected string $view = 'filament.business.pages.stock-levels';
+
+    public function getTableRecordKey(Model|array $record): string
+    {
+        return "{$record->product_id}-{$record->location_id}";
+    }
 
     public function table(Table $table): Table
     {

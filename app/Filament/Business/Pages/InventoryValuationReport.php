@@ -19,6 +19,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
@@ -34,6 +35,11 @@ class InventoryValuationReport extends Page implements HasTable
     protected static ?int $navigationSort = 54;
 
     protected string $view = 'filament.business.pages.inventory-valuation-report';
+
+    public function getTableRecordKey(Model|array $record): string
+    {
+        return "{$record->product_id}-{$record->location_id}";
+    }
 
     protected function baseQuery(): Builder
     {

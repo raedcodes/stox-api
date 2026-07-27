@@ -8,10 +8,16 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class TopProductsWidget extends TableWidget
 {
     protected static ?string $heading = 'Top products (last 30 days)';
+
+    public function getTableRecordKey(Model|array $record): string
+    {
+        return (string) $record->product_id;
+    }
 
     public function table(Table $table): Table
     {
