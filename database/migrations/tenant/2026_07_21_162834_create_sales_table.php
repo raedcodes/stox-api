@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('payment_method')->nullable();
             $table->string('discount_type')->nullable();
             $table->decimal('discount_value', 12, 2)->nullable();
-            $table->date('sale_date');
+            $table->dateTime('sale_date');
             $table->text('notes')->nullable();
             // No FK constraint: users live in the central database, not this
             // tenant database, so a cross-database constraint isn't possible.

@@ -35,7 +35,7 @@ class Sale extends Model
             'payment_method' => PaymentMethod::class,
             'discount_type' => DiscountType::class,
             'discount_value' => 'decimal:2',
-            'sale_date' => 'date',
+            'sale_date' => 'datetime',
         ];
     }
 

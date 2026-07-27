@@ -21,7 +21,7 @@ class CustomerTransaction extends Model
         return [
             'type' => CustomerTransactionType::class,
             'amount' => 'decimal:2',
-            'transaction_date' => 'date',
+            'transaction_date' => 'datetime',
         ];
     }
 

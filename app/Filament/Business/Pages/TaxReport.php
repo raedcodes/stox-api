@@ -70,6 +70,7 @@ class TaxReport extends Page implements HasTable
             ->groups([
                 Group::make('sale.sale_date')
                     ->label('Month')
+                    ->getKeyFromRecordUsing(fn (SaleItem $record) => $record->sale->sale_date->format('Y-m'))
                     ->getTitleFromRecordUsing(fn (SaleItem $record) => $record->sale->sale_date->format('F Y')),
             ])
             ->filters([

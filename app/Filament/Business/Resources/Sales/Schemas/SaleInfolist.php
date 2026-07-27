@@ -30,7 +30,7 @@ class SaleInfolist
                         TextEntry::make('location.name')
                             ->label('Location'),
                         TextEntry::make('sale_date')
-                            ->date(),
+                            ->dateTime(),
                         TextEntry::make('cashier.name')
                             ->label('Cashier')
                             ->placeholder('—'),

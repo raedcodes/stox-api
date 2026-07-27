@@ -22,7 +22,7 @@ class CustomerTransactionInfolist
                         TextEntry::make('amount')
                             ->money(fn () => tenant('currency')?->value),
                         TextEntry::make('transaction_date')
-                            ->date(),
+                            ->dateTime(),
                         TextEntry::make('description')
                             ->placeholder('—')
                             ->columnSpanFull(),

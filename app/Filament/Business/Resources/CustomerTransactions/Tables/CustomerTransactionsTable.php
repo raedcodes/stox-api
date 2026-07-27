@@ -31,7 +31,7 @@ class CustomerTransactionsTable
                     ->placeholder('—')
                     ->limit(40),
                 TextColumn::make('transaction_date')
-                    ->date()
+                    ->dateTime()
                     ->sortable(),
             ])
             ->recordUrl(fn (CustomerTransaction $record) => CustomerTransactionResource::getUrl('view', ['record' => $record]))

@@ -38,7 +38,7 @@ class SalesTable
                 TextColumn::make('payment_method')
                     ->placeholder('—'),
                 TextColumn::make('sale_date')
-                    ->date()
+                    ->dateTime()
                     ->sortable(),
                 TextColumn::make('total')
                     ->state(fn (Sale $record) => $record->total())
