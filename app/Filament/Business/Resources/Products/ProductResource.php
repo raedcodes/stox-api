@@ -31,7 +31,7 @@ class ProductResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Catalog;
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 32;
 
     public static function getGloballySearchableAttributes(): array
     {

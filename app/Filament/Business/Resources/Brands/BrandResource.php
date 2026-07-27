@@ -35,7 +35,7 @@ class BrandResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Catalog;
 
-    protected static ?int $navigationSort = 32;
+    protected static ?int $navigationSort = 30;
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
