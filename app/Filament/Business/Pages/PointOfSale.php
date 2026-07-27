@@ -40,6 +40,8 @@ class PointOfSale extends Page
 
     public string $scanInput = '';
 
+    public ?string $lastAddedLabel = null;
+
     public function mount(): void
     {
         $this->form->fill([
@@ -50,6 +52,8 @@ class PointOfSale extends Page
             'discount_value' => null,
             'items' => [],
         ]);
+
+        $this->lastAddedLabel = null;
     }
 
     public function defaultForm(Schema $schema): Schema
@@ -126,7 +130,6 @@ class PointOfSale extends Page
     public function addByScan(): void
     {
         $term = trim($this->scanInput);
-        $this->scanInput = '';
 
         if (blank($term)) {
             return;
@@ -146,12 +149,55 @@ class PointOfSale extends Page
             return;
         }
 
+        $this->addProductToCart($product, $term);
+    }
+
+    /**
+     * Add a product picked from the search-as-you-type results to the cart.
+     */
+    public function addProductById(int $productId): void
+    {
+        $product = Product::find($productId);
+
+        if (! $product) {
+            return;
+        }
+
+        $this->addProductToCart($product, $product->sku);
+    }
+
+    /**
+     * Products matching the current scan input, for the search-as-you-type
+     * results list. Blank input returns no matches.
+     */
+    public function getScanMatchesProperty()
+    {
+        $term = trim($this->scanInput);
+
+        if (blank($term)) {
+            return collect();
+        }
+
+        return Product::query()
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                    ->orWhere('sku', 'like', "%{$term}%")
+                    ->orWhere('barcode', 'like', "%{$term}%");
+            })
+            ->limit(8)
+            ->get();
+    }
+
+    protected function addProductToCart(Product $product, string $matchedTerm): void
+    {
         $items = $this->data['items'] ?? [];
 
         foreach ($items as $key => $item) {
             if ((int) ($item['product_id'] ?? null) === $product->id) {
                 $items[$key]['quantity'] = (float) ($item['quantity'] ?? 0) + 1;
                 $this->data['items'] = $items;
+                $this->form->fill($this->data);
+                $this->finishAddingToCart($product, $matchedTerm);
 
                 return;
             }
@@ -166,6 +212,14 @@ class PointOfSale extends Page
         ];
 
         $this->data['items'] = $items;
+        $this->form->fill($this->data);
+        $this->finishAddingToCart($product, $matchedTerm);
+    }
+
+    protected function finishAddingToCart(Product $product, string $matchedTerm): void
+    {
+        $this->lastAddedLabel = "{$matchedTerm} \u{2192} {$product->name}";
+        $this->scanInput = '';
     }
 
     public function checkout(): void
