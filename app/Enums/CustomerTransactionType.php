@@ -13,7 +13,7 @@ enum CustomerTransactionType: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::CreditSale => 'Credit sale',
+            self::CreditSale => 'Credit sale (owed)',
             self::Payment => 'Payment received',
         };
     }
