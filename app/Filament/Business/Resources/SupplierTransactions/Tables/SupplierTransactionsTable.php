@@ -20,6 +20,10 @@ class SupplierTransactionsTable
     {
         return $table
             ->columns([
+                TextColumn::make('transaction_number')
+                    ->label('Transaction #')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('supplier.name')
                     ->label('Supplier')
                     ->searchable()
@@ -27,6 +31,10 @@ class SupplierTransactionsTable
                 TextColumn::make('type'),
                 TextColumn::make('amount')
                     ->money(fn () => tenant('currency')?->value),
+                TextColumn::make('referenceLabel')
+                    ->label('Reference')
+                    ->state(fn (SupplierTransaction $record) => $record->referenceLabel())
+                    ->placeholder('—'),
                 TextColumn::make('description')
                     ->placeholder('—')
                     ->limit(40),

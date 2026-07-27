@@ -132,6 +132,8 @@ class ReceiveStockAction
                             'amount' => $totalValue,
                             'description' => "Receipt against {$record->po_number}",
                             'transaction_date' => $data['received_date'],
+                            'reference_type' => $record->getMorphClass(),
+                            'reference_id' => $record->id,
                         ]);
                     }
 

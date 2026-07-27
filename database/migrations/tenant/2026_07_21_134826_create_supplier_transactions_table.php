@@ -10,11 +10,13 @@ return new class extends Migration
     {
         Schema::create('supplier_transactions', function (Blueprint $table) {
             $table->id();
+            $table->string('transaction_number')->unique();
             $table->foreignId('supplier_id')->constrained('suppliers')->restrictOnDelete();
             $table->string('type');
             $table->decimal('amount', 12, 2);
             $table->string('description')->nullable();
             $table->date('transaction_date');
+            $table->nullableMorphs('reference');
             $table->timestamps();
         });
     }

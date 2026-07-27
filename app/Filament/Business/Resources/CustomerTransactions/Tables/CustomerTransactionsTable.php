@@ -20,6 +20,10 @@ class CustomerTransactionsTable
     {
         return $table
             ->columns([
+                TextColumn::make('transaction_number')
+                    ->label('Transaction #')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('customer.name')
                     ->label('Customer')
                     ->searchable()
@@ -27,6 +31,10 @@ class CustomerTransactionsTable
                 TextColumn::make('type'),
                 TextColumn::make('amount')
                     ->money(fn () => tenant('currency')?->value),
+                TextColumn::make('referenceLabel')
+                    ->label('Reference')
+                    ->state(fn (CustomerTransaction $record) => $record->referenceLabel())
+                    ->placeholder('—'),
                 TextColumn::make('description')
                     ->placeholder('—')
                     ->limit(40),

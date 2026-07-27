@@ -157,6 +157,8 @@ class Sale extends Model
                     'amount' => $this->total(),
                     'description' => "Sale {$this->sale_number}",
                     'transaction_date' => $this->sale_date,
+                    'reference_type' => $this->getMorphClass(),
+                    'reference_id' => $this->id,
                 ]);
             }
 

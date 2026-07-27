@@ -80,6 +80,8 @@ class SaleReturn extends Model
                     'amount' => $this->total(),
                     'description' => "Return against {$this->sale->sale_number}",
                     'transaction_date' => $this->return_date,
+                    'reference_type' => $this->getMorphClass(),
+                    'reference_id' => $this->id,
                 ]);
             }
 
