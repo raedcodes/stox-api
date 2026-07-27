@@ -35,6 +35,7 @@ class PurchaseReturnInfolist
                             ->columnSpanFull(),
                     ]),
                 Section::make('Items')
+                    ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
@@ -46,14 +47,14 @@ class PurchaseReturnInfolist
                             ])
                             ->schema([
                                 TextEntry::make('product.name')
-                                    ->hiddenLabel(),
+                                    ->label('Product'),
                                 TextEntry::make('quantity')
-                                    ->hiddenLabel(),
+                                    ->label('Qty'),
                                 TextEntry::make('unit_cost')
-                                    ->hiddenLabel()
+                                    ->label('Unit cost')
                                     ->money(fn () => tenant('currency')?->value),
                                 TextEntry::make('lineTotal')
-                                    ->hiddenLabel()
+                                    ->label('Line total')
                                     ->state(fn (PurchaseReturnItem $record) => $record->quantity * $record->unit_cost)
                                     ->money(fn () => tenant('currency')?->value),
                             ]),

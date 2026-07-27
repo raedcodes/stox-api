@@ -34,7 +34,16 @@ class SaleReturnInfolist
                             ->placeholder('—')
                             ->columnSpanFull(),
                     ]),
+                Section::make('Total')
+                    ->schema([
+                        TextEntry::make('total')
+                            ->label('Total')
+                            ->weight('bold')
+                            ->state(fn (SaleReturn $record) => $record->total())
+                            ->money(fn () => tenant('currency')?->value),
+                    ]),
                 Section::make('Items')
+                    ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
@@ -46,26 +55,19 @@ class SaleReturnInfolist
                             ])
                             ->schema([
                                 TextEntry::make('product.name')
-                                    ->hiddenLabel(),
+                                    ->label('Product'),
                                 TextEntry::make('quantity')
-                                    ->hiddenLabel(),
+                                    ->label('Qty'),
                                 TextEntry::make('unit_price')
-                                    ->hiddenLabel()
+                                    ->label('Unit price')
                                     ->money(fn () => tenant('currency')?->value),
                                 TextEntry::make('lineTotal')
-                                    ->hiddenLabel()
+                                    ->label('Line total')
                                     ->state(fn (SaleReturnItem $record) => $record->quantity * $record->unit_price)
                                     ->money(fn () => tenant('currency')?->value),
                             ]),
                     ]),
-                Section::make('Total')
-                    ->schema([
-                        TextEntry::make('total')
-                            ->label('Total')
-                            ->weight('bold')
-                            ->state(fn (SaleReturn $record) => $record->total())
-                            ->money(fn () => tenant('currency')?->value),
-                    ]),
+
             ]);
     }
 }

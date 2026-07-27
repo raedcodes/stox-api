@@ -38,6 +38,7 @@ class PurchaseOrderInfolist
                             ->columnSpanFull(),
                     ]),
                 Section::make('Items')
+                    ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
@@ -50,21 +51,22 @@ class PurchaseOrderInfolist
                             ])
                             ->schema([
                                 TextEntry::make('product.name')
-                                    ->hiddenLabel(),
+                                    ->label('Product'),
                                 TextEntry::make('quantity_ordered')
-                                    ->hiddenLabel(),
+                                    ->label('Ordered'),
                                 TextEntry::make('quantity_received')
-                                    ->hiddenLabel(),
+                                    ->label('Received'),
                                 TextEntry::make('unit_cost')
-                                    ->hiddenLabel()
+                                    ->label('Unit cost')
                                     ->money(fn () => tenant('currency')?->value),
                                 TextEntry::make('lineTotal')
-                                    ->hiddenLabel()
+                                    ->label('Line total')
                                     ->state(fn (PurchaseOrderItem $record) => $record->quantity_ordered * $record->unit_cost)
                                     ->money(fn () => tenant('currency')?->value),
                             ]),
                     ]),
                 Section::make('Landed costs')
+                    ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('charges')
                             ->hiddenLabel()
@@ -74,9 +76,9 @@ class PurchaseOrderInfolist
                             ])
                             ->schema([
                                 TextEntry::make('description')
-                                    ->hiddenLabel(),
+                                    ->label('Description'),
                                 TextEntry::make('amount')
-                                    ->hiddenLabel()
+                                    ->label('Amount')
                                     ->money(fn () => tenant('currency')?->value),
                             ]),
                     ])

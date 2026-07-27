@@ -32,6 +32,7 @@ class StockTransferInfolist
                             ->columnSpanFull(),
                     ]),
                 Section::make('Items')
+                    ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
@@ -41,9 +42,9 @@ class StockTransferInfolist
                             ])
                             ->schema([
                                 TextEntry::make('product.name')
-                                    ->hiddenLabel(),
+                                    ->label('Product'),
                                 TextEntry::make('quantity')
-                                    ->hiddenLabel(),
+                                    ->label('Quantity'),
                             ]),
                     ]),
             ]);
