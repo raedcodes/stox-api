@@ -12,7 +12,7 @@
                     wire:keydown.enter.prevent="addByScan"
                     autofocus
                     autocomplete="off"
-                    placeholder="Scan a barcode or type a SKU, then press Enter"
+                    placeholder="Scan a barcode or type an SKU, then press Enter"
                 />
             </x-filament::input.wrapper>
 
