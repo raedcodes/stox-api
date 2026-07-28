@@ -35,9 +35,11 @@ class SaleForm
                     ->preload()
                     ->required(),
                 Select::make('status')
-                    ->options(SaleStatus::options())
+                    ->options([SaleStatus::Draft->value => SaleStatus::Draft->getLabel()])
                     ->default(SaleStatus::Draft->value)
-                    ->required(),
+                    ->required()
+                    ->disabled()
+                    ->helperText('Use the "Complete Sale" action to finalize a sale — this deducts stock and updates the customer ledger.'),
                 Select::make('payment_method')
                     ->options(PaymentMethod::options())
                     ->required(),
