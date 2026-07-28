@@ -84,6 +84,7 @@ class SaleForm
                             ->minValue(0),
                     ])
                     ->columns(5)
+                    ->columnSpan(2)
                     ->addActionLabel('Add product')
                     ->minItems(1)
                     ->required(),
