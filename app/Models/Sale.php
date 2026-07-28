@@ -147,7 +147,10 @@ class Sale extends Model
         }
 
         DB::transaction(function () {
+            $taxRate = (float) TaxSetting::current()->rate;
+
             foreach ($this->items as $item) {
+                $item->update(['tax_rate' => $taxRate]);
                 $this->deductStock($item);
             }
 

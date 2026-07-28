@@ -7,6 +7,7 @@ use App\Enums\PaymentMethod;
 use App\Enums\SaleStatus;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\TaxSetting;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -46,6 +47,12 @@ class SaleForm
                 DatePicker::make('sale_date')
                     ->required()
                     ->default(now()),
+                TextInput::make('tax_rate_display')
+                    ->label('Tax rate')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->default(fn () => number_format((float) TaxSetting::current()->rate, 2).'%')
+                    ->helperText('This is the business-wide tax rate set in Tax Settings — it applies automatically to every sale and can\'t be changed per invoice.'),
                 Select::make('discount_type')
                     ->label('Invoice discount type')
                     ->options(DiscountType::options()),

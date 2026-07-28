@@ -15,6 +15,7 @@ class SaleItem extends Model
         'unit_price',
         'discount_type',
         'discount_value',
+        'tax_rate',
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class SaleItem extends Model
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:2',
             'discount_value' => 'decimal:2',
+            'tax_rate' => 'decimal:2',
         ];
     }
 
@@ -58,10 +60,16 @@ class SaleItem extends Model
     /**
      * Tax portion of this line. If the product's price is tax-inclusive, tax
      * is extracted from the subtotal rather than added on top of it.
+     *
+     * Uses the tax rate frozen onto this line when the sale was completed
+     * (see Sale::complete()), so a later change to the tenant's tax rate
+     * never rewrites the tax on a sale that already happened. Falls back to
+     * the current live rate only for a sale that hasn't been completed yet
+     * (draft sales have no frozen rate, since nothing has happened yet).
      */
     public function taxAmount(): float
     {
-        $rate = (float) TaxSetting::current()->rate;
+        $rate = $this->tax_rate !== null ? (float) $this->tax_rate : (float) TaxSetting::current()->rate;
 
         if ($rate <= 0) {
             return 0;

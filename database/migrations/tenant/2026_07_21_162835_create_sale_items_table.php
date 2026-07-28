@@ -16,6 +16,7 @@ return new class extends Migration
             $table->decimal('unit_price', 12, 2);
             $table->string('discount_type')->nullable();
             $table->decimal('discount_value', 12, 2)->nullable();
+            $table->decimal('tax_rate', 5, 2)->nullable();
             $table->timestamps();
         });
     }
