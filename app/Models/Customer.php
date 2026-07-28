@@ -55,7 +55,9 @@ class Customer extends Model
     }
 
     /**
-     * Current balance owed by this customer: total credit sales minus total payments.
+     * Current balance owed by this customer: total credit sales minus total
+     * payments and returns (both reduce what's owed, whether or not cash
+     * actually changed hands).
      */
     public function balance(): float
     {
@@ -64,7 +66,11 @@ class Customer extends Model
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        return (float) ($totals[CustomerTransactionType::CreditSale->value] ?? 0)
-            - (float) ($totals[CustomerTransactionType::Payment->value] ?? 0);
+        $reducing = array_sum(array_map(
+            fn (CustomerTransactionType $type) => (float) ($totals[$type->value] ?? 0),
+            CustomerTransactionType::reducingTypes(),
+        ));
+
+        return (float) ($totals[CustomerTransactionType::CreditSale->value] ?? 0) - $reducing;
     }
 }

@@ -64,6 +64,7 @@ class SupplierTransaction extends Model
     {
         return match (true) {
             $this->reference instanceof PurchaseOrder => "Purchase order {$this->reference->po_number}",
+            $this->reference instanceof PurchaseReturn => "Purchase return #{$this->reference->id} (PO {$this->reference->purchaseOrder?->po_number})",
             default => null,
         };
     }

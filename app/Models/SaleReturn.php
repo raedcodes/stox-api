@@ -76,7 +76,7 @@ class SaleReturn extends Model
 
             if ($this->sale->payment_method === PaymentMethod::Credit) {
                 $this->sale->customer->transactions()->create([
-                    'type' => CustomerTransactionType::Payment,
+                    'type' => CustomerTransactionType::Return,
                     'amount' => $this->total(),
                     'description' => "Return against {$this->sale->sale_number}",
                     'transaction_date' => $this->return_date,

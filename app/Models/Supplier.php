@@ -36,7 +36,9 @@ class Supplier extends Model
     }
 
     /**
-     * Current balance owed to this supplier: total charges minus total payments.
+     * Current balance owed to this supplier: total charges minus total
+     * payments and returns (both reduce what's owed, whether or not cash
+     * actually changed hands).
      */
     public function balance(): float
     {
@@ -45,7 +47,11 @@ class Supplier extends Model
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        return (float) ($totals[SupplierTransactionType::Charge->value] ?? 0)
-            - (float) ($totals[SupplierTransactionType::Payment->value] ?? 0);
+        $reducing = array_sum(array_map(
+            fn (SupplierTransactionType $type) => (float) ($totals[$type->value] ?? 0),
+            SupplierTransactionType::reducingTypes(),
+        ));
+
+        return (float) ($totals[SupplierTransactionType::Charge->value] ?? 0) - $reducing;
     }
 }

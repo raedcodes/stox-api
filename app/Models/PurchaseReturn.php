@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StockMovementType;
+use App\Enums\SupplierTransactionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -98,6 +99,15 @@ class PurchaseReturn extends Model
                     );
                 }
             }
+
+            $this->purchaseOrder->supplier->transactions()->create([
+                'type' => SupplierTransactionType::Return,
+                'amount' => $this->total(),
+                'description' => "Return against {$this->purchaseOrder->po_number}",
+                'transaction_date' => $this->return_date,
+                'reference_type' => $this->getMorphClass(),
+                'reference_id' => $this->id,
+            ]);
 
             $this->update(['processed_at' => now()]);
 

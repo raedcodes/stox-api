@@ -89,8 +89,12 @@ class CustomerStatement extends Page
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        return (float) ($totals[CustomerTransactionType::CreditSale->value] ?? 0)
-            - (float) ($totals[CustomerTransactionType::Payment->value] ?? 0);
+        $reducing = array_sum(array_map(
+            fn (CustomerTransactionType $type) => (float) ($totals[$type->value] ?? 0),
+            CustomerTransactionType::reducingTypes(),
+        ));
+
+        return (float) ($totals[CustomerTransactionType::CreditSale->value] ?? 0) - $reducing;
     }
 
     /**
