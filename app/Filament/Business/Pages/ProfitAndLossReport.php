@@ -14,7 +14,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
 class ProfitAndLossReport extends Page
@@ -102,7 +102,7 @@ class ProfitAndLossReport extends Page
         ];
     }
 
-    protected function exportPdf(): Response
+    protected function exportPdf(): StreamedResponse
     {
         $pdf = Pdf::loadView('pdf.reports.profit-and-loss', [
             'title' => 'Profit & Loss (Gross Profit)',
@@ -115,6 +115,6 @@ class ProfitAndLossReport extends Page
             'grossMarginPercent' => $this->grossMarginPercent(),
         ]);
 
-        return $pdf->stream('profit-and-loss-report.pdf');
+        return response()->streamDownload(fn () => print ($pdf->output()), 'profit-and-loss-report.pdf');
     }
 }

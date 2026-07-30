@@ -16,8 +16,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
 class SupplierStatement extends Page
@@ -143,7 +143,7 @@ class SupplierStatement extends Page
         ];
     }
 
-    protected function exportPdf(): ?Response
+    protected function exportPdf(): ?StreamedResponse
     {
         $supplier = $this->supplier();
 
@@ -167,6 +167,6 @@ class SupplierStatement extends Page
             'closingBalance' => $this->closingBalance(),
         ]);
 
-        return $pdf->stream('supplier-statement.pdf');
+        return response()->streamDownload(fn () => print ($pdf->output()), 'supplier-statement.pdf');
     }
 }

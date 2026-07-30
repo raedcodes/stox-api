@@ -21,8 +21,8 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
 class TaxReport extends Page implements HasTable
@@ -107,7 +107,7 @@ class TaxReport extends Page implements HasTable
         ];
     }
 
-    protected function exportPdf(): Response
+    protected function exportPdf(): StreamedResponse
     {
         $items = $this->getFilteredTableQuery()->with(['product', 'sale'])->get();
 
@@ -119,6 +119,6 @@ class TaxReport extends Page implements HasTable
             'items' => $items,
         ]);
 
-        return $pdf->stream('tax-report.pdf');
+        return response()->streamDownload(fn () => print ($pdf->output()), 'tax-report.pdf');
     }
 }
