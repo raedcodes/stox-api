@@ -26,9 +26,10 @@ class DemoBusinessSeeder extends Seeder
             ],
         );
 
-        if ($tenant->domain()->doesntExist()) {
-            $tenant->domains()->create(['domain' => env('DEMO_TENANT_DOMAIN', 'demo')]);
-        }
+        $tenant->domains()->updateOrCreate(
+            ['tenant_id' => $tenant->id],
+            ['domain' => env('DEMO_TENANT_DOMAIN', 'demo')],
+        );
 
         $owner = User::firstOrCreate(
             ['email' => 'owner@business-suite.com'],
