@@ -27,7 +27,7 @@ class DemoBusinessSeeder extends Seeder
         );
 
         if ($tenant->domain()->doesntExist()) {
-            $tenant->domains()->create(['domain' => 'demo']);
+            $tenant->domains()->create(['domain' => env('DEMO_TENANT_DOMAIN', 'demo')]);
         }
 
         $owner = User::firstOrCreate(
