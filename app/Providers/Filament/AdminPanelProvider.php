@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('Stox Admin')
             ->login(AdminLogin::class)
+            ->authGuard('web')
             ->profile()
             ->colors([
                 'primary' => Color::Slate,

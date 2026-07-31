@@ -42,6 +42,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'business' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*

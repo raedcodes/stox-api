@@ -34,6 +34,7 @@ class BusinessPanelProvider extends PanelProvider
             ->path('app')
             ->brandName(fn () => tenant('name') ?? 'Stox')
             ->login(BusinessLogin::class)
+            ->authGuard('business')
             ->profile()
             ->viteTheme('resources/css/filament/business/theme.css')
             ->colors([
