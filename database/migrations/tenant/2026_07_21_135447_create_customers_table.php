@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\CustomerType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +11,6 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('customer_type')->default(CustomerType::B2C);
             $table->boolean('is_walk_in')->default(false);
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
