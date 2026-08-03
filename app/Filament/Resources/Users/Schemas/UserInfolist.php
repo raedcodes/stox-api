@@ -20,7 +20,26 @@ class UserInfolist
                         TextEntry::make('tenant.name')
                             ->label('Business'),
                         TextEntry::make('tenant.domain.domain')
-                            ->label('Subdomain'),
+                            ->label('Subdomain')
+                            ->url(function (User $record): ?string {
+                                $subdomain = $record->tenant?->domain?->domain;
+
+                                if (blank($subdomain)) {
+                                    return null;
+                                }
+
+                                $host = request()->getHost();
+
+                                $centralDomain = collect(config('tenancy.central_domains'))
+                                    ->first(fn (string $domain): bool => $host === $domain || str_ends_with($host, ".{$domain}"));
+
+                                $baseDomain = $centralDomain ?? $host;
+                                $port = request()->getPort();
+                                $portSuffix = in_array($port, [80, 443], true) ? '' : ":{$port}";
+
+                                return request()->getScheme()."://{$subdomain}.{$baseDomain}{$portSuffix}/app";
+                            })
+                            ->openUrlInNewTab(),
                     ]),
                 Section::make('Account')
                     ->columns(3)
