@@ -44,6 +44,7 @@ class InventoryValuationReport extends Page implements HasTable
     protected function baseQuery(): Builder
     {
         return ProductBatch::query()
+            ->with(['product', 'location'])
             ->join('products', 'products.id', '=', 'product_batches.product_id')
             ->where('product_batches.is_active', true)
             ->selectRaw('product_batches.product_id, product_batches.location_id, SUM(product_batches.quantity) as total_quantity, SUM(product_batches.quantity * products.cost_price) as total_value')
@@ -58,6 +59,11 @@ class InventoryValuationReport extends Page implements HasTable
                 TextColumn::make('product.name')
                     ->label('Product')
                     ->searchable(),
+                TextColumn::make('product.description')
+                    ->label('Description')
+                    ->limit(40)
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('location.name')
                     ->label('Location'),
                 TextColumn::make('total_quantity')

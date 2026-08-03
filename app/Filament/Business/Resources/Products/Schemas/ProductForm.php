@@ -5,6 +5,7 @@ namespace App\Filament\Business\Resources\Products\Schemas;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -22,6 +23,9 @@ class ProductForm
                     ->unique(table: 'products', column: 'sku', ignoreRecord: true),
                 TextInput::make('barcode')
                     ->unique(table: 'products', column: 'barcode', ignoreRecord: true),
+                Textarea::make('description')
+                    ->rows(3)
+                    ->columnSpanFull(),
                 Select::make('category_id')
                     ->label('Category')
                     ->relationship('category', 'name')
@@ -58,6 +62,17 @@ class ProductForm
                     ->numeric()
                     ->minValue(0)
                     ->prefix(fn () => tenant('currency')?->value),
+                TextInput::make('wsp')
+                    ->label('Wholesale selling price')
+                    ->numeric()
+                    ->minValue(0)
+                    ->prefix(fn () => tenant('currency')?->value)
+                    ->helperText('Reference price for wholesale/B2B customers. Not applied automatically at sale.'),
+                TextInput::make('cbm')
+                    ->label('CBM (volume, m³)')
+                    ->numeric()
+                    ->minValue(0)
+                    ->helperText('Cubic meter volume per unit, for shipping/container planning.'),
                 Checkbox::make('tax_inclusive')
                     ->label('Selling price already includes tax')
                     ->default(false),

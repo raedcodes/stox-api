@@ -13,6 +13,7 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'description',
         'sku',
         'barcode',
         'category_id',
@@ -22,6 +23,8 @@ class Product extends Model
         'reorder_level',
         'cost_price',
         'selling_price',
+        'wsp',
+        'cbm',
         'tax_inclusive',
         'images',
         'is_active',
@@ -34,6 +37,8 @@ class Product extends Model
             'reorder_level' => 'decimal:2',
             'cost_price' => 'decimal:2',
             'selling_price' => 'decimal:2',
+            'wsp' => 'decimal:2',
+            'cbm' => 'decimal:4',
             'tax_inclusive' => 'boolean',
             'images' => 'array',
             'is_active' => 'boolean',

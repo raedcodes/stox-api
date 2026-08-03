@@ -25,6 +25,10 @@ class ProductBatchInfolist
                             ->label('Batch / lot number')
                             ->placeholder('—'),
                         TextEntry::make('quantity'),
+                        TextEntry::make('manufactured_date')
+                            ->label('Manufactured date')
+                            ->date()
+                            ->placeholder('—'),
                         TextEntry::make('expiry_date')
                             ->date()
                             ->placeholder('No expiry')

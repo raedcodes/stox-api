@@ -29,6 +29,9 @@ class ProductInfolist
                             ->label('SKU'),
                         TextEntry::make('barcode')
                             ->placeholder('—'),
+                        TextEntry::make('description')
+                            ->placeholder('—')
+                            ->columnSpanFull(),
                         TextEntry::make('category.name')
                             ->label('Category')
                             ->placeholder('—'),
@@ -57,6 +60,13 @@ class ProductInfolist
                             ->placeholder('—'),
                         TextEntry::make('selling_price')
                             ->money(fn () => tenant('currency')?->value)
+                            ->placeholder('—'),
+                        TextEntry::make('wsp')
+                            ->label('Wholesale selling price')
+                            ->money(fn () => tenant('currency')?->value)
+                            ->placeholder('—'),
+                        TextEntry::make('cbm')
+                            ->label('CBM (volume, m³)')
                             ->placeholder('—'),
                         IconEntry::make('tax_inclusive')
                             ->label('Price includes tax')

@@ -39,6 +39,11 @@ class ProductsTable
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->searchable(),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->limit(40)
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('barcode')
                     ->searchable()
                     ->toggleable(),
@@ -65,6 +70,15 @@ class ProductsTable
                 TextColumn::make('selling_price')
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—'),
+                TextColumn::make('wsp')
+                    ->label('WSP')
+                    ->money(fn () => tenant('currency')?->value)
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('cbm')
+                    ->label('CBM (m³)')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('tax_inclusive')
                     ->label('Tax incl.')
                     ->boolean()

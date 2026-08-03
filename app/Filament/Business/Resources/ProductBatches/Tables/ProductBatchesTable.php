@@ -34,6 +34,11 @@ class ProductBatchesTable
                     ->label('Batch #')
                     ->searchable(),
                 TextColumn::make('quantity'),
+                TextColumn::make('manufactured_date')
+                    ->label('Manufactured')
+                    ->date()
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('expiry_date')
                     ->date()
                     ->sortable(query: fn (Builder $query, string $direction) => $query->orderByRaw("expiry_date IS NULL, expiry_date {$direction}"))

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Customers;
 
+use App\Enums\CustomerType;
 use App\Enums\NavigationGroup;
 use App\Filament\Business\Resources\Customers\Pages\ManageCustomers;
 use App\Models\Customer;
@@ -15,6 +16,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -22,6 +24,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -67,6 +70,11 @@ class CustomerResource extends Resource
             ->components([
                 TextInput::make('name')
                     ->required(),
+                Select::make('customer_type')
+                    ->label('Customer type')
+                    ->options(CustomerType::options())
+                    ->default(CustomerType::B2C)
+                    ->required(),
                 TextInput::make('email')
                     ->email(),
                 TextInput::make('phone')
@@ -85,6 +93,9 @@ class CustomerResource extends Resource
                 TextColumn::make('name')
                     ->searchable()
                     ->formatStateUsing(fn (Customer $record) => $record->is_walk_in ? "{$record->name} (default)" : $record->name),
+                TextColumn::make('customer_type')
+                    ->label('Type')
+                    ->badge(),
                 TextColumn::make('email')
                     ->placeholder('—'),
                 TextColumn::make('phone')
@@ -107,6 +118,9 @@ class CustomerResource extends Resource
                     ->sortable(query: fn ($query, $direction) => $query->orderBy('created_at', $direction)),
             ])
             ->filters([
+                SelectFilter::make('customer_type')
+                    ->label('Type')
+                    ->options(CustomerType::options()),
                 TernaryFilter::make('is_active'),
                 TrashedFilter::make(),
             ])

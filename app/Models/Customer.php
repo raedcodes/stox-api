@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CustomerTransactionType;
+use App\Enums\CustomerType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,7 @@ class Customer extends Model
 
     protected $fillable = [
         'name',
+        'customer_type',
         'is_walk_in',
         'email',
         'phone',
@@ -23,6 +25,7 @@ class Customer extends Model
     protected function casts(): array
     {
         return [
+            'customer_type' => CustomerType::class,
             'is_walk_in' => 'boolean',
             'is_active' => 'boolean',
         ];

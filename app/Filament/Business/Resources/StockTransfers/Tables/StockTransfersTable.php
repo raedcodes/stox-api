@@ -58,7 +58,7 @@ class StockTransfersTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::Draft)
+                    ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true))
                     ->action(function (StockTransfer $record) {
                         try {
                             $record->complete();
@@ -76,9 +76,9 @@ class StockTransfersTable
                         }
                     }),
                 EditAction::make()
-                    ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::Draft),
+                    ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
                 DeleteAction::make()
-                    ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::Draft),
+                    ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

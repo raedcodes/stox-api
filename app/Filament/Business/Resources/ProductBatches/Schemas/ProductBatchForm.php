@@ -33,6 +33,8 @@ class ProductBatchForm
                     ->numeric()
                     ->minValue(0)
                     ->required(),
+                DatePicker::make('manufactured_date')
+                    ->label('Manufactured date'),
                 DatePicker::make('expiry_date')
                     ->helperText('Leave empty if this batch doesn\'t expire.'),
                 Checkbox::make('is_active')

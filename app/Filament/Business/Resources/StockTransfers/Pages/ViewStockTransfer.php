@@ -16,7 +16,7 @@ class ViewStockTransfer extends ViewRecord
     {
         return [
             EditAction::make()
-                ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::Draft),
+                ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
         ];
     }
 }

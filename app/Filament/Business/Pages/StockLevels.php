@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
+use App\Enums\PurchaseOrderStatus;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
@@ -39,7 +40,17 @@ class StockLevels extends Page implements HasTable
         return $table
             ->query(
                 ProductBatch::query()
-                    ->selectRaw('product_id, location_id, SUM(quantity) as total_quantity')
+                    ->selectRaw(
+                        'product_id, location_id, SUM(quantity) as total_quantity, ('
+                        .'select coalesce(sum(poi.quantity_ordered - poi.quantity_received), 0) '
+                        .'from purchase_order_items poi '
+                        .'inner join purchase_orders po on po.id = poi.purchase_order_id '
+                        .'where poi.product_id = product_batches.product_id '
+                        .'and po.location_id = product_batches.location_id '
+                        .'and po.status in (?, ?)'
+                        .') as on_order_quantity',
+                        [PurchaseOrderStatus::Ordered->value, PurchaseOrderStatus::PartiallyReceived->value],
+                    )
                     ->where('is_active', true)
                     ->groupBy('product_id', 'location_id')
             )
@@ -53,6 +64,10 @@ class StockLevels extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('total_quantity')
                     ->label('On hand')
+                    ->sortable(),
+                TextColumn::make('on_order_quantity')
+                    ->label('On order')
+                    ->placeholder('—')
                     ->sortable(),
                 TextColumn::make('product.reorder_level')
                     ->label('Reorder at')
