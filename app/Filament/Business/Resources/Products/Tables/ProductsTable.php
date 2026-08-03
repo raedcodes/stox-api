@@ -51,7 +51,7 @@ class ProductsTable
                 TextColumn::make('unit.abbreviation')
                     ->label('Unit'),
                 TextColumn::make('min_stock_level')
-                    ->label('Min')
+                    ->label('Min stock')
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('reorder_level')

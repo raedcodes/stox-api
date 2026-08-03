@@ -37,7 +37,7 @@ class StockMovementsTable
                     ->color(fn (StockMovement $record) => $record->quantity_change >= 0 ? 'success' : 'danger')
                     ->formatStateUsing(fn (StockMovement $record) => ($record->quantity_change >= 0 ? '+' : '').rtrim(rtrim(number_format($record->quantity_change, 2), '0'), '.')),
                 TextColumn::make('quantity_after')
-                    ->label('Balance after'),
+                    ->label('On hand after'),
                 TextColumn::make('referenceLabel')
                     ->label('Reference')
                     ->state(fn (StockMovement $record) => $record->referenceLabel())
