@@ -84,6 +84,7 @@ class StockLevels extends Page implements HasTable
                     ->label('Location')
                     ->options(fn () => Location::query()->pluck('name', 'id')),
             ])
-            ->defaultSort('total_quantity', 'asc');
+            ->defaultSort('total_quantity', 'asc')
+            ->defaultKeySort(false);
     }
 }

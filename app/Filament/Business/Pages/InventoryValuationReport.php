@@ -75,7 +75,8 @@ class InventoryValuationReport extends Page implements HasTable
                     ->label('Location')
                     ->options(fn () => Location::query()->pluck('name', 'id')),
             ])
-            ->defaultSort('total_value', 'desc');
+            ->defaultSort('total_value', 'desc')
+            ->defaultKeySort(false);
     }
 
     protected function getHeaderActions(): array

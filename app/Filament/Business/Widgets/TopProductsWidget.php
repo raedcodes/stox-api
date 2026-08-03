@@ -41,6 +41,7 @@ class TopProductsWidget extends TableWidget
                     ->money(fn () => tenant('currency')?->value),
             ])
             ->defaultSort('total_quantity', 'desc')
+            ->defaultKeySort(false)
             ->paginated([5, 10, 25]);
     }
 }
