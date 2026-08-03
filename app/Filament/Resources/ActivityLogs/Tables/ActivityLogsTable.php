@@ -6,6 +6,7 @@ use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Activity;
 
@@ -14,14 +15,22 @@ class ActivityLogsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['subject', 'causer']))
             ->columns([
                 TextColumn::make('description')
                     ->wrap(),
                 TextColumn::make('subject_type')
                     ->label('Subject')
-                    ->state(fn (Activity $record) => $record->subject_type
-                        ? Str::afterLast($record->subject_type, '\\').' #'.$record->subject_id
-                        : null)
+                    ->state(function (Activity $record) {
+                        if (! $record->subject_type) {
+                            return null;
+                        }
+
+                        $label = Str::afterLast($record->subject_type, '\\');
+                        $name = $record->subject?->name;
+
+                        return $name ? "{$label}: {$name}" : "{$label} #{$record->subject_id}";
+                    })
                     ->placeholder('—'),
                 TextColumn::make('causer.name')
                     ->label('By')
