@@ -15,7 +15,7 @@ enum PaymentMethod: string implements HasLabel
         return match ($this) {
             self::Cash => 'Cash',
             self::Card => 'Card',
-            self::Credit => 'Credit (pay later)',
+            self::Credit => 'On account (pay later)',
         };
     }
 
