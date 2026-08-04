@@ -25,10 +25,6 @@ Route::middleware([
     InitializeTenancyBySubdomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    Route::get('/tenant-check', function () {
-        return 'The id of the current tenant is ' . tenant('id');
-    });
-
     Route::middleware([AuthenticateBusinessUser::class])->group(function () {
         Route::get('/sales/{sale}/invoice', [SaleInvoiceController::class, 'show'])
             ->name('business.sales.invoice');

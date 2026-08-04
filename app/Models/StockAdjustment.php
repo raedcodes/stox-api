@@ -60,7 +60,10 @@ class StockAdjustment extends Model
      */
     public function apply(): void
     {
-        $batch = $this->batch;
+        // Locked for the duration of the caller's transaction, so a
+        // concurrent adjustment or sale against the same batch can't read a
+        // stale quantity and push it negative.
+        $batch = $this->batch()->lockForUpdate()->firstOrFail();
 
         if ($this->quantity_change < 0 && (float) $batch->quantity < abs((float) $this->quantity_change)) {
             throw new RuntimeException(

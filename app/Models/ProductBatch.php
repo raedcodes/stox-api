@@ -52,6 +52,11 @@ class ProductBatch extends Model
      * touched. Keyed by variant (not just product) so different variants
      * of the same product are tracked as separate stock.
      *
+     * Locks the candidate batch rows for the duration of the caller's
+     * transaction (every caller wraps this in DB::transaction()), so two
+     * concurrent sales/transfers/returns hitting the same batches can't both
+     * read the same "quantity available" and oversell it.
+     *
      * @return Collection<int, array{batch: ProductBatch, quantity: float}>
      */
     public static function deductFefo(int $productVariantId, int $locationId, float $quantity): Collection
@@ -64,6 +69,7 @@ class ProductBatch extends Model
             ->where('is_active', true)
             ->where('quantity', '>', 0)
             ->orderByRaw('expiry_date IS NULL, expiry_date ASC')
+            ->lockForUpdate()
             ->get();
 
         foreach ($batches as $batch) {

@@ -46,7 +46,9 @@ class ProductBatchesTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('expiry_date')
                     ->date()
-                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderByRaw("expiry_date IS NULL, expiry_date {$direction}"))
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderByRaw(
+                        'expiry_date IS NULL, expiry_date '.(strtolower($direction) === 'desc' ? 'desc' : 'asc')
+                    ))
                     ->placeholder('No expiry')
                     ->color(fn (?ProductBatch $record) => match (true) {
                         $record?->expiry_date === null => 'gray',

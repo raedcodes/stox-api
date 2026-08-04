@@ -18,7 +18,10 @@ class AuthenticateBusinessUser
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = auth()->user();
+        // Must check the "business" guard specifically — the business panel
+        // authenticates there (not the default "web" guard), so checking the
+        // default guard here would reject a properly logged-in business user.
+        $user = auth('business')->user();
 
         if (! $user || $user->tenant_id === null || $user->tenant_id !== tenant('id')) {
             return redirect()->guest(Filament::getPanel('business')->getLoginUrl());
