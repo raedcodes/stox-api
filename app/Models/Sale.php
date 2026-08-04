@@ -188,4 +188,59 @@ class Sale extends Model
             );
         }
     }
+
+    /**
+     * Void a completed sale: restock everything it deducted and reverse any
+     * customer ledger charge, as if the sale never happened. Distinct from a
+     * SaleReturn — a return is goods physically coming back after a valid
+     * sale; a cancellation says the sale itself shouldn't have counted.
+     */
+    public function cancel(): void
+    {
+        if ($this->status !== SaleStatus::Completed) {
+            throw new RuntimeException('Only a completed sale can be cancelled.');
+        }
+
+        DB::transaction(function () {
+            foreach ($this->items as $item) {
+                $batch = ProductBatch::create([
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'location_id' => $this->location_id,
+                    'batch_number' => null,
+                    'quantity' => $item->quantity,
+                    // Same approximation as a SaleReturn: FEFO doesn't track which
+                    // original batch(es) this sale drew from, so the product's
+                    // current cost is the best available stand-in.
+                    'unit_cost' => $item->product?->cost_price,
+                ]);
+
+                StockMovement::record(
+                    batch: $batch,
+                    type: StockMovementType::SaleCancelled,
+                    quantityChange: (float) $item->quantity,
+                    reference: $this,
+                );
+            }
+
+            if ($this->payment_method === PaymentMethod::Credit) {
+                $this->customer->transactions()->create([
+                    'type' => CustomerTransactionType::SaleCancelled,
+                    'amount' => $this->total(),
+                    'description' => "Cancelled sale {$this->sale_number}",
+                    'transaction_date' => now(),
+                    'reference_type' => $this->getMorphClass(),
+                    'reference_id' => $this->id,
+                ]);
+            }
+
+            $this->update(['status' => SaleStatus::Cancelled]);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties(['sale_number' => $this->sale_number, 'total' => $this->total()])
+                ->log("Sale {$this->sale_number} cancelled");
+        });
+    }
 }

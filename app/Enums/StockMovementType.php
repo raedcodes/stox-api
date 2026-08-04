@@ -9,6 +9,7 @@ enum StockMovementType: string implements HasLabel
     case PurchaseReceipt = 'purchase_receipt';
     case Sale = 'sale';
     case SaleReturn = 'sale_return';
+    case SaleCancelled = 'sale_cancelled';
     case PurchaseReturn = 'purchase_return';
     case Adjustment = 'adjustment';
     case TransferOut = 'transfer_out';
@@ -21,6 +22,7 @@ enum StockMovementType: string implements HasLabel
             self::PurchaseReceipt => 'Purchase receipt',
             self::Sale => 'Sale',
             self::SaleReturn => 'Sale return',
+            self::SaleCancelled => 'Sale cancelled',
             self::PurchaseReturn => 'Purchase return',
             self::Adjustment => 'Adjustment',
             self::TransferOut => 'Transfer out',

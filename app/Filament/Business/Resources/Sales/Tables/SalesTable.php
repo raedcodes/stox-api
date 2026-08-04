@@ -90,6 +90,29 @@ class SalesTable
                     ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
                     ->url(fn (Sale $record) => route('business.sales.invoice', $record))
                     ->openUrlInNewTab(),
+                Action::make('cancel')
+                    ->label('Cancel Sale')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalDescription('This restocks everything on the invoice and reverses any charge to the customer\'s account. This cannot be undone.')
+                    ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
+                    ->action(function (Sale $record) {
+                        try {
+                            $record->cancel();
+
+                            Notification::make()
+                                ->title('Sale cancelled')
+                                ->success()
+                                ->send();
+                        } catch (RuntimeException $e) {
+                            Notification::make()
+                                ->title('Cannot cancel sale')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
                 EditAction::make()
                     ->visible(fn (Sale $record) => $record->status === SaleStatus::Draft),
                 DeleteAction::make()
