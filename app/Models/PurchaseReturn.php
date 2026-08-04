@@ -56,7 +56,7 @@ class PurchaseReturn extends Model
         $short = [];
 
         foreach ($this->items as $item) {
-            $available = $item->product->stockOnHand($this->purchaseOrder->location_id);
+            $available = $item->productVariant->stockOnHand($this->purchaseOrder->location_id);
 
             if ((float) $item->quantity > $available) {
                 $short[] = "{$item->product->name} (need {$item->quantity}, have {$available})";
@@ -85,7 +85,7 @@ class PurchaseReturn extends Model
         DB::transaction(function () {
             foreach ($this->items as $item) {
                 $consumed = ProductBatch::deductFefo(
-                    $item->product_id,
+                    $item->product_variant_id,
                     $this->purchaseOrder->location_id,
                     (float) $item->quantity,
                 );

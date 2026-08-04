@@ -3,14 +3,18 @@
 namespace App\Models;
 
 use App\Enums\DiscountType;
+use App\Models\Concerns\HasDefaultProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SaleItem extends Model
 {
+    use HasDefaultProductVariant;
+
     protected $fillable = [
         'sale_id',
         'product_id',
+        'product_variant_id',
         'quantity',
         'unit_price',
         'discount_type',

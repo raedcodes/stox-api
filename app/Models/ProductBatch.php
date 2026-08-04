@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasDefaultProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 
 class ProductBatch extends Model
 {
+    use HasDefaultProductVariant;
+
     protected $fillable = [
         'product_id',
+        'product_variant_id',
         'location_id',
         'batch_number',
         'quantity',
@@ -39,19 +43,21 @@ class ProductBatch extends Model
     }
 
     /**
-     * Deduct a quantity of a product at a location across its batches,
-     * first-expired-first-out. Shared by every flow that removes stock
-     * (sales, purchase returns, transfers) so they all consume batches the
-     * same way and can log a movement per batch actually touched.
+     * Deduct a quantity of a product variant at a location across its
+     * batches, first-expired-first-out. Shared by every flow that removes
+     * stock (sales, purchase returns, transfers) so they all consume
+     * batches the same way and can log a movement per batch actually
+     * touched. Keyed by variant (not just product) so different variants
+     * of the same product are tracked as separate stock.
      *
      * @return Collection<int, array{batch: ProductBatch, quantity: float}>
      */
-    public static function deductFefo(int $productId, int $locationId, float $quantity): Collection
+    public static function deductFefo(int $productVariantId, int $locationId, float $quantity): Collection
     {
         $remaining = $quantity;
         $consumed = collect();
 
-        $batches = static::where('product_id', $productId)
+        $batches = static::where('product_variant_id', $productVariantId)
             ->where('location_id', $locationId)
             ->where('is_active', true)
             ->where('quantity', '>', 0)

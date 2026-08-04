@@ -124,7 +124,7 @@ class Sale extends Model
         $short = [];
 
         foreach ($this->items as $item) {
-            $available = $item->product->stockOnHand($this->location_id);
+            $available = $item->productVariant->stockOnHand($this->location_id);
 
             if ((float) $item->quantity > $available) {
                 $short[] = "{$item->product->name} (need {$item->quantity}, have {$available})";
@@ -177,7 +177,7 @@ class Sale extends Model
 
     protected function deductStock(SaleItem $item): void
     {
-        $consumed = ProductBatch::deductFefo($item->product_id, $this->location_id, (float) $item->quantity);
+        $consumed = ProductBatch::deductFefo($item->product_variant_id, $this->location_id, (float) $item->quantity);
 
         foreach ($consumed as $entry) {
             StockMovement::record(

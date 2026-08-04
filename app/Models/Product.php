@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -65,6 +66,11 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function defaultVariant(): HasOne
+    {
+        return $this->hasOne(ProductVariant::class)->where('is_default', true);
+    }
+
     public function batches(): HasMany
     {
         return $this->hasMany(ProductBatch::class);
@@ -80,5 +86,26 @@ class Product extends Model
             ->where('is_active', true)
             ->when($locationId, fn ($query) => $query->where('location_id', $locationId))
             ->sum('quantity');
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (self $product) {
+            $product->variants()->create([
+                'is_default' => true,
+                'sku' => $product->sku,
+                'barcode' => $product->barcode,
+                'is_active' => true,
+            ]);
+        });
+
+        static::updated(function (self $product) {
+            if ($product->wasChanged(['sku', 'barcode'])) {
+                $product->defaultVariant?->update([
+                    'sku' => $product->sku,
+                    'barcode' => $product->barcode,
+                ]);
+            }
+        });
     }
 }

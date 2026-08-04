@@ -4,14 +4,18 @@ namespace App\Models;
 
 use App\Enums\StockAdjustmentReason;
 use App\Enums\StockMovementType;
+use App\Models\Concerns\HasDefaultProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use RuntimeException;
 
 class StockAdjustment extends Model
 {
+    use HasDefaultProductVariant;
+
     protected $fillable = [
         'product_id',
+        'product_variant_id',
         'location_id',
         'product_batch_id',
         'quantity_change',

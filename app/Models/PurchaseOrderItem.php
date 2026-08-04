@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasDefaultProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PurchaseOrderItem extends Model
 {
+    use HasDefaultProductVariant;
+
     protected $fillable = [
         'purchase_order_id',
         'product_id',
+        'product_variant_id',
         'quantity_ordered',
         'quantity_received',
         'unit_cost',

@@ -100,6 +100,7 @@ class ReceiveStockAction
                         // for sales to have anything to deduct from later.
                         $productBatch = ProductBatch::create([
                             'product_id' => $poItem->product_id,
+                            'product_variant_id' => $poItem->product_variant_id,
                             'location_id' => $record->location_id,
                             'batch_number' => $line['batch_number'] ?? null,
                             'quantity' => $quantity,

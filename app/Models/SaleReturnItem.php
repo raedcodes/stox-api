@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasDefaultProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SaleReturnItem extends Model
 {
+    use HasDefaultProductVariant;
+
     protected $fillable = [
         'sale_return_id',
         'product_id',
+        'product_variant_id',
         'quantity',
         'unit_price',
     ];

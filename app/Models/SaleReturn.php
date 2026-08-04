@@ -61,6 +61,7 @@ class SaleReturn extends Model
             foreach ($this->items as $item) {
                 $batch = ProductBatch::create([
                     'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
                     'location_id' => $this->sale->location_id,
                     'batch_number' => null,
                     'quantity' => $item->quantity,

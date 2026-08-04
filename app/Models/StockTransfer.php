@@ -71,7 +71,7 @@ class StockTransfer extends Model
         $short = [];
 
         foreach ($this->items as $item) {
-            $available = $item->product->stockOnHand($this->from_location_id);
+            $available = $item->productVariant->stockOnHand($this->from_location_id);
 
             if ((float) $item->quantity > $available) {
                 $short[] = "{$item->product->name} (need {$item->quantity}, have {$available})";
@@ -100,7 +100,7 @@ class StockTransfer extends Model
         DB::transaction(function () {
             foreach ($this->items as $item) {
                 $consumed = ProductBatch::deductFefo(
-                    $item->product_id,
+                    $item->product_variant_id,
                     $this->from_location_id,
                     (float) $item->quantity,
                 );
@@ -119,6 +119,7 @@ class StockTransfer extends Model
 
                     $destinationBatch = ProductBatch::firstOrNew([
                         'product_id' => $item->product_id,
+                        'product_variant_id' => $item->product_variant_id,
                         'location_id' => $this->to_location_id,
                         'batch_number' => $sourceBatch->batch_number,
                         'expiry_date' => $sourceBatch->expiry_date,

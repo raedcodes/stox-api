@@ -3,14 +3,18 @@
 namespace App\Models;
 
 use App\Enums\StockMovementType;
+use App\Models\Concerns\HasDefaultProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class StockMovement extends Model
 {
+    use HasDefaultProductVariant;
+
     protected $fillable = [
         'product_id',
+        'product_variant_id',
         'location_id',
         'product_batch_id',
         'type',
@@ -90,6 +94,7 @@ class StockMovement extends Model
     ): self {
         return static::create([
             'product_id' => $batch->product_id,
+            'product_variant_id' => $batch->product_variant_id,
             'location_id' => $batch->location_id,
             'product_batch_id' => $batch->id,
             'type' => $type,
