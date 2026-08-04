@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasDefaultProductVariant;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 
 class ProductBatch extends Model
 {
-    use HasDefaultProductVariant;
+    use HasDefaultProductVariant, HasFactory;
 
     protected $fillable = [
         'product_id',
