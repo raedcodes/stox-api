@@ -3,7 +3,9 @@
 namespace App\Filament\Business\Widgets;
 
 use App\Enums\UserRole;
+use App\Filament\Business\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\Product;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -43,6 +45,14 @@ class LowStockWidget extends TableWidget
                 TextColumn::make('reorder_level')
                     ->label('Reorder at')
                     ->placeholder('—'),
+            ])
+            ->recordActions([
+                Action::make('createPurchaseOrder')
+                    ->label('Create PO')
+                    ->icon('heroicon-o-plus-circle')
+                    ->color('warning')
+                    ->visible(fn () => auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]) ?? false)
+                    ->url(fn (Product $record) => PurchaseOrderResource::getUrl('create').'?product_id='.$record->id),
             ])
             ->defaultSort('stock_on_hand', 'asc')
             ->paginated([5, 10, 25]);

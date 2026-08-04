@@ -5,8 +5,13 @@ namespace App\Providers\Filament;
 use App\Enums\NavigationGroup;
 use App\Filament\Business\Auth\BusinessLogin;
 use App\Filament\Business\Widgets\DashboardKpisWidget;
+use App\Filament\Business\Widgets\ExecutiveKpisWidget;
 use App\Filament\Business\Widgets\ExpiryAlertsWidget;
 use App\Filament\Business\Widgets\LowStockWidget;
+use App\Filament\Business\Widgets\RecentCreditSalesWidget;
+use App\Filament\Business\Widgets\SalesRevenueTrendChart;
+use App\Filament\Business\Widgets\StockExpiryTimelineChart;
+use App\Filament\Business\Widgets\TopProductsChart;
 use App\Filament\Business\Widgets\TopProductsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -48,9 +53,14 @@ class BusinessPanelProvider extends PanelProvider
             ->navigationGroups(NavigationGroup::class)
             ->widgets([
                 DashboardKpisWidget::class,
+                ExecutiveKpisWidget::class,
+                SalesRevenueTrendChart::class,
+                TopProductsChart::class,
+                StockExpiryTimelineChart::class,
                 TopProductsWidget::class,
                 LowStockWidget::class,
                 ExpiryAlertsWidget::class,
+                RecentCreditSalesWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

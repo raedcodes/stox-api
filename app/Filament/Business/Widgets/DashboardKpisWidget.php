@@ -4,6 +4,7 @@ namespace App\Filament\Business\Widgets;
 
 use App\Enums\SaleStatus;
 use App\Enums\UserRole;
+use App\Filament\Business\Widgets\Concerns\HasTrendComparison;
 use App\Models\Product;
 use App\Models\Sale;
 use Filament\Widgets\StatsOverviewWidget;
@@ -11,6 +12,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DashboardKpisWidget extends StatsOverviewWidget
 {
+    use HasTrendComparison;
+
     public static function canView(): bool
     {
         return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
@@ -41,43 +44,15 @@ class DashboardKpisWidget extends StatsOverviewWidget
 
         return [
             Stat::make("Today's sales", $todaysSales->count())
-                ->description($this->trendDescription($todaysSales->count(), $yesterdaysSales->count()))
+                ->description($this->trendDescription($todaysSales->count(), $yesterdaysSales->count(), 'yesterday'))
                 ->descriptionIcon($this->trendIcon($todaysSales->count(), $yesterdaysSales->count()))
                 ->descriptionColor($this->trendColor($todaysSales->count(), $yesterdaysSales->count())),
             Stat::make('Today\'s revenue', tenant('currency')?->value.' '.number_format($todaysRevenue, 2))
-                ->description($this->trendDescription($todaysRevenue, $yesterdaysRevenue))
+                ->description($this->trendDescription($todaysRevenue, $yesterdaysRevenue, 'yesterday'))
                 ->descriptionIcon($this->trendIcon($todaysRevenue, $yesterdaysRevenue))
                 ->descriptionColor($this->trendColor($todaysRevenue, $yesterdaysRevenue)),
             Stat::make('Low / out of stock', $lowStockCount)
                 ->color($lowStockCount > 0 ? 'danger' : 'success'),
         ];
-    }
-
-    /**
-     * A human-readable "vs. yesterday" comparison for a today/yesterday pair.
-     */
-    protected function trendDescription(float $today, float $yesterday): string
-    {
-        if ($today == $yesterday) {
-            return 'Same as yesterday';
-        }
-
-        if ($yesterday == 0.0) {
-            return 'Up from zero yesterday';
-        }
-
-        $percent = (($today - $yesterday) / $yesterday) * 100;
-
-        return number_format(abs($percent), 1).'% '.($percent >= 0 ? 'up' : 'down').' vs. yesterday';
-    }
-
-    protected function trendIcon(float $today, float $yesterday): string
-    {
-        return $today >= $yesterday ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down';
-    }
-
-    protected function trendColor(float $today, float $yesterday): string
-    {
-        return $today >= $yesterday ? 'success' : 'danger';
     }
 }
