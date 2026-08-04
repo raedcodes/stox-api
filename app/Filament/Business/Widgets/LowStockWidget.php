@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Widgets;
 
+use App\Enums\UserRole;
 use App\Models\Product;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -10,6 +11,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LowStockWidget extends TableWidget
 {
+    public static function canView(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]);
+    }
+
     protected static ?string $heading = 'Low & out-of-stock products';
 
     public function table(Table $table): Table

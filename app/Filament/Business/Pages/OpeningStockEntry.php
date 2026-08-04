@@ -4,6 +4,7 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
 use App\Enums\StockMovementType;
+use App\Enums\UserRole;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
@@ -26,6 +27,11 @@ use UnitEnum;
 
 class OpeningStockEntry extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Inventory;

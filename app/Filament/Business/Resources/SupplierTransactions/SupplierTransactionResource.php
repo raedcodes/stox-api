@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\SupplierTransactions;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\CreateSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\EditSupplierTransaction;
 use App\Filament\Business\Resources\SupplierTransactions\Pages\ListSupplierTransactions;
@@ -20,7 +22,14 @@ use UnitEnum;
 
 class SupplierTransactionResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = SupplierTransaction::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
 

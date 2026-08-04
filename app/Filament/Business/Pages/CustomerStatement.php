@@ -4,6 +4,7 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\CustomerTransactionType;
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
 use App\Models\Customer;
 use App\Models\CustomerTransaction;
 use App\Models\Tenant;
@@ -22,6 +23,11 @@ use UnitEnum;
 
 class CustomerStatement extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;

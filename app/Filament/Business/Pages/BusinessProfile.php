@@ -5,6 +5,7 @@ namespace App\Filament\Business\Pages;
 use App\Enums\BusinessType;
 use App\Enums\Currency;
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
 use App\Models\Tenant;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -23,6 +24,11 @@ use UnitEnum;
 
 class BusinessProfile extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasRole(UserRole::Owner);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Settings;

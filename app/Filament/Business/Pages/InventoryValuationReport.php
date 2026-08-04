@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
 use App\Exports\InventoryValuationReportExport;
 use App\Models\Location;
 use App\Models\ProductBatch;
@@ -27,6 +28,11 @@ use UnitEnum;
 class InventoryValuationReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
 

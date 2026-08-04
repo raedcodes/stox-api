@@ -4,6 +4,7 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
 use App\Enums\SupplierTransactionType;
+use App\Enums\UserRole;
 use App\Models\Supplier;
 use App\Models\SupplierTransaction;
 use App\Models\Tenant;
@@ -22,6 +23,11 @@ use UnitEnum;
 
 class SupplierStatement extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;

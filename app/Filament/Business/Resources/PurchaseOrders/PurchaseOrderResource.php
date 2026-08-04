@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\PurchaseOrders;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Business\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
@@ -22,7 +24,14 @@ use UnitEnum;
 
 class PurchaseOrderResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = PurchaseOrder::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static ?string $recordTitleAttribute = 'po_number';
 

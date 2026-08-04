@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Widgets;
 
 use App\Enums\SaleStatus;
+use App\Enums\UserRole;
 use App\Models\SaleItem;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -12,6 +13,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class TopProductsWidget extends TableWidget
 {
+    public static function canView(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
+
     protected static ?string $heading = 'Top products (last 30 days)';
 
     public function getTableRecordKey(Model|array $record): string

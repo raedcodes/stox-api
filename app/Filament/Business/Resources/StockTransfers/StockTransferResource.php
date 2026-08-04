@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\StockTransfers;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\StockTransfers\Pages\CreateStockTransfer;
 use App\Filament\Business\Resources\StockTransfers\Pages\EditStockTransfer;
 use App\Filament\Business\Resources\StockTransfers\Pages\ListStockTransfers;
@@ -20,7 +22,14 @@ use UnitEnum;
 
 class StockTransferResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = StockTransfer::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 

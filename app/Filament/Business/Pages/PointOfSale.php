@@ -5,6 +5,7 @@ namespace App\Filament\Business\Pages;
 use App\Enums\DiscountType;
 use App\Enums\PaymentMethod;
 use App\Enums\SaleStatus;
+use App\Enums\UserRole;
 use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Product;
@@ -27,6 +28,11 @@ use RuntimeException;
 
 class PointOfSale extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::Cashier]);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalculator;
 
     protected static ?int $navigationSort = -1;

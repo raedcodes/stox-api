@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\StockAdjustments;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\StockAdjustments\Pages\CreateStockAdjustment;
 use App\Filament\Business\Resources\StockAdjustments\Pages\ListStockAdjustments;
 use App\Filament\Business\Resources\StockAdjustments\Pages\ViewStockAdjustment;
@@ -19,7 +21,14 @@ use UnitEnum;
 
 class StockAdjustmentResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = StockAdjustment::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 

@@ -4,6 +4,7 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
+use App\Enums\UserRole;
 use App\Models\SaleItem;
 use App\Models\Tenant;
 use BackedEnum;
@@ -19,6 +20,11 @@ use UnitEnum;
 
 class ProfitAndLossReport extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartPie;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Reports;

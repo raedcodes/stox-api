@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\Brands;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Brands\Pages\ManageBrands;
 use App\Models\Brand;
 use BackedEnum;
@@ -29,7 +31,14 @@ use UnitEnum;
 
 class BrandResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Brand::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookmark;
 

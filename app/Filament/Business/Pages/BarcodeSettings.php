@@ -4,6 +4,7 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\BarcodeFormat;
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
 use App\Models\BarcodeSetting;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -20,6 +21,11 @@ use UnitEnum;
 
 class BarcodeSettings extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasRole(UserRole::Owner);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Settings;

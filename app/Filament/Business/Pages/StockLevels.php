@@ -4,6 +4,7 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
 use App\Enums\PurchaseOrderStatus;
+use App\Enums\UserRole;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
@@ -21,6 +22,11 @@ use UnitEnum;
 class StockLevels extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]);
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
 

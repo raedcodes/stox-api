@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\Sales;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Sales\Pages\CreateSale;
 use App\Filament\Business\Resources\Sales\Pages\EditSale;
 use App\Filament\Business\Resources\Sales\Pages\ListSales;
@@ -22,7 +24,14 @@ use UnitEnum;
 
 class SaleResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Sale::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager];
+    }
 
     protected static ?string $recordTitleAttribute = 'sale_number';
 

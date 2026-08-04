@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Widgets;
 
 use App\Enums\SaleStatus;
+use App\Enums\UserRole;
 use App\Models\Product;
 use App\Models\Sale;
 use Filament\Widgets\StatsOverviewWidget;
@@ -10,6 +11,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DashboardKpisWidget extends StatsOverviewWidget
 {
+    public static function canView(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
+
     protected function getStats(): array
     {
         $todaysSales = Sale::query()

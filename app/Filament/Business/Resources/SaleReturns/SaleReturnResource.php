@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\SaleReturns;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\SaleReturns\Pages\CreateSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Pages\EditSaleReturn;
 use App\Filament\Business\Resources\SaleReturns\Pages\ListSaleReturns;
@@ -20,7 +22,14 @@ use UnitEnum;
 
 class SaleReturnResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = SaleReturn::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptRefund;
 

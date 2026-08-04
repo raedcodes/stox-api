@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
 use App\Exports\PurchaseReportExport;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
@@ -28,6 +29,11 @@ use UnitEnum;
 class PurchaseReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPresentationChartLine;
 

@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\Products;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Products\Pages\CreateProduct;
 use App\Filament\Business\Resources\Products\Pages\EditProduct;
 use App\Filament\Business\Resources\Products\Pages\ListProducts;
@@ -23,7 +25,14 @@ use UnitEnum;
 
 class ProductResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Product::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 

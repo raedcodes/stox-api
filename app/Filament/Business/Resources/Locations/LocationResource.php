@@ -4,6 +4,8 @@ namespace App\Filament\Business\Resources\Locations;
 
 use App\Enums\LocationType;
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Locations\Pages\ManageLocations;
 use App\Models\Location;
 use BackedEnum;
@@ -31,7 +33,14 @@ use UnitEnum;
 
 class LocationResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Location::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 

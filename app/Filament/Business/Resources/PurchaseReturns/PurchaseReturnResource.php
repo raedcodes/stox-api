@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\PurchaseReturns;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\CreatePurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\EditPurchaseReturn;
 use App\Filament\Business\Resources\PurchaseReturns\Pages\ListPurchaseReturns;
@@ -20,7 +22,14 @@ use UnitEnum;
 
 class PurchaseReturnResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = PurchaseReturn::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUturnLeft;
 

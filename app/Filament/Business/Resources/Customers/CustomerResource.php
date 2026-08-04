@@ -4,6 +4,8 @@ namespace App\Filament\Business\Resources\Customers;
 
 use App\Enums\CustomerType;
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Customers\Pages\ManageCustomers;
 use App\Models\Customer;
 use BackedEnum;
@@ -35,7 +37,14 @@ use UnitEnum;
 
 class CustomerResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Customer::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager];
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 

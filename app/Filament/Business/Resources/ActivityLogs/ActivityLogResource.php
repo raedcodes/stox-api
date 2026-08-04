@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\ActivityLogs;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\ActivityLogs\Pages\ListActivityLogs;
 use App\Filament\Business\Resources\ActivityLogs\Pages\ViewActivityLog;
 use App\Filament\Business\Resources\ActivityLogs\Schemas\ActivityLogInfolist;
@@ -17,7 +19,14 @@ use UnitEnum;
 
 class ActivityLogResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Activity::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 

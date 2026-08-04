@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\CustomerTransactions;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\CustomerTransactions\Pages\CreateCustomerTransaction;
 use App\Filament\Business\Resources\CustomerTransactions\Pages\EditCustomerTransaction;
 use App\Filament\Business\Resources\CustomerTransactions\Pages\ListCustomerTransactions;
@@ -20,7 +22,14 @@ use UnitEnum;
 
 class CustomerTransactionResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = CustomerTransaction::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 

@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\Categories;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Categories\Pages\ManageCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,7 +36,14 @@ use UnitEnum;
 
 class CategoryResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Category::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 

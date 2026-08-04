@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\StockMovements;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\StockMovements\Pages\ListStockMovements;
 use App\Filament\Business\Resources\StockMovements\Pages\ViewStockMovement;
 use App\Filament\Business\Resources\StockMovements\Schemas\StockMovementInfolist;
@@ -17,7 +19,14 @@ use UnitEnum;
 
 class StockMovementResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = StockMovement::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;
 

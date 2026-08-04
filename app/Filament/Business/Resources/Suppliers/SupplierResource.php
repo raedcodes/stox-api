@@ -4,6 +4,8 @@ namespace App\Filament\Business\Resources\Suppliers;
 
 use App\Enums\NavigationGroup;
 use App\Enums\PaymentTerms;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Suppliers\Pages\ManageSuppliers;
 use App\Models\Supplier;
 use BackedEnum;
@@ -35,7 +37,14 @@ use UnitEnum;
 
 class SupplierResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = Supplier::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 

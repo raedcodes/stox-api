@@ -4,6 +4,7 @@ namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
+use App\Enums\UserRole;
 use App\Exports\TaxReportExport;
 use App\Models\SaleItem;
 use App\Models\TaxSetting;
@@ -28,6 +29,11 @@ use UnitEnum;
 class TaxReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 

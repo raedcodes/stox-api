@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
 use App\Models\TaxSetting;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -18,6 +19,11 @@ use UnitEnum;
 
 class TaxSettings extends Page
 {
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->hasRole(UserRole::Owner);
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Settings;

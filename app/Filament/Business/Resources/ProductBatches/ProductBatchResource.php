@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\ProductBatches;
 
 use App\Enums\NavigationGroup;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\ProductBatches\Pages\CreateProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Pages\EditProductBatch;
 use App\Filament\Business\Resources\ProductBatches\Pages\ListProductBatches;
@@ -20,7 +22,14 @@ use UnitEnum;
 
 class ProductBatchResource extends Resource
 {
+    use RestrictedToRoles;
+
     protected static ?string $model = ProductBatch::class;
+
+    protected static function allowedRoles(): array
+    {
+        return [UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper];
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBoxArrowDown;
 
