@@ -124,7 +124,19 @@ class StockTransfer extends Model
                         'batch_number' => $sourceBatch->batch_number,
                         'expiry_date' => $sourceBatch->expiry_date,
                     ]);
-                    $destinationBatch->quantity = ($destinationBatch->exists ? $destinationBatch->quantity : 0) + $quantity;
+
+                    // Preserve cost basis across the transfer — a moved batch is still
+                    // the same goods, so its cost shouldn't change. If merging into an
+                    // existing destination batch, weighted-average the two cost bases.
+                    $existingQuantity = $destinationBatch->exists ? (float) $destinationBatch->quantity : 0;
+                    $existingUnitCost = $destinationBatch->exists ? (float) $destinationBatch->unit_cost : 0;
+                    $sourceUnitCost = (float) $sourceBatch->unit_cost;
+
+                    $destinationBatch->unit_cost = ($existingQuantity + $quantity) > 0
+                        ? (($existingQuantity * $existingUnitCost) + ($quantity * $sourceUnitCost)) / ($existingQuantity + $quantity)
+                        : $sourceUnitCost;
+
+                    $destinationBatch->quantity = $existingQuantity + $quantity;
                     $destinationBatch->is_active = true;
                     $destinationBatch->save();
 

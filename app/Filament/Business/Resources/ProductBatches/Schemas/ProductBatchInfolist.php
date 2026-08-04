@@ -25,6 +25,10 @@ class ProductBatchInfolist
                             ->label('Batch / lot number')
                             ->placeholder('—'),
                         TextEntry::make('quantity'),
+                        TextEntry::make('unit_cost')
+                            ->label('Unit cost')
+                            ->money(fn () => tenant('currency')?->value)
+                            ->placeholder('—'),
                         TextEntry::make('manufactured_date')
                             ->label('Manufactured date')
                             ->date()

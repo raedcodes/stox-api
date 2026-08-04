@@ -89,11 +89,37 @@ class ReceiveStockAction
                         'received_date' => $data['received_date'],
                     ]);
 
+                    $poItems = PurchaseOrderItem::findMany($lines->pluck('purchase_order_item_id'))->keyBy('id');
+
+                    // Landed costs (freight, customs, handling — entered once for the
+                    // whole order) get allocated proportionally by value across whatever
+                    // is being received right now, so a partial receipt only carries its
+                    // fair share and the total converges exactly once fully received.
+                    $poSubtotal = $record->subtotal();
+                    $poLandedCostTotal = $record->landedCostTotal();
+
+                    $receiptRawValue = $lines->sum(
+                        fn (array $line) => (float) $line['quantity_received'] * (float) $poItems[$line['purchase_order_item_id']]->unit_cost
+                    );
+
+                    $receiptAllocatedLandedCost = $poSubtotal > 0
+                        ? ($receiptRawValue / $poSubtotal) * $poLandedCostTotal
+                        : 0;
+
                     $totalValue = 0;
 
                     foreach ($lines as $line) {
-                        $poItem = PurchaseOrderItem::findOrFail($line['purchase_order_item_id']);
+                        $poItem = $poItems[$line['purchase_order_item_id']];
                         $quantity = (float) $line['quantity_received'];
+                        $lineRawValue = $quantity * (float) $poItem->unit_cost;
+
+                        $lineAllocatedLandedCost = $receiptRawValue > 0
+                            ? ($lineRawValue / $receiptRawValue) * $receiptAllocatedLandedCost
+                            : 0;
+
+                        // The batch's real cost basis: what was paid per unit, plus its
+                        // share of landed costs — not just the PO's raw unit_cost.
+                        $landedUnitCost = (float) $poItem->unit_cost + ($lineAllocatedLandedCost / $quantity);
 
                         // Always tracked as a batch, even without a real batch number/expiry —
                         // this is the only record of on-hand stock, so every receipt needs one
@@ -104,6 +130,7 @@ class ReceiveStockAction
                             'location_id' => $record->location_id,
                             'batch_number' => $line['batch_number'] ?? null,
                             'quantity' => $quantity,
+                            'unit_cost' => $landedUnitCost,
                             'expiry_date' => $line['expiry_date'] ?? null,
                         ]);
 
@@ -124,14 +151,16 @@ class ReceiveStockAction
 
                         $poItem->increment('quantity_received', $quantity);
 
-                        $totalValue += $quantity * (float) $poItem->unit_cost;
+                        $totalValue += $lineRawValue + $lineAllocatedLandedCost;
                     }
 
                     if ($totalValue > 0) {
                         $record->supplier->transactions()->create([
                             'type' => SupplierTransactionType::Charge,
                             'amount' => $totalValue,
-                            'description' => "Receipt against {$record->po_number}",
+                            'description' => $receiptAllocatedLandedCost > 0
+                                ? "Receipt against {$record->po_number} (incl. landed costs)"
+                                : "Receipt against {$record->po_number}",
                             'transaction_date' => $data['received_date'],
                             'reference_type' => $record->getMorphClass(),
                             'reference_id' => $record->id,

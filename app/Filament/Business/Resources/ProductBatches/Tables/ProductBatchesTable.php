@@ -34,6 +34,11 @@ class ProductBatchesTable
                     ->label('Batch #')
                     ->searchable(),
                 TextColumn::make('quantity'),
+                TextColumn::make('unit_cost')
+                    ->label('Unit cost')
+                    ->money(fn () => tenant('currency')?->value)
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('manufactured_date')
                     ->label('Manufactured')
                     ->date()

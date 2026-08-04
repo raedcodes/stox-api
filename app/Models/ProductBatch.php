@@ -17,6 +17,7 @@ class ProductBatch extends Model
         'location_id',
         'batch_number',
         'quantity',
+        'unit_cost',
         'manufactured_date',
         'expiry_date',
         'is_active',
@@ -26,6 +27,7 @@ class ProductBatch extends Model
     {
         return [
             'quantity' => 'decimal:2',
+            'unit_cost' => 'decimal:2',
             'manufactured_date' => 'date',
             'expiry_date' => 'date',
             'is_active' => 'boolean',

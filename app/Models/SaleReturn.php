@@ -65,6 +65,10 @@ class SaleReturn extends Model
                     'location_id' => $this->sale->location_id,
                     'batch_number' => null,
                     'quantity' => $item->quantity,
+                    // The original sale could have drawn from batches at different
+                    // costs (FEFO doesn't track which); the product's current cost
+                    // is the best available approximation for the returned goods.
+                    'unit_cost' => $item->product?->cost_price,
                 ]);
 
                 StockMovement::record(

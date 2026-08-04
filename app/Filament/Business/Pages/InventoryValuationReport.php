@@ -45,9 +45,8 @@ class InventoryValuationReport extends Page implements HasTable
     {
         return ProductBatch::query()
             ->with(['product', 'location'])
-            ->join('products', 'products.id', '=', 'product_batches.product_id')
             ->where('product_batches.is_active', true)
-            ->selectRaw('product_batches.product_id, product_batches.location_id, SUM(product_batches.quantity) as total_quantity, SUM(product_batches.quantity * products.cost_price) as total_value')
+            ->selectRaw('product_batches.product_id, product_batches.location_id, SUM(product_batches.quantity) as total_quantity, SUM(product_batches.quantity * product_batches.unit_cost) as total_value')
             ->groupBy('product_batches.product_id', 'product_batches.location_id');
     }
 
@@ -68,9 +67,13 @@ class InventoryValuationReport extends Page implements HasTable
                     ->label('Location'),
                 TextColumn::make('total_quantity')
                     ->label('On hand'),
-                TextColumn::make('product.cost_price')
-                    ->label('Unit cost')
-                    ->money(fn () => tenant('currency')?->value),
+                TextColumn::make('unit_cost')
+                    ->label('Unit cost (avg)')
+                    ->state(fn ($record) => (float) $record->total_quantity > 0
+                        ? (float) $record->total_value / (float) $record->total_quantity
+                        : 0)
+                    ->money(fn () => tenant('currency')?->value)
+                    ->tooltip('Weighted average cost across this product\'s batches at this location — batches can have different actual costs (e.g. landed costs vary by shipment).'),
                 TextColumn::make('total_value')
                     ->label('Value')
                     ->money(fn () => tenant('currency')?->value)

@@ -19,19 +19,22 @@ class InventoryValuationReportExport implements FromQuery, WithHeadings, WithMap
 
     public function headings(): array
     {
-        return ['Product', 'Description', 'Location', 'On hand', 'Unit cost', 'Value'];
+        return ['Product', 'Description', 'Location', 'On hand', 'Unit cost (avg)', 'Value'];
     }
 
     public function map($row): array
     {
         /** @var ProductBatch $row */
+        $quantity = (float) $row->total_quantity;
+        $value = (float) $row->total_value;
+
         return [
             $row->product->name,
             $row->product->description,
             $row->location->name,
-            (float) $row->total_quantity,
-            (float) $row->product->cost_price,
-            (float) $row->total_value,
+            $quantity,
+            $quantity > 0 ? $value / $quantity : 0,
+            $value,
         ];
     }
 }
