@@ -15,7 +15,10 @@ class BrandFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->randomElement([
+            // Not ->unique(): that tracks used values for the whole PHP
+            // process, not per call, and exhausts this small fixed list
+            // after only a handful of draws across a multi-tenant run.
+            'name' => fake()->randomElement([
                 'Nova', 'Meridian', 'Everstone', 'BluePeak', 'Solace',
                 'Cascade', 'Northline', 'Amberly', 'Vantage', 'Pure Origin',
             ]),

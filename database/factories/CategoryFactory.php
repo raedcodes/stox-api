@@ -16,7 +16,10 @@ class CategoryFactory extends Factory
     {
         return [
             'parent_id' => null,
-            'name' => fake()->unique()->randomElement([
+            // Not ->unique(): that tracks used values for the whole PHP
+            // process, not per call, and exhausts this small fixed list
+            // after only a handful of draws across a multi-tenant run.
+            'name' => fake()->randomElement([
                 'Electronics', 'Groceries & FMCG', 'Pharmaceuticals',
                 'Household Supplies', 'Beverages', 'Personal Care',
             ]),

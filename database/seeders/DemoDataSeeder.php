@@ -86,13 +86,21 @@ class DemoDataSeeder extends Seeder
     }
 
     /**
+     * Built the same way as seedCategories() — a plain fixed-name loop, not
+     * the factory's fake()->unique(), which exhausts its small pool of
+     * options after the first tenant when tenants:seed runs for several
+     * tenants in one process (Faker's uniqueness tracking is per-process,
+     * not per model-creation batch).
+     *
      * @return Collection<int, Brand>
      */
     protected function seedBrands(): Collection
     {
-        return Brand::query()->count() >= 6
-            ? Brand::query()->limit(6)->get()
-            : Brand::factory()->count(6)->create();
+        $names = ['Nova', 'Meridian', 'Everstone', 'BluePeak', 'Solace', 'Cascade'];
+
+        return new Collection(collect($names)
+            ->map(fn (string $name) => Brand::firstOrCreate(['name' => $name], ['is_active' => true]))
+            ->all());
     }
 
     /**
