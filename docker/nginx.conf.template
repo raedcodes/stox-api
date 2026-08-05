@@ -16,10 +16,15 @@ http {
 
     # Default temp paths live under /var/lib/nginx, owned by root from the
     # package install — the container runs as www-data, so point everything
-    # nginx might need to write at /tmp instead.
+    # nginx might try to create at /tmp instead. All five of nginx's temp
+    # path directives are set here even though uwsgi/scgi are unused —
+    # nginx creates all five on startup regardless of which modules are
+    # actually referenced by a location block, and fails hard if it can't.
     client_body_temp_path /tmp/nginx-client-body;
     proxy_temp_path /tmp/nginx-proxy;
     fastcgi_temp_path /tmp/nginx-fastcgi;
+    uwsgi_temp_path /tmp/nginx-uwsgi;
+    scgi_temp_path /tmp/nginx-scgi;
 
     server {
         listen ${PORT};
