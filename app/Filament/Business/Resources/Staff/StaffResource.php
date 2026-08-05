@@ -10,13 +10,12 @@ use App\Filament\Business\Resources\Staff\Pages\EditStaff;
 use App\Filament\Business\Resources\Staff\Pages\ListStaff;
 use App\Filament\Business\Resources\Staff\Schemas\StaffForm;
 use App\Filament\Business\Resources\Staff\Tables\StaffTable;
-use App\Models\User;
+use App\Models\Staff;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
@@ -24,7 +23,7 @@ class StaffResource extends Resource
 {
     use RestrictedToRoles;
 
-    protected static ?string $model = User::class;
+    protected static ?string $model = Staff::class;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -59,22 +58,6 @@ class StaffResource extends Resource
     public static function canDeleteAny(): bool
     {
         return false;
-    }
-
-    /**
-     * Only this business's own staff (Manager/Cashier/Storekeeper) — never
-     * the Owner account itself, so there's no way to accidentally edit,
-     * demote, or delete your own account from this screen.
-     */
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->where('tenant_id', tenant('id'))
-            ->whereHas('roles', fn (Builder $query) => $query->whereIn('name', [
-                UserRole::Manager->value,
-                UserRole::Cashier->value,
-                UserRole::StoreKeeper->value,
-            ]));
     }
 
     public static function form(Schema $schema): Schema

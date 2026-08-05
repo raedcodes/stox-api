@@ -10,6 +10,7 @@ use App\Enums\StockMovementType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -26,6 +27,7 @@ class Sale extends Model
         'sale_date',
         'notes',
         'created_by',
+        'creator_type',
     ];
 
     protected function casts(): array
@@ -47,7 +49,8 @@ class Sale extends Model
             }
 
             if (blank($sale->created_by)) {
-                $sale->created_by = auth()->id();
+                $sale->created_by = auth()->user()?->getKey();
+                $sale->creator_type = auth()->user()?->getMorphClass();
             }
         });
     }
@@ -79,9 +82,9 @@ class Sale extends Model
         return $this->hasMany(SaleReturn::class);
     }
 
-    public function cashier(): BelongsTo
+    public function cashier(): MorphTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->morphTo(name: 'creator', type: 'creator_type', id: 'created_by');
     }
 
     public function subtotal(): float

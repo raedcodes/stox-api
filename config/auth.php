@@ -45,7 +45,7 @@ return [
 
         'business' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'business_users',
         ],
     ],
 
@@ -76,6 +76,13 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+
+        // Authenticates the 'business' guard against tenant Staff first,
+        // falling back to the tenant's central Owner — see
+        // App\Auth\TenantAwareUserProvider.
+        'business_users' => [
+            'driver' => 'tenant_aware',
+        ],
     ],
 
     /*

@@ -9,6 +9,7 @@ use App\Exports\SalesReportExport;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\SaleItem;
+use App\Models\Staff;
 use App\Models\Tenant;
 use App\Models\User;
 use BackedEnum;
@@ -115,10 +116,23 @@ class SalesReport extends Page implements HasTable
                     )),
                 SelectFilter::make('created_by')
                     ->label('Cashier')
-                    ->options(fn () => User::query()->where('tenant_id', tenant('id'))->pluck('name', 'id'))
+                    // created_by is polymorphic (a staff member or the central
+                    // Owner) — a plain id can collide between the two tables,
+                    // so options/filtering both carry the type alongside it.
+                    ->options(fn () => Staff::query()->pluck('name', 'id')
+                        ->mapWithKeys(fn ($name, $id) => ["staff:{$id}" => $name])
+                        ->union(
+                            User::query()->where('tenant_id', tenant('id'))->pluck('name', 'id')
+                                ->mapWithKeys(fn ($name, $id) => ["user:{$id}" => $name])
+                        ))
                     ->query(fn (Builder $query, array $data) => $query->when(
                         $data['value'] ?? null,
-                        fn ($q, $userId) => $q->where('sales.created_by', $userId)
+                        function (Builder $q, string $value) {
+                            [$type, $id] = explode(':', $value, 2);
+
+                            $q->where('sales.created_by', $id)
+                                ->where('sales.creator_type', $type === 'staff' ? Staff::class : User::class);
+                        }
                     )),
             ])
             ->defaultSort('sale.sale_date', 'desc');

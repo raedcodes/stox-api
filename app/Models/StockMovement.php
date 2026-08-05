@@ -25,6 +25,7 @@ class StockMovement extends Model
         'reference_type',
         'reference_id',
         'performed_by',
+        'performer_type',
     ];
 
     protected function casts(): array
@@ -56,9 +57,9 @@ class StockMovement extends Model
         return $this->morphTo();
     }
 
-    public function performedBy(): BelongsTo
+    public function performedBy(): MorphTo
     {
-        return $this->belongsTo(User::class, 'performed_by');
+        return $this->morphTo(name: 'performer', type: 'performer_type', id: 'performed_by');
     }
 
     /**
@@ -104,7 +105,8 @@ class StockMovement extends Model
             'notes' => $notes,
             'reference_type' => $reference?->getMorphClass(),
             'reference_id' => $reference?->getKey(),
-            'performed_by' => auth()->id(),
+            'performed_by' => auth()->user()?->getKey(),
+            'performer_type' => auth()->user()?->getMorphClass(),
         ]);
     }
 }

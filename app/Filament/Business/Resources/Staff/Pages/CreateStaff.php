@@ -3,7 +3,7 @@
 namespace App\Filament\Business\Resources\Staff\Pages;
 
 use App\Filament\Business\Resources\Staff\StaffResource;
-use App\Models\User;
+use App\Models\Staff;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,23 +13,21 @@ class CreateStaff extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $user = User::create([
-            'tenant_id' => tenant('id'),
+        $staff = Staff::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
+            'role' => $data['role'],
             'is_active' => $data['is_active'] ?? true,
             'email_verified_at' => now(),
         ]);
 
-        $user->assignRole($data['role']);
-
         activity()
             ->causedBy(auth()->user())
-            ->performedOn($user)
-            ->withProperties(['name' => $user->name, 'role' => $data['role']])
-            ->log("Staff account created: {$user->name}");
+            ->performedOn($staff)
+            ->withProperties(['name' => $staff->name, 'role' => $data['role']])
+            ->log("Staff account created: {$staff->name}");
 
-        return $user;
+        return $staff;
     }
 }

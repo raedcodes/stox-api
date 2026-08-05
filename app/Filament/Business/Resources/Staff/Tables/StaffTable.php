@@ -4,7 +4,7 @@ namespace App\Filament\Business\Resources\Staff\Tables;
 
 use App\Enums\UserRole;
 use App\Filament\Business\Resources\Staff\Schemas\StaffForm;
-use App\Models\User;
+use App\Models\Staff;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
@@ -14,7 +14,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class StaffTable
 {
@@ -28,7 +27,7 @@ class StaffTable
                     ->searchable(),
                 TextColumn::make('role')
                     ->badge()
-                    ->state(fn (User $record) => $record->getRoleNames()->first())
+                    ->state(fn (Staff $record) => $record->getRoleNames()->first())
                     ->formatStateUsing(fn (?string $state) => $state ? UserRole::from($state)->getLabel() : null)
                     ->color(fn (?string $state) => match ($state) {
                         UserRole::Manager->value => 'info',
@@ -47,10 +46,7 @@ class StaffTable
             ->defaultSort('name')
             ->filters([
                 SelectFilter::make('role')
-                    ->options(StaffForm::assignableRoles())
-                    ->query(fn (Builder $query, array $data) => filled($data['value'] ?? null)
-                        ? $query->whereHas('roles', fn (Builder $query) => $query->where('name', $data['value']))
-                        : $query),
+                    ->options(StaffForm::assignableRoles()),
                 TernaryFilter::make('is_active')
                     ->label('Status')
                     ->placeholder('All')
@@ -61,14 +57,14 @@ class StaffTable
                 ActionGroup::make([
                     EditAction::make(),
                     Action::make('toggleActive')
-                        ->label(fn (User $record) => $record->is_active ? 'Deactivate' : 'Activate')
-                        ->icon(fn (User $record) => $record->is_active ? Heroicon::OutlinedLockClosed : Heroicon::OutlinedLockOpen)
-                        ->color(fn (User $record) => $record->is_active ? 'danger' : 'success')
+                        ->label(fn (Staff $record) => $record->is_active ? 'Deactivate' : 'Activate')
+                        ->icon(fn (Staff $record) => $record->is_active ? Heroicon::OutlinedLockClosed : Heroicon::OutlinedLockOpen)
+                        ->color(fn (Staff $record) => $record->is_active ? 'danger' : 'success')
                         ->requiresConfirmation()
-                        ->modalDescription(fn (User $record) => $record->is_active
+                        ->modalDescription(fn (Staff $record) => $record->is_active
                             ? "{$record->name} will be immediately blocked from logging in. Their sales, stock, and activity history stay intact."
                             : "{$record->name} will be able to log in again immediately.")
-                        ->action(function (User $record) {
+                        ->action(function (Staff $record) {
                             $record->update(['is_active' => ! $record->is_active]);
 
                             activity()

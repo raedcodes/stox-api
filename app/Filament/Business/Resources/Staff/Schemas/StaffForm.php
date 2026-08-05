@@ -3,7 +3,7 @@
 namespace App\Filament\Business\Resources\Staff\Schemas;
 
 use App\Enums\UserRole;
-use App\Models\User;
+use App\Models\Staff;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -36,11 +36,14 @@ class StaffForm
                     ->label('Email address')
                     ->email()
                     ->required()
-                    ->unique(table: 'users', column: 'email', ignoreRecord: true),
+                    // Unique within this tenant's own `staff` table only — two
+                    // different businesses can each have a staff member with
+                    // the same email address.
+                    ->unique(table: 'staff', column: 'email', ignoreRecord: true),
                 Select::make('role')
                     ->label('Role')
                     ->options(self::assignableRoles())
-                    ->default(fn (?User $record) => $record?->getRoleNames()->first())
+                    ->default(fn (?Staff $record) => $record?->getRoleNames()->first())
                     ->helperText('Manager: everything except staff management. Cashier: Point of Sale only. Storekeeper: inventory & stock only, no sales or financial data.')
                     ->required(),
                 TextInput::make('password')

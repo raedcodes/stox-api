@@ -11,11 +11,10 @@ class EditStaff extends EditRecord
 
     /**
      * No delete action: staff removal is deactivation (is_active = false),
-     * never a hard delete. Users live in the central database while their
-     * sales/stock-movement/activity-log references live in each tenant
-     * database, so there's no foreign key to protect those records —
-     * deleting a staff account would silently orphan every sale, stock
-     * movement, and activity log entry they ever caused.
+     * never a hard delete. sales.created_by/stock_movements.performed_by are
+     * polymorphic (a staff member or the central Owner) with no FK possible
+     * across that split, so deleting a staff account would silently orphan
+     * every sale, stock movement, and activity log entry they ever caused.
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
