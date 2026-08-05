@@ -18,6 +18,8 @@ class ExpiryAlertsWidget extends TableWidget
 
     protected static ?string $heading = 'Expiring & expired batches';
 
+    protected int|string|array $columnSpan = 'full';
+
     public function table(Table $table): Table
     {
         return $table

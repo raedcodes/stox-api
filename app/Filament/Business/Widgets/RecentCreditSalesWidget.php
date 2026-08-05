@@ -13,10 +13,13 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RecentCreditSalesWidget extends TableWidget
 {
     protected static ?string $heading = 'Recent credit sales';
+
+    protected int|string|array $columnSpan = 'full';
 
     public static function canView(): bool
     {
@@ -35,7 +38,7 @@ class RecentCreditSalesWidget extends TableWidget
                     // ->balance() per row (its own aggregate query every
                     // time) with two correlated subqueries computed once,
                     // for the whole page, by the database.
-                    ->with(['items.product', 'customer' => fn (Builder $query) => $query
+                    ->with(['items.product', 'customer' => fn (BelongsTo $query) => $query
                         ->withSum(['transactions as credit_sales_sum' => fn (Builder $query) => $query->where('type', CustomerTransactionType::CreditSale)], 'amount')
                         ->withSum(['transactions as reducing_sum' => fn (Builder $query) => $query->whereIn('type', array_map(fn (CustomerTransactionType $type) => $type->value, CustomerTransactionType::reducingTypes()))], 'amount')])
             )
