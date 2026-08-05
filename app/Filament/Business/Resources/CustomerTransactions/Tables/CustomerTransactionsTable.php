@@ -6,6 +6,7 @@ use App\Enums\CustomerTransactionType;
 use App\Filament\Business\Resources\CustomerTransactions\CustomerTransactionResource;
 use App\Models\Customer;
 use App\Models\CustomerTransaction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -52,8 +53,10 @@ class CustomerTransactionsTable
                     ->options(CustomerTransactionType::options()),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

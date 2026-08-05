@@ -4,9 +4,9 @@ namespace App\Filament\Business\Resources\Staff\Schemas;
 
 use App\Enums\UserRole;
 use App\Models\User;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 
@@ -41,13 +41,18 @@ class StaffForm
                     ->label('Role')
                     ->options(self::assignableRoles())
                     ->default(fn (?User $record) => $record?->getRoleNames()->first())
+                    ->helperText('Manager: everything except staff management. Cashier: Point of Sale only. Storekeeper: inventory & stock only, no sales or financial data.')
                     ->required(),
                 TextInput::make('password')
                     ->password()
+                    ->revealable()
                     ->autocomplete('new-password')
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->confirmed()
                     ->dehydrated(fn (?string $state): bool => filled($state))
+                    ->helperText(fn (string $operation): string => $operation === 'create'
+                        ? 'Share this with the staff member securely — they can change it themselves afterwards from their profile page.'
+                        : 'Leave blank to keep the current password.')
                     ->rules([
                         Password::min(8)
                             ->letters()
@@ -59,10 +64,13 @@ class StaffForm
                 TextInput::make('password_confirmation')
                     ->label('Confirm password')
                     ->password()
+                    ->revealable()
                     ->autocomplete('new-password')
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(false),
-                Checkbox::make('is_active')
+                Toggle::make('is_active')
+                    ->label('Active')
+                    ->helperText('Inactive staff are blocked from logging in immediately. Their sales, stock, and activity history are always preserved.')
                     ->default(true),
             ]);
     }

@@ -8,6 +8,7 @@ use App\Filament\Business\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\Location;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -68,10 +69,12 @@ class PurchaseOrdersTable
                     ->options(PurchaseOrderStatus::options()),
             ])
             ->recordActions([
-                ReceiveStockAction::make(),
-                EditAction::make(),
-                DeleteAction::make()
-                    ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::Draft),
+                ActionGroup::make([
+                    ReceiveStockAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::Draft),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

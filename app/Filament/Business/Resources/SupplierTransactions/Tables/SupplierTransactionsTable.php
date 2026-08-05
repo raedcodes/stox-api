@@ -6,6 +6,7 @@ use App\Enums\SupplierTransactionType;
 use App\Filament\Business\Resources\SupplierTransactions\SupplierTransactionResource;
 use App\Models\Supplier;
 use App\Models\SupplierTransaction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -52,8 +53,10 @@ class SupplierTransactionsTable
                     ->options(SupplierTransactionType::options()),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -6,6 +6,7 @@ use App\Filament\Business\Resources\ProductBatches\ProductBatchResource;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -76,8 +77,10 @@ class ProductBatchesTable
                 TernaryFilter::make('is_active'),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

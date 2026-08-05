@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Sale;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -63,62 +64,64 @@ class SalesTable
                     ->options(SaleStatus::options()),
             ])
             ->recordActions([
-                Action::make('complete')
-                    ->label('Complete Sale')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->visible(fn (Sale $record) => $record->status === SaleStatus::Draft)
-                    ->action(function (Sale $record) {
-                        try {
-                            $record->complete();
+                ActionGroup::make([
+                    Action::make('complete')
+                        ->label('Complete Sale')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->visible(fn (Sale $record) => $record->status === SaleStatus::Draft)
+                        ->action(function (Sale $record) {
+                            try {
+                                $record->complete();
 
-                            Notification::make()
-                                ->title('Sale completed')
-                                ->success()
-                                ->send();
-                        } catch (RuntimeException $e) {
-                            Notification::make()
-                                ->title('Cannot complete sale')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                Action::make('printInvoice')
-                    ->label('Print Invoice')
-                    ->icon('heroicon-o-printer')
-                    ->color('gray')
-                    ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
-                    ->url(fn (Sale $record) => route('business.sales.invoice', $record))
-                    ->openUrlInNewTab(),
-                Action::make('cancel')
-                    ->label('Cancel Sale')
-                    ->icon('heroicon-o-x-circle')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalDescription('This restocks everything on the invoice and reverses any charge to the customer\'s account. This cannot be undone.')
-                    ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
-                    ->action(function (Sale $record) {
-                        try {
-                            $record->cancel();
+                                Notification::make()
+                                    ->title('Sale completed')
+                                    ->success()
+                                    ->send();
+                            } catch (RuntimeException $e) {
+                                Notification::make()
+                                    ->title('Cannot complete sale')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Action::make('printInvoice')
+                        ->label('Print Invoice')
+                        ->icon('heroicon-o-printer')
+                        ->color('gray')
+                        ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
+                        ->url(fn (Sale $record) => route('business.sales.invoice', $record))
+                        ->openUrlInNewTab(),
+                    Action::make('cancel')
+                        ->label('Cancel Sale')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalDescription('This restocks everything on the invoice and reverses any charge to the customer\'s account. This cannot be undone.')
+                        ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
+                        ->action(function (Sale $record) {
+                            try {
+                                $record->cancel();
 
-                            Notification::make()
-                                ->title('Sale cancelled')
-                                ->success()
-                                ->send();
-                        } catch (RuntimeException $e) {
-                            Notification::make()
-                                ->title('Cannot cancel sale')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                EditAction::make()
-                    ->visible(fn (Sale $record) => $record->status === SaleStatus::Draft),
-                DeleteAction::make()
-                    ->visible(fn (Sale $record) => $record->status === SaleStatus::Draft),
+                                Notification::make()
+                                    ->title('Sale cancelled')
+                                    ->success()
+                                    ->send();
+                            } catch (RuntimeException $e) {
+                                Notification::make()
+                                    ->title('Cannot cancel sale')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    EditAction::make()
+                        ->visible(fn (Sale $record) => $record->status === SaleStatus::Draft),
+                    DeleteAction::make()
+                        ->visible(fn (Sale $record) => $record->status === SaleStatus::Draft),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

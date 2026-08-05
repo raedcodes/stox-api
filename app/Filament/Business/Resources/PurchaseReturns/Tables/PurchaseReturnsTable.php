@@ -6,6 +6,7 @@ use App\Filament\Business\Resources\PurchaseReturns\PurchaseReturnResource;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseReturn;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -61,32 +62,34 @@ class PurchaseReturnsTable
                     ->options(fn () => PurchaseOrder::query()->pluck('po_number', 'id')),
             ])
             ->recordActions([
-                Action::make('process')
-                    ->label('Process Return')
-                    ->icon('heroicon-o-arrow-uturn-left')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->visible(fn (PurchaseReturn $record) => $record->processed_at === null)
-                    ->action(function (PurchaseReturn $record) {
-                        try {
-                            $record->process();
+                ActionGroup::make([
+                    Action::make('process')
+                        ->label('Process Return')
+                        ->icon('heroicon-o-arrow-uturn-left')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->visible(fn (PurchaseReturn $record) => $record->processed_at === null)
+                        ->action(function (PurchaseReturn $record) {
+                            try {
+                                $record->process();
 
-                            Notification::make()
-                                ->title('Return processed')
-                                ->success()
-                                ->send();
-                        } catch (RuntimeException $e) {
-                            Notification::make()
-                                ->title('Cannot process return')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                EditAction::make()
-                    ->visible(fn (PurchaseReturn $record) => $record->processed_at === null),
-                DeleteAction::make()
-                    ->visible(fn (PurchaseReturn $record) => $record->processed_at === null),
+                                Notification::make()
+                                    ->title('Return processed')
+                                    ->success()
+                                    ->send();
+                            } catch (RuntimeException $e) {
+                                Notification::make()
+                                    ->title('Cannot process return')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    EditAction::make()
+                        ->visible(fn (PurchaseReturn $record) => $record->processed_at === null),
+                    DeleteAction::make()
+                        ->visible(fn (PurchaseReturn $record) => $record->processed_at === null),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

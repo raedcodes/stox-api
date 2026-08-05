@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class StaffResource extends Resource
@@ -29,6 +30,10 @@ class StaffResource extends Resource
 
     protected static ?string $navigationLabel = 'Staff';
 
+    protected static ?string $modelLabel = 'Staff member';
+
+    protected static ?string $pluralModelLabel = 'Staff';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     protected static UnitEnum|string|null $navigationGroup = NavigationGroup::Settings;
@@ -38,6 +43,22 @@ class StaffResource extends Resource
     protected static function allowedRoles(): array
     {
         return [UserRole::Owner];
+    }
+
+    /**
+     * Staff removal is deactivation (is_active = false), never a hard
+     * delete — see EditStaff::mutateFormDataBeforeFill() for why. Overridden
+     * here (not just hidden in the table/page UI) so no action can delete a
+     * staff account regardless of how it's triggered.
+     */
+    public static function canDelete(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Filament\Business\Resources\StockTransfers\StockTransferResource;
 use App\Models\Location;
 use App\Models\StockTransfer;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -53,32 +54,34 @@ class StockTransfersTable
                     ->options(StockTransferStatus::options()),
             ])
             ->recordActions([
-                Action::make('complete')
-                    ->label('Complete Transfer')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true))
-                    ->action(function (StockTransfer $record) {
-                        try {
-                            $record->complete();
+                ActionGroup::make([
+                    Action::make('complete')
+                        ->label('Complete Transfer')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true))
+                        ->action(function (StockTransfer $record) {
+                            try {
+                                $record->complete();
 
-                            Notification::make()
-                                ->title('Transfer completed')
-                                ->success()
-                                ->send();
-                        } catch (RuntimeException $e) {
-                            Notification::make()
-                                ->title('Cannot complete transfer')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                EditAction::make()
-                    ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
-                DeleteAction::make()
-                    ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
+                                Notification::make()
+                                    ->title('Transfer completed')
+                                    ->success()
+                                    ->send();
+                            } catch (RuntimeException $e) {
+                                Notification::make()
+                                    ->title('Cannot complete transfer')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    EditAction::make()
+                        ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
+                    DeleteAction::make()
+                        ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
