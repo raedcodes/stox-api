@@ -4,6 +4,7 @@ namespace App\Filament\Business\Resources\Suppliers;
 
 use App\Enums\NavigationGroup;
 use App\Enums\PaymentTerms;
+use App\Enums\SupplierTransactionType;
 use App\Enums\UserRole;
 use App\Filament\Business\Concerns\RestrictedToRoles;
 use App\Filament\Business\Resources\Suppliers\Pages\ManageSuppliers;
@@ -96,6 +97,13 @@ class SupplierResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                // Two correlated-subquery sums instead of calling ->balance()
+                // per row (which runs its own grouped aggregate query every
+                // time it's called — twice per row here, once for the state
+                // and once for the color).
+                ->withSum(['transactions as charges_sum' => fn (Builder $query) => $query->where('type', SupplierTransactionType::Charge)], 'amount')
+                ->withSum(['transactions as reducing_sum' => fn (Builder $query) => $query->whereIn('type', array_map(fn (SupplierTransactionType $type) => $type->value, SupplierTransactionType::reducingTypes()))], 'amount'))
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
@@ -109,9 +117,9 @@ class SupplierResource extends Resource
                     ->label('Payment terms')
                     ->placeholder('—'),
                 TextColumn::make('balance')
-                    ->state(fn (Supplier $record) => $record->balance())
+                    ->state(fn (Supplier $record) => (float) ($record->charges_sum ?? 0) - (float) ($record->reducing_sum ?? 0))
                     ->money(fn () => tenant('currency')?->value)
-                    ->color(fn (Supplier $record) => $record->balance() > 0 ? 'danger' : 'success'),
+                    ->color(fn ($state) => (float) $state > 0 ? 'danger' : 'success'),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')

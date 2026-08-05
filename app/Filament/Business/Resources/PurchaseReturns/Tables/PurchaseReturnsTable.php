@@ -15,6 +15,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use RuntimeException;
 
 class PurchaseReturnsTable
@@ -22,6 +23,15 @@ class PurchaseReturnsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with(['purchaseOrder.supplier'])
+                // Precomputed instead of calling ->total() per row: that
+                // method always issues its own aggregate query regardless of
+                // eager loading, since it queries the relation builder
+                // directly rather than a loaded collection.
+                ->selectRaw('purchase_returns.*, (
+                    select coalesce(sum(quantity * unit_cost), 0) from purchase_return_items where purchase_return_items.purchase_return_id = purchase_returns.id
+                ) as computed_total'))
             ->columns([
                 TextColumn::make('purchaseOrder.po_number')
                     ->label('PO #')
@@ -36,7 +46,7 @@ class PurchaseReturnsTable
                     ->placeholder('—')
                     ->limit(40),
                 TextColumn::make('total')
-                    ->state(fn (PurchaseReturn $record) => $record->total())
+                    ->state(fn (PurchaseReturn $record) => $record->computed_total)
                     ->money(fn () => tenant('currency')?->value),
                 IconColumn::make('processed_at')
                     ->label('Processed')

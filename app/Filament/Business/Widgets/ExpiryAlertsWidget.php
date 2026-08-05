@@ -23,6 +23,7 @@ class ExpiryAlertsWidget extends TableWidget
         return $table
             ->query(
                 fn (): Builder => ProductBatch::query()
+                    ->with(['product', 'location'])
                     ->where('is_active', true)
                     ->where('quantity', '>', 0)
                     ->whereNotNull('expiry_date')

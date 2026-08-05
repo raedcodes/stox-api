@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\Customers;
 
+use App\Enums\CustomerTransactionType;
 use App\Enums\CustomerType;
 use App\Enums\NavigationGroup;
 use App\Enums\UserRole;
@@ -98,6 +99,13 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                // Two correlated-subquery sums instead of calling ->balance()
+                // per row (which runs its own grouped aggregate query every
+                // time it's called — twice per row here, once for the state
+                // and once for the color).
+                ->withSum(['transactions as credit_sales_sum' => fn (Builder $query) => $query->where('type', CustomerTransactionType::CreditSale)], 'amount')
+                ->withSum(['transactions as reducing_sum' => fn (Builder $query) => $query->whereIn('type', array_map(fn (CustomerTransactionType $type) => $type->value, CustomerTransactionType::reducingTypes()))], 'amount'))
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
@@ -110,9 +118,9 @@ class CustomerResource extends Resource
                 TextColumn::make('phone')
                     ->placeholder('—'),
                 TextColumn::make('balance')
-                    ->state(fn (Customer $record) => $record->balance())
+                    ->state(fn (Customer $record) => (float) ($record->credit_sales_sum ?? 0) - (float) ($record->reducing_sum ?? 0))
                     ->money(fn () => tenant('currency')?->value)
-                    ->color(fn (Customer $record) => $record->balance() > 0 ? 'danger' : 'success'),
+                    ->color(fn ($state) => (float) $state > 0 ? 'danger' : 'success'),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')

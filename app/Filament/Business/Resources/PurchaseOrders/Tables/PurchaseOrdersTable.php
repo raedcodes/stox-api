@@ -15,12 +15,23 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PurchaseOrdersTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with(['supplier', 'location'])
+                // Precomputed here instead of calling ->total() per row: that
+                // method always issues its own two aggregate queries (items +
+                // charges) regardless of eager loading, since it queries the
+                // relation builder directly rather than a loaded collection.
+                ->selectRaw('purchase_orders.*, (
+                    (select coalesce(sum(quantity_ordered * unit_cost), 0) from purchase_order_items where purchase_order_items.purchase_order_id = purchase_orders.id)
+                    + (select coalesce(sum(amount), 0) from purchase_order_charges where purchase_order_charges.purchase_order_id = purchase_orders.id)
+                ) as computed_total'))
             ->columns([
                 TextColumn::make('po_number')
                     ->label('PO #')
@@ -41,7 +52,7 @@ class PurchaseOrdersTable
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total')
-                    ->state(fn (PurchaseOrder $record) => $record->total())
+                    ->state(fn (PurchaseOrder $record) => $record->computed_total)
                     ->money(fn () => tenant('currency')?->value),
             ])
             ->recordUrl(fn (PurchaseOrder $record) => PurchaseOrderResource::getUrl('view', ['record' => $record]))

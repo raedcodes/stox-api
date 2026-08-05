@@ -38,14 +38,19 @@ class ExecutiveKpisWidget extends StatsOverviewWidget
         $lastMonthStart = now()->subMonthNoOverflow()->startOfMonth();
         $lastMonthEnd = now()->subMonthNoOverflow()->endOfMonth();
 
+        // ->total() reads $this->items (and each item's ->product), so both
+        // must be eager-loaded here — otherwise every sale summed below
+        // triggers its own lazy-loaded items + product queries.
         $thisMonthSales = Sale::query()
             ->where('status', SaleStatus::Completed)
             ->where('sale_date', '>=', $thisMonthStart)
+            ->with('items.product')
             ->get();
 
         $lastMonthSales = Sale::query()
             ->where('status', SaleStatus::Completed)
             ->whereBetween('sale_date', [$lastMonthStart, $lastMonthEnd])
+            ->with('items.product')
             ->get();
 
         $thisMonthRevenue = $thisMonthSales->sum(fn (Sale $sale) => $sale->total());

@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use RuntimeException;
 
 class SalesTable
@@ -23,6 +24,7 @@ class SalesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['customer', 'location', 'cashier', 'items.product']))
             ->columns([
                 TextColumn::make('sale_number')
                     ->label('Invoice #')

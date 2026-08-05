@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Widgets;
 
+use App\Enums\CustomerTransactionType;
 use App\Enums\PaymentMethod;
 use App\Enums\SaleStatus;
 use App\Enums\UserRole;
@@ -29,7 +30,14 @@ class RecentCreditSalesWidget extends TableWidget
                 fn (): Builder => Sale::query()
                     ->where('status', SaleStatus::Completed)
                     ->where('payment_method', PaymentMethod::Credit)
-                    ->with('customer')
+                    // items.product: ->total() reads $this->items/->product.
+                    // The two withSums on customer replace calling
+                    // ->balance() per row (its own aggregate query every
+                    // time) with two correlated subqueries computed once,
+                    // for the whole page, by the database.
+                    ->with(['items.product', 'customer' => fn (Builder $query) => $query
+                        ->withSum(['transactions as credit_sales_sum' => fn (Builder $query) => $query->where('type', CustomerTransactionType::CreditSale)], 'amount')
+                        ->withSum(['transactions as reducing_sum' => fn (Builder $query) => $query->whereIn('type', array_map(fn (CustomerTransactionType $type) => $type->value, CustomerTransactionType::reducingTypes()))], 'amount')])
             )
             ->columns([
                 TextColumn::make('sale_number')
@@ -45,7 +53,9 @@ class RecentCreditSalesWidget extends TableWidget
                     ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('customer_balance')
                     ->label('Customer owes (total)')
-                    ->state(fn (Sale $record) => $record->customer?->balance())
+                    ->state(fn (Sale $record) => $record->customer
+                        ? (float) ($record->customer->credit_sales_sum ?? 0) - (float) ($record->customer->reducing_sum ?? 0)
+                        : null)
                     ->money(fn () => tenant('currency')?->value)
                     ->color(fn ($state) => (float) $state > 0 ? 'danger' : 'success'),
             ])

@@ -21,14 +21,19 @@ class DashboardKpisWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        // ->total() reads $this->items (and each item's ->product), so both
+        // must be eager-loaded here — otherwise every sale summed below
+        // triggers its own lazy-loaded items + product queries.
         $todaysSales = Sale::query()
             ->where('status', SaleStatus::Completed)
             ->whereDate('sale_date', today())
+            ->with('items.product')
             ->get();
 
         $yesterdaysSales = Sale::query()
             ->where('status', SaleStatus::Completed)
             ->whereDate('sale_date', today()->subDay())
+            ->with('items.product')
             ->get();
 
         $todaysRevenue = $todaysSales->sum(fn (Sale $sale) => $sale->total());
