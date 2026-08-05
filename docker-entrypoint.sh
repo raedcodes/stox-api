@@ -18,4 +18,11 @@ if [ "$SEED_DEMO_DATA" = "true" ]; then
     php artisan tenants:seed --class="DemoDataSeeder" --force
 fi
 
-exec php artisan serve --host=0.0.0.0 --port="${PORT:-10000}"
+# Rendered to /tmp (not /etc/nginx) since the container runs as www-data,
+# which can't write into /etc/nginx. nginx.conf is a template because Render
+# only tells us the port to listen on at runtime, via $PORT — envsubst is
+# scoped to just this one variable so it doesn't touch nginx's own
+# $uri/$query_string/etc. syntax.
+PORT="${PORT:-10000}" envsubst '${PORT}' < /etc/nginx/nginx.conf.template > /tmp/nginx.conf
+
+exec supervisord -c /etc/supervisor/conf.d/supervisord.conf

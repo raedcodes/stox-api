@@ -1,9 +1,10 @@
-FROM php:8.3-cli-bookworm
+FROM php:8.3-fpm-bookworm
 
 RUN apt-get update && apt-get install -y \
         git unzip libzip-dev libpng-dev libonig-dev libxml2-dev libicu-dev \
+        nginx supervisor gettext-base \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install pdo_mysql zip gd mbstring xml bcmath intl \
+    && docker-php-ext-install pdo_mysql zip gd mbstring xml bcmath intl opcache \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -28,11 +29,18 @@ RUN composer dump-autoload --optimize --no-dev \
     && rm -rf node_modules/.cache
 
 RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache
+
+COPY docker/opcache.ini /usr/local/etc/php/conf.d/opcache-recommended.ini
+COPY docker/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 10000
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER www-data
 
 ENTRYPOINT ["docker-entrypoint.sh"]
