@@ -19,6 +19,10 @@ return new class extends Migration
             $table->date('expected_date')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+
+            // Every dashboard widget and report filters by status + a date
+            // range together.
+            $table->index(['status', 'order_date'], 'purchase_orders_status_date_index');
         });
     }
 

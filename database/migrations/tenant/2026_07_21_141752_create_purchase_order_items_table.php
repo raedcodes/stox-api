@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('purchase_order_id')->constrained('purchase_orders')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained('products')->restrictOnDelete();
+            $table->foreignId('product_variant_id')->constrained('product_variants')->restrictOnDelete();
             $table->decimal('quantity_ordered', 12, 2);
             $table->decimal('quantity_received', 12, 2)->default(0);
             $table->decimal('unit_cost', 12, 2);

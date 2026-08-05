@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('stock_transfer_id')->constrained('stock_transfers')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained('products')->restrictOnDelete();
+            $table->foreignId('product_variant_id')->constrained('product_variants')->restrictOnDelete();
             $table->decimal('quantity', 12, 2);
             $table->timestamps();
         });

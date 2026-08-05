@@ -18,6 +18,10 @@ return new class extends Migration
             $table->dateTime('transaction_date');
             $table->nullableMorphs('reference');
             $table->timestamps();
+
+            // balance() and the dashboard's outstanding-balance calc both
+            // GROUP BY type per party.
+            $table->index(['customer_id', 'type'], 'customer_transactions_customer_type_index');
         });
     }
 

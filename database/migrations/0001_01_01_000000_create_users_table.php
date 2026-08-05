@@ -31,7 +31,12 @@ return new class extends Migration
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            // Not a plain foreign key: this stores whatever the
+            // authenticated guard's getAuthIdentifier() returns, which for
+            // a tenant Staff session is a "staff:{id}" string (see
+            // Staff::getAuthIdentifier()) rather than a plain central
+            // users.id integer.
+            $table->string('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');

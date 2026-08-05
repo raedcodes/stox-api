@@ -20,10 +20,15 @@ return new class extends Migration
             $table->decimal('discount_value', 12, 2)->nullable();
             $table->dateTime('sale_date');
             $table->text('notes')->nullable();
-            // No FK constraint: users live in the central database, not this
-            // tenant database, so a cross-database constraint isn't possible.
+            // Polymorphic (a tenant Staff member or the central Owner) — no
+            // FK constraint possible across that split.
             $table->unsignedBigInteger('created_by')->nullable();
+            $table->string('creator_type')->nullable();
             $table->timestamps();
+
+            // Every dashboard widget and report filters by status + a date
+            // range together.
+            $table->index(['status', 'sale_date'], 'sales_status_date_index');
         });
     }
 

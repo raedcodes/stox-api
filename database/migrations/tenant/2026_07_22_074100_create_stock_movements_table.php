@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained('products')->restrictOnDelete();
+            $table->foreignId('product_variant_id')->constrained('product_variants')->restrictOnDelete();
             $table->foreignId('location_id')->constrained('locations')->restrictOnDelete();
             $table->foreignId('product_batch_id')->nullable()->constrained('product_batches')->nullOnDelete();
             $table->string('type');
@@ -19,7 +20,10 @@ return new class extends Migration
             $table->string('reason')->nullable();
             $table->text('notes')->nullable();
             $table->nullableMorphs('reference');
+            // Polymorphic (a tenant Staff member or the central Owner) — no
+            // FK possible across that split, same as sales.created_by.
             $table->unsignedBigInteger('performed_by')->nullable();
+            $table->string('performer_type')->nullable();
             $table->timestamps();
         });
     }
