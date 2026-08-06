@@ -4,6 +4,7 @@ namespace App\Filament\Business\Resources\StockAdjustments\Schemas;
 
 use App\Enums\StockAdjustmentReason;
 use App\Models\ProductBatch;
+use App\Models\ProductVariant;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -24,8 +25,19 @@ class StockAdjustmentForm
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->afterStateUpdated(fn (Get $get, $set) => $set('product_batch_id', null))
+                    ->afterStateUpdated(function ($state, $set) {
+                        $set('product_variant_id', ProductVariant::soleActiveIdFor($state));
+                        $set('product_batch_id', null);
+                    })
                     ->required(),
+                Select::make('product_variant_id')
+                    ->label('Variant')
+                    ->options(fn (Get $get) => ProductVariant::activeOptionsFor($get('product_id')))
+                    ->visible(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
+                    ->required(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
+                    ->dehydratedWhenHidden()
+                    ->live()
+                    ->afterStateUpdated(fn ($set) => $set('product_batch_id', null)),
                 Select::make('location_id')
                     ->label('Location')
                     ->relationship('location', 'name')
@@ -37,12 +49,14 @@ class StockAdjustmentForm
                 Select::make('product_batch_id')
                     ->label('Batch')
                     ->options(function (Get $get) {
-                        if (! $get('product_id') || ! $get('location_id')) {
+                        $variantId = $get('product_variant_id') ?: ProductVariant::soleActiveIdFor($get('product_id'));
+
+                        if (! $variantId || ! $get('location_id')) {
                             return [];
                         }
 
                         return ProductBatch::query()
-                            ->where('product_id', $get('product_id'))
+                            ->where('product_variant_id', $variantId)
                             ->where('location_id', $get('location_id'))
                             ->where('is_active', true)
                             ->get()

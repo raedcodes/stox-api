@@ -9,6 +9,7 @@ use App\Enums\UserRole;
 use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Sale;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -20,6 +21,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -105,7 +107,14 @@ class PointOfSale extends Page
                             ->live()
                             ->afterStateUpdated(function ($state, Set $set) {
                                 $set('unit_price', Product::find($state)?->selling_price);
+                                $set('product_variant_id', ProductVariant::soleActiveIdFor($state));
                             }),
+                        Select::make('product_variant_id')
+                            ->label('Variant')
+                            ->options(fn (Get $get) => ProductVariant::activeOptionsFor($get('product_id')))
+                            ->visible(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
+                            ->required(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
+                            ->dehydratedWhenHidden(),
                         TextInput::make('quantity')
                             ->numeric()
                             ->minValue(0.01)
@@ -123,7 +132,7 @@ class PointOfSale extends Page
                             ->numeric()
                             ->minValue(0),
                     ])
-                    ->columns(6)
+                    ->columns(7)
                     ->addActionLabel('Add product manually')
                     ->reorderable(false),
             ]);
@@ -211,6 +220,7 @@ class PointOfSale extends Page
 
         $items[] = [
             'product_id' => $product->id,
+            'product_variant_id' => ProductVariant::soleActiveIdFor($product->id),
             'quantity' => 1,
             'unit_price' => (float) $product->selling_price,
             'discount_type' => null,
@@ -256,6 +266,7 @@ class PointOfSale extends Page
                 foreach ($state['items'] as $item) {
                     $sale->items()->create([
                         'product_id' => $item['product_id'],
+                        'product_variant_id' => $item['product_variant_id'] ?? null,
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['unit_price'],
                         'discount_type' => $item['discount_type'] ?? null,

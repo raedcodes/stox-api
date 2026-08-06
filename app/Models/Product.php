@@ -131,7 +131,11 @@ class Product extends Model
         });
 
         static::updated(function (self $product) {
-            if ($product->wasChanged(['sku', 'barcode'])) {
+            // Only while the product still has just its one auto-created
+            // variant — once real variants exist, the default variant may
+            // have been deliberately repurposed (e.g. renamed to "Small"
+            // with its own sku) and shouldn't be silently overwritten.
+            if ($product->wasChanged(['sku', 'barcode']) && $product->variants()->count() === 1) {
                 $product->defaultVariant?->update([
                     'sku' => $product->sku,
                     'barcode' => $product->barcode,

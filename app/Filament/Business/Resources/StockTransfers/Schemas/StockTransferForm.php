@@ -3,11 +3,14 @@
 namespace App\Filament\Business\Resources\StockTransfers\Schemas;
 
 use App\Enums\StockTransferStatus;
+use App\Models\ProductVariant;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class StockTransferForm
@@ -47,13 +50,21 @@ class StockTransferForm
                             ->relationship('product', 'name')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn ($state, Set $set) => $set('product_variant_id', ProductVariant::soleActiveIdFor($state))),
+                        Select::make('product_variant_id')
+                            ->label('Variant')
+                            ->options(fn (Get $get) => ProductVariant::activeOptionsFor($get('product_id')))
+                            ->visible(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
+                            ->required(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
+                            ->dehydratedWhenHidden(),
                         TextInput::make('quantity')
                             ->numeric()
                             ->minValue(0.01)
                             ->required(),
                     ])
-                    ->columns(2)
+                    ->columns(3)
                     ->addActionLabel('Add product')
                     ->minItems(1)
                     ->required(),

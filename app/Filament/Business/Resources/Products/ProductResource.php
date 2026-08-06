@@ -9,6 +9,7 @@ use App\Filament\Business\Resources\Products\Pages\CreateProduct;
 use App\Filament\Business\Resources\Products\Pages\EditProduct;
 use App\Filament\Business\Resources\Products\Pages\ListProducts;
 use App\Filament\Business\Resources\Products\Pages\ViewProduct;
+use App\Filament\Business\Resources\Products\RelationManagers\VariantsRelationManager;
 use App\Filament\Business\Resources\Products\Schemas\ProductForm;
 use App\Filament\Business\Resources\Products\Schemas\ProductInfolist;
 use App\Filament\Business\Resources\Products\Tables\ProductsTable;
@@ -84,7 +85,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            VariantsRelationManager::class,
         ];
     }
 
