@@ -15,15 +15,31 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Render turns any dashboard env var into a build ARG of the same name for
+# Docker-based services, so setting INCLUDE_DEV_DEPS=true on a given
+# service (e.g. a staging service that needs Faker for DemoDataSeeder,
+# since fake() only exists when fakerphp/faker is actually installed) pulls
+# dev dependencies into that image, while the default (unset) keeps
+# production lean via --no-dev.
+ARG INCLUDE_DEV_DEPS=false
+
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+RUN if [ "$INCLUDE_DEV_DEPS" = "true" ]; then \
+        composer install --no-scripts --no-autoloader --prefer-dist; \
+    else \
+        composer install --no-dev --no-scripts --no-autoloader --prefer-dist; \
+    fi
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
 
-RUN composer dump-autoload --optimize --no-dev \
+RUN if [ "$INCLUDE_DEV_DEPS" = "true" ]; then \
+        composer dump-autoload --optimize; \
+    else \
+        composer dump-autoload --optimize --no-dev; \
+    fi \
     && npm run build \
     && npm prune --omit=dev \
     && rm -rf node_modules/.cache
