@@ -6,8 +6,11 @@ use App\Enums\LocationType;
 use App\Enums\PaymentMethod;
 use App\Enums\PurchaseOrderStatus;
 use App\Enums\SaleStatus;
+use App\Enums\StockAdjustmentReason;
 use App\Enums\StockMovementType;
+use App\Enums\StockTransferStatus;
 use App\Enums\SupplierTransactionType;
+use App\Enums\UserRole;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Customer;
@@ -15,8 +18,12 @@ use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseReturn;
 use App\Models\Sale;
+use App\Models\Staff;
+use App\Models\StockAdjustment;
 use App\Models\StockMovement;
+use App\Models\StockTransfer;
 use App\Models\Supplier;
 use App\Models\UnitOfMeasure;
 use Illuminate\Database\Eloquent\Collection;
@@ -38,16 +45,65 @@ class DemoDataSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
+            $this->seedStaff();
             $locations = $this->seedLocations();
             [$categories, $brands] = [$this->seedCategories(), $this->seedBrands()];
             $products = $this->seedProducts($categories, $brands);
             $this->seedBatches($products, $locations);
+            $this->seedProductVariants($products, $locations);
+            $this->seedStockAdjustments();
+            $this->seedStockTransfers($products, $locations);
             $customers = $this->seedCustomers();
             $suppliers = $this->seedSuppliers();
             $this->seedPurchaseOrders($suppliers, $products, $locations);
+            $this->seedPurchaseReturns($suppliers, $products, $locations);
             $this->seedSales($customers, $products, $locations);
             $this->seedPartialPayments($customers, $suppliers);
+            $this->seedLowStockProducts($products);
         });
+    }
+
+    /**
+     * A predictable Manager/Cashier/Storekeeper login for demoing
+     * role-based access. No Owner account here — every tenant already has
+     * exactly one, made when the business itself was provisioned (see
+     * StaffForm::assignableRoles()'s docblock) — and its password isn't
+     * touched by this seeder.
+     */
+    protected function seedStaff(): void
+    {
+        Staff::firstOrCreate(
+            ['email' => 'storekeeper@demo.test'],
+            [
+                'name' => 'Demo Storekeeper',
+                'role' => UserRole::StoreKeeper->value,
+                'password' => 'password',
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        Staff::firstOrCreate(
+            ['email' => 'manager@demo.test'],
+            [
+                'name' => 'Demo Manager',
+                'role' => UserRole::Manager->value,
+                'password' => 'password',
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        Staff::firstOrCreate(
+            ['email' => 'cashier@demo.test'],
+            [
+                'name' => 'Demo Cashier',
+                'role' => UserRole::Cashier->value,
+                'password' => 'password',
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ],
+        );
     }
 
     /**
@@ -231,6 +287,137 @@ class DemoDataSeeder extends Seeder
     }
 
     /**
+     * Real Size/Color variants for a handful of products that plausibly
+     * have them — every product already has its one auto-created default
+     * variant (Product::booted()'s `created` hook), so this is on top of
+     * that, not instead of it. Each new variant gets its own small batch
+     * at the warehouse, so it has real stock to show, not just an empty
+     * row on the product's Variants tab.
+     *
+     * @param  Collection<int, Product>  $products
+     * @param  Collection<int, Location>  $locations
+     */
+    protected function seedProductVariants(Collection $products, Collection $locations): void
+    {
+        $warehouse = $locations[1];
+        $variantProductNames = ['Wireless Bluetooth Earbuds', 'Wireless Mouse', 'Mechanical Keyboard'];
+
+        foreach ($products->whereIn('name', $variantProductNames) as $product) {
+            // Already has more than its one auto-created default — this
+            // step already ran for it.
+            if ($product->variants()->count() > 1) {
+                continue;
+            }
+
+            foreach (['Black', 'White'] as $color) {
+                $variant = $product->variants()->create([
+                    'color' => $color,
+                    'is_active' => true,
+                ]);
+
+                ProductBatch::factory()->for($product)->for($warehouse, 'location')->noExpiry()->create([
+                    'product_variant_id' => $variant->id,
+                    'unit_cost' => round((float) $product->cost_price * fake()->randomFloat(2, 0.92, 1.08), 2),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * A handful of manual stock corrections against existing batches, with
+     * a realistic mix of reasons — damage/loss (always a decrease) and
+     * correction (either direction, e.g. a recount finding more or less
+     * than expected).
+     */
+    protected function seedStockAdjustments(): void
+    {
+        if (StockAdjustment::query()->exists()) {
+            return;
+        }
+
+        $batches = ProductBatch::query()->where('is_active', true)->inRandomOrder()->limit(5)->get();
+
+        foreach ($batches as $batch) {
+            $reason = fake()->randomElement([
+                StockAdjustmentReason::Damage,
+                StockAdjustmentReason::Loss,
+                StockAdjustmentReason::Correction,
+            ]);
+
+            $isIncrease = $reason === StockAdjustmentReason::Correction && fake()->boolean();
+
+            $quantityChange = $isIncrease
+                ? random_int(1, 10)
+                : -min(random_int(1, 10), max((int) floor((float) $batch->quantity), 1));
+
+            $adjustment = StockAdjustment::create([
+                'product_id' => $batch->product_id,
+                'product_variant_id' => $batch->product_variant_id,
+                'location_id' => $batch->location_id,
+                'product_batch_id' => $batch->id,
+                'quantity_change' => $quantityChange,
+                'reason' => $reason,
+                'notes' => 'Demo data — '.$reason->getLabel().' found during a routine check.',
+                'adjustment_date' => now()->subDays(random_int(0, 30)),
+            ]);
+
+            $adjustment->apply();
+        }
+    }
+
+    /**
+     * Warehouse-to-store transfers — the same route the business actually
+     * restocks its two storefronts from. One is left incomplete (Draft) so
+     * the list also shows a pending transfer, not just finished ones.
+     *
+     * @param  Collection<int, Product>  $products
+     * @param  Collection<int, Location>  $locations
+     */
+    protected function seedStockTransfers(Collection $products, Collection $locations): void
+    {
+        if (StockTransfer::query()->exists()) {
+            return;
+        }
+
+        [$store, $warehouse, $downtown] = [$locations[0], $locations[1], $locations[2]];
+        $routes = [[$warehouse, $store], [$warehouse, $downtown]];
+
+        foreach ($routes as $index => [$from, $to]) {
+            $transfer = StockTransfer::create([
+                'from_location_id' => $from->id,
+                'to_location_id' => $to->id,
+                'status' => StockTransferStatus::Draft,
+                'transfer_date' => now()->subDays(random_int(1, 20)),
+                'notes' => 'Demo data.',
+            ]);
+
+            foreach ($products->random(3) as $product) {
+                $available = $product->stockOnHand($from->id);
+
+                if ($available < 1) {
+                    continue;
+                }
+
+                $transfer->items()->create([
+                    'product_id' => $product->id,
+                    'quantity' => min(random_int(1, 10), (int) floor($available)),
+                ]);
+            }
+
+            if ($transfer->items()->count() === 0) {
+                $transfer->delete();
+
+                continue;
+            }
+
+            // Leave the last route as an open Draft, the rest completed.
+            if ($index < count($routes) - 1) {
+                $transfer->complete();
+            }
+        }
+    }
+
+    /**
      * @return Collection<int, Customer>
      */
     protected function seedCustomers(): Collection
@@ -331,6 +518,90 @@ class DemoDataSeeder extends Seeder
     }
 
     /**
+     * A purchase return against a freshly received order (its own,
+     * self-contained order — not one of the eight from seedPurchaseOrders(),
+     * so this doesn't depend on which of those happened to be received)
+     * — half the received quantity returned to the supplier for being
+     * damaged on arrival, processed through PurchaseReturn::process() so
+     * stock is FEFO-deducted and the supplier ledger carries a real
+     * Return-type transaction, exactly as a real return would.
+     *
+     * @param  Collection<int, Supplier>  $suppliers
+     * @param  Collection<int, Product>  $products
+     * @param  Collection<int, Location>  $locations
+     */
+    protected function seedPurchaseReturns(Collection $suppliers, Collection $products, Collection $locations): void
+    {
+        if (PurchaseReturn::query()->exists()) {
+            return;
+        }
+
+        $warehouse = $locations[1];
+        $supplier = $suppliers->random();
+        $product = $products->random();
+        $orderDate = now()->subDays(30);
+        $quantity = 40;
+        $unitCost = (float) $product->cost_price;
+
+        $po = PurchaseOrder::create([
+            'supplier_id' => $supplier->id,
+            'location_id' => $warehouse->id,
+            'status' => PurchaseOrderStatus::Ordered,
+            'order_date' => $orderDate,
+            'expected_date' => $orderDate->copy()->addDays(7),
+        ]);
+
+        $item = $po->items()->create([
+            'product_id' => $product->id,
+            'quantity_ordered' => $quantity,
+            'unit_cost' => $unitCost,
+        ]);
+
+        $batch = ProductBatch::create([
+            'product_id' => $product->id,
+            'location_id' => $warehouse->id,
+            'batch_number' => 'PO-'.$po->id.'-'.$product->id,
+            'quantity' => $quantity,
+            'unit_cost' => $unitCost,
+        ]);
+
+        $item->update(['quantity_received' => $quantity]);
+
+        StockMovement::record(
+            batch: $batch,
+            type: StockMovementType::PurchaseReceipt,
+            quantityChange: $quantity,
+            reference: $po,
+        );
+
+        $supplier->transactions()->create([
+            'type' => SupplierTransactionType::Charge,
+            'amount' => $quantity * $unitCost,
+            'description' => "Receipt against {$po->po_number}",
+            'transaction_date' => $orderDate->copy()->addDays(2),
+            'reference_type' => $po->getMorphClass(),
+            'reference_id' => $po->id,
+        ]);
+
+        $po->recomputeStatus();
+
+        $return = PurchaseReturn::create([
+            'purchase_order_id' => $po->id,
+            'return_date' => now()->subDays(10),
+            'reason' => 'Damaged on arrival',
+        ]);
+
+        $return->items()->create([
+            'product_id' => $product->id,
+            'product_variant_id' => $item->product_variant_id,
+            'quantity' => (int) round($quantity / 2),
+            'unit_cost' => $unitCost,
+        ]);
+
+        $return->process();
+    }
+
+    /**
      * 55 sales spread across the last 60 days, with a realistic payment
      * method mix (mostly cash/card, some on account), so revenue/COGS trend
      * charts and the customer ledger both have real history.
@@ -351,11 +622,17 @@ class DemoDataSeeder extends Seeder
                 PaymentMethod::Credit,
             ])->random();
 
+            // The first few are pinned to today (not left to the random day
+            // offset below) so the dashboard's "Today's sales/revenue" KPIs
+            // always have something to show, not just whichever historical
+            // days happened to get a random hit.
+            $saleDate = $i < 3 ? now() : now()->subDays(random_int(0, 59));
+
             $sale = Sale::create([
                 'customer_id' => $customers->random()->id,
                 'location_id' => $location->id,
                 'payment_method' => $paymentMethod,
-                'sale_date' => now()->subDays(random_int(0, 59))->setTime(random_int(9, 20), random_int(0, 59)),
+                'sale_date' => $saleDate->setTime(random_int(9, 20), random_int(0, 59)),
                 'status' => SaleStatus::Draft,
             ]);
 
@@ -438,5 +715,68 @@ class DemoDataSeeder extends Seeder
                 'transaction_date' => now()->subDays(random_int(0, 15)),
             ]);
         }
+    }
+
+    /**
+     * seedBatches() gives every product hundreds of units across three
+     * locations, so nothing ever naturally dips below its reorder level —
+     * the dashboard's "Low / out of stock" KPI and the Low Stock widget
+     * would otherwise always read zero. Deliberately depletes two specific
+     * products down to a known state (via real StockAdjustment::apply()
+     * calls, not a raw update) so both have something to show. Runs last,
+     * after sales/transfers/adjustments, so nothing earlier trips over
+     * these two having little or no stock.
+     *
+     * @param  Collection<int, Product>  $products
+     */
+    protected function seedLowStockProducts(Collection $products): void
+    {
+        $outOfStock = $products->firstWhere('name', 'Cough Syrup 100ml');
+
+        if ($outOfStock && $outOfStock->stockOnHand() > 0) {
+            foreach ($outOfStock->batches()->where('is_active', true)->get() as $batch) {
+                $this->depleteBatch($batch);
+            }
+        }
+
+        $lowStock = $products->firstWhere('name', 'Allergy Relief Tablets (10ct)');
+        $target = 10; // below every seeded product's reorder_level of 50
+
+        if ($lowStock && $lowStock->stockOnHand() > $target) {
+            $batches = $lowStock->batches()->where('is_active', true)->get();
+
+            foreach ($batches as $index => $batch) {
+                $keep = $index === $batches->count() - 1 ? min($target, (float) $batch->quantity) : 0;
+
+                $this->depleteBatch($batch, (float) $batch->quantity - $keep);
+            }
+        }
+    }
+
+    /**
+     * Reduce a batch's quantity via a real stock adjustment rather than a
+     * raw update — logs a StockMovement and shows up in the batch/product's
+     * history exactly like a real recount-driven correction would.
+     */
+    protected function depleteBatch(ProductBatch $batch, ?float $decrease = null): void
+    {
+        $decrease ??= (float) $batch->quantity;
+
+        if ($decrease <= 0) {
+            return;
+        }
+
+        $adjustment = StockAdjustment::create([
+            'product_id' => $batch->product_id,
+            'product_variant_id' => $batch->product_variant_id,
+            'location_id' => $batch->location_id,
+            'product_batch_id' => $batch->id,
+            'quantity_change' => -$decrease,
+            'reason' => StockAdjustmentReason::Correction,
+            'notes' => 'Demo data — recount found less on hand than expected.',
+            'adjustment_date' => now()->subDays(random_int(0, 5)),
+        ]);
+
+        $adjustment->apply();
     }
 }
