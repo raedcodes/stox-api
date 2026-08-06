@@ -4,17 +4,25 @@ namespace App\Exports;
 
 use App\Models\ProductBatch;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\FromQuery;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class InventoryValuationReportExport implements FromQuery, WithHeadings, WithMapping
+class InventoryValuationReportExport implements FromCollection, WithHeadings, WithMapping
 {
     public function __construct(protected Builder $query) {}
 
-    public function query(): Builder
+    /**
+     * Not FromQuery: that interface streams via Eloquent's chunk(), which
+     * appends its own ORDER BY id — invalid here since id isn't in this
+     * query's GROUP BY, and rejected outright under MySQL's
+     * only_full_group_by mode. The row count (distinct product/location
+     * combinations for one tenant) is always small enough to fetch at once.
+     */
+    public function collection(): Collection
     {
-        return $this->query;
+        return $this->query->get();
     }
 
     public function headings(): array
