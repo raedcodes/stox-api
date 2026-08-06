@@ -28,7 +28,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -79,31 +78,35 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with('parent'))
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with('parent')
+                ->withCount(['products', 'children'])
+                // Clusters each subcategory directly beneath its own parent
+                // (by the parent's name, or its own name for a top-level
+                // category) instead of the flat creation-order list Filament
+                // would otherwise produce — replaces the old collapsible
+                // "group by parent" section, which visually separated a
+                // parent from its own children.
+                ->orderByRaw('coalesce((select name from categories as p where p.id = categories.parent_id), categories.name) asc')
+                ->orderByRaw('(categories.parent_id is not null) asc')
+                ->orderBy('categories.name'))
             ->columns([
                 TextColumn::make('name')
                     ->label('Category')
                     ->searchable()
-                    ->state(fn (Category $record) => $record->breadcrumb()),
+                    ->weight(fn (Category $record) => $record->parent_id ? 'normal' : 'bold')
+                    ->html()
+                    ->formatStateUsing(fn (Category $record, string $state) => $record->parent_id
+                        ? '<span style="padding-left: 1.5rem;">└─ '.e($state).'</span>'
+                        : e($state)),
                 IconColumn::make('is_active')
                     ->boolean(),
-                TextColumn::make('created_at')
-                    ->label('Created at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('created_at_since')
-                    ->label('Since')
-                    ->state(fn (Category $record) => $record->created_at)
-                    ->since()
-                    ->dateTooltip()
-                    ->sortable(query: fn ($query, $direction) => $query->orderBy('created_at', $direction)),
+                TextColumn::make('products_count')
+                    ->label('Products'),
+                TextColumn::make('children_count')
+                    ->label('Subcategories')
+                    ->placeholder('0'),
             ])
-            ->groups([
-                Group::make('parent.name')
-                    ->label('Parent category')
-                    ->collapsible(),
-            ])
-            ->defaultGroup('parent.name')
             ->filters([
                 Filter::make('top_level')
                     ->label('Top-level only')
