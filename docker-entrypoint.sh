@@ -10,11 +10,6 @@ php artisan db:seed --force
 php artisan tenants:migrate --force
 php artisan tenants:seed --class="TenantDatabaseSeeder" --force
 
-# Set SEED_DEMO_DATA=true as env to seed demo data for every tennant
-if [ "$SEED_DEMO_DATA" = "true" ]; then
-    php artisan tenants:seed --class="DemoDataSeeder" --force
-fi
-
 # Set RESET_ALL_TENANTS=true as env to reset all tennant data in db
 if [ "$RESET_ALL_TENANTS" = "true" ]; then
     php artisan tenants:migrate-fresh --no-interaction
