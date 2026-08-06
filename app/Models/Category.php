@@ -34,4 +34,15 @@ class Category extends Model
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
+
+    /**
+     * "Electronics" for a top-level category, "Electronics › Audio" for one
+     * of its subcategories — the standard breadcrumb-style display used by
+     * most inventory/POS category pickers instead of a separate parent
+     * column.
+     */
+    public function breadcrumb(): string
+    {
+        return $this->parent ? "{$this->parent->name} › {$this->name}" : $this->name;
+    }
 }

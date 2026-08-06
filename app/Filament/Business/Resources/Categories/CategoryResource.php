@@ -79,12 +79,12 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('parent'))
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('parent.name')
-                    ->label('Parent')
-                    ->placeholder('—'),
+                    ->label('Category')
+                    ->searchable()
+                    ->state(fn (Category $record) => $record->breadcrumb()),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')
@@ -100,7 +100,7 @@ class CategoryResource extends Resource
             ])
             ->groups([
                 Group::make('parent.name')
-                    ->label('Category')
+                    ->label('Parent category')
                     ->collapsible(),
             ])
             ->defaultGroup('parent.name')

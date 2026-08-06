@@ -8,6 +8,7 @@ use App\Filament\Business\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\Location;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -69,6 +70,12 @@ class PurchaseOrdersTable
                     ->options(PurchaseOrderStatus::options()),
             ])
             ->recordActions([
+                Action::make('printPo')
+                    ->label('Print PO')
+                    ->icon('heroicon-o-printer')
+                    ->color('gray')
+                    ->url(fn (PurchaseOrder $record) => route('business.purchase-orders.pdf', $record))
+                    ->openUrlInNewTab(),
                 ActionGroup::make([
                     ReceiveStockAction::make(),
                     EditAction::make(),

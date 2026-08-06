@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\PurchaseOrderPdfController;
 use App\Http\Controllers\SaleInvoiceController;
 use App\Http\Middleware\AuthenticateBusinessUser;
 use Illuminate\Support\Facades\Route;
@@ -28,5 +29,7 @@ Route::middleware([
     Route::middleware([AuthenticateBusinessUser::class])->group(function () {
         Route::get('/sales/{sale}/invoice', [SaleInvoiceController::class, 'show'])
             ->name('business.sales.invoice');
+        Route::get('/purchase-orders/{purchaseOrder}/pdf', [PurchaseOrderPdfController::class, 'show'])
+            ->name('business.purchase-orders.pdf');
     });
 });

@@ -5,6 +5,7 @@ namespace App\Filament\Business\Pages;
 use App\Enums\NavigationGroup;
 use App\Enums\SupplierTransactionType;
 use App\Enums\UserRole;
+use App\Exports\SupplierStatementExport;
 use App\Models\Supplier;
 use App\Models\SupplierTransaction;
 use App\Models\Tenant;
@@ -18,6 +19,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
@@ -146,6 +148,10 @@ class SupplierStatement extends Page
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
+            Action::make('exportExcel')
+                ->label('Export Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(fn () => $this->exportExcel()),
         ];
     }
 
@@ -174,5 +180,24 @@ class SupplierStatement extends Page
         ]);
 
         return response()->streamDownload(fn () => print ($pdf->output()), 'supplier-statement.pdf');
+    }
+
+    protected function exportExcel(): mixed
+    {
+        $supplier = $this->supplier();
+
+        if (! $supplier) {
+            Notification::make()
+                ->title('Select a supplier first')
+                ->warning()
+                ->send();
+
+            return null;
+        }
+
+        return Excel::download(
+            new SupplierStatementExport($supplier, $this->openingBalance(), $this->rows(), $this->closingBalance()),
+            'supplier-statement.xlsx'
+        );
     }
 }

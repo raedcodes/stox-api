@@ -5,6 +5,7 @@ namespace App\Filament\Business\Pages;
 use App\Enums\CustomerTransactionType;
 use App\Enums\NavigationGroup;
 use App\Enums\UserRole;
+use App\Exports\CustomerStatementExport;
 use App\Models\Customer;
 use App\Models\CustomerTransaction;
 use App\Models\Tenant;
@@ -18,6 +19,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
@@ -146,6 +148,10 @@ class CustomerStatement extends Page
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
+            Action::make('exportExcel')
+                ->label('Export Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(fn () => $this->exportExcel()),
         ];
     }
 
@@ -174,5 +180,24 @@ class CustomerStatement extends Page
         ]);
 
         return response()->streamDownload(fn () => print ($pdf->output()), 'customer-statement.pdf');
+    }
+
+    protected function exportExcel(): mixed
+    {
+        $customer = $this->customer();
+
+        if (! $customer) {
+            Notification::make()
+                ->title('Select a customer first')
+                ->warning()
+                ->send();
+
+            return null;
+        }
+
+        return Excel::download(
+            new CustomerStatementExport($customer, $this->openingBalance(), $this->rows(), $this->closingBalance()),
+            'customer-statement.xlsx'
+        );
     }
 }

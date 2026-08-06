@@ -5,6 +5,7 @@ namespace App\Filament\Business\Pages;
 use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
 use App\Enums\UserRole;
+use App\Exports\ProfitAndLossReportExport;
 use App\Models\SaleItem;
 use App\Models\Tenant;
 use BackedEnum;
@@ -15,6 +16,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
@@ -105,6 +107,10 @@ class ProfitAndLossReport extends Page
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
+            Action::make('exportExcel')
+                ->label('Export Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(fn () => $this->exportExcel()),
         ];
     }
 
@@ -122,5 +128,13 @@ class ProfitAndLossReport extends Page
         ]);
 
         return response()->streamDownload(fn () => print ($pdf->output()), 'profit-and-loss-report.pdf');
+    }
+
+    protected function exportExcel(): mixed
+    {
+        return Excel::download(
+            new ProfitAndLossReportExport($this->revenue(), $this->cogs(), $this->grossProfit(), $this->grossMarginPercent()),
+            'profit-and-loss-report.xlsx'
+        );
     }
 }
