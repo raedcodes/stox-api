@@ -10,7 +10,7 @@ php artisan db:seed --force
 php artisan tenants:migrate --force
 php artisan tenants:seed --class="TenantDatabaseSeeder" --force
 
-# Set seed_demo_data=true as env to seed demo data for every tennant
+# Set SEED_DEMO_DATA=true as env to seed demo data for every tennant
 if [ "$SEED_DEMO_DATA" = "true" ]; then
     php artisan tenants:seed --class="DemoDataSeeder" --force
 fi
