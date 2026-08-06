@@ -130,15 +130,44 @@ class DemoDataSeeder extends Seeder
     }
 
     /**
+     * Only the top-level categories are returned — seedProducts() assigns
+     * every product to one of these, matching ProductFactory::catalog()'s
+     * grouping. Subcategories are seeded as a side effect (some, not all,
+     * of these get a couple) purely so the Categories page has real
+     * parent/child examples to show; nothing currently assigns products to
+     * them.
+     *
      * @return Collection<int, Category>
      */
     protected function seedCategories(): Collection
     {
         $names = ['Electronics', 'Groceries & FMCG', 'Pharmaceuticals', 'Household Supplies', 'Beverages', 'Personal Care'];
 
-        return new Collection(collect($names)
+        $categories = new Collection(collect($names)
             ->map(fn (string $name) => Category::firstOrCreate(['name' => $name], ['is_active' => true]))
             ->all());
+
+        $subcategoriesByParent = [
+            'Electronics' => ['Audio', 'Mobile Accessories'],
+            'Groceries & FMCG' => ['Pantry Staples', 'Canned & Packaged Goods'],
+            'Pharmaceuticals' => ['Pain Relief', 'Vitamins & Supplements'],
+            'Personal Care' => ['Hair Care', 'Skin Care'],
+        ];
+
+        $categoriesByName = $categories->keyBy('name');
+
+        foreach ($subcategoriesByParent as $parentName => $subNames) {
+            $parent = $categoriesByName->get($parentName);
+
+            foreach ($subNames as $subName) {
+                Category::firstOrCreate(
+                    ['name' => $subName, 'parent_id' => $parent->id],
+                    ['is_active' => true],
+                );
+            }
+        }
+
+        return $categories;
     }
 
     /**
@@ -291,8 +320,16 @@ class DemoDataSeeder extends Seeder
      * have them — every product already has its one auto-created default
      * variant (Product::booted()'s `created` hook), so this is on top of
      * that, not instead of it. Each new variant gets its own small batch
-     * at the warehouse, so it has real stock to show, not just an empty
-     * row on the product's Variants tab.
+     * at the warehouse (so it has real stock, not an empty row on the
+     * product's Variants tab) and its own barcode. Size is only set where
+     * it's a real retail dimension for that product — keyboards commonly
+     * come in Full-size/Compact form factors, but earbuds and a mouse
+     * don't have a meaningful "size" beyond their fixed shape, so those
+     * stay Color-only.
+     *
+     * Matched by color (updateOrCreate, not create) so re-running this
+     * against a tenant that already has these variants from an earlier
+     * seed fills in the missing barcode/size rather than duplicating them.
      *
      * @param  Collection<int, Product>  $products
      * @param  Collection<int, Location>  $locations
@@ -300,20 +337,39 @@ class DemoDataSeeder extends Seeder
     protected function seedProductVariants(Collection $products, Collection $locations): void
     {
         $warehouse = $locations[1];
-        $variantProductNames = ['Wireless Bluetooth Earbuds', 'Wireless Mouse', 'Mechanical Keyboard'];
 
-        foreach ($products->whereIn('name', $variantProductNames) as $product) {
-            // Already has more than its one auto-created default — this
-            // step already ran for it.
-            if ($product->variants()->count() > 1) {
-                continue;
-            }
+        $variantsByProduct = [
+            'Wireless Bluetooth Earbuds' => [
+                ['color' => 'Black'],
+                ['color' => 'White'],
+            ],
+            'Wireless Mouse' => [
+                ['color' => 'Black'],
+                ['color' => 'White'],
+            ],
+            'Mechanical Keyboard' => [
+                ['color' => 'Black', 'size' => 'Full-size'],
+                ['color' => 'White', 'size' => 'Compact'],
+            ],
+        ];
 
-            foreach (['Black', 'White'] as $color) {
-                $variant = $product->variants()->create([
-                    'color' => $color,
-                    'is_active' => true,
-                ]);
+        foreach ($products->whereIn('name', array_keys($variantsByProduct)) as $product) {
+            foreach ($variantsByProduct[$product->name] as $attributes) {
+                $color = $attributes['color'];
+                $size = $attributes['size'] ?? null;
+
+                $variant = $product->variants()->updateOrCreate(
+                    ['color' => $color],
+                    [
+                        'size' => $size,
+                        'barcode' => $this->generateBarcode("{$product->name}-{$color}-{$size}"),
+                        'is_active' => true,
+                    ],
+                );
+
+                if ($variant->batches()->where('location_id', $warehouse->id)->exists()) {
+                    continue;
+                }
 
                 ProductBatch::factory()->for($product)->for($warehouse, 'location')->noExpiry()->create([
                     'product_variant_id' => $variant->id,
