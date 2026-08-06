@@ -65,6 +65,12 @@ class StockLevels extends Page implements HasTable
                     ->label('Product')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('product.sku')
+                    ->label('SKU')
+                    ->searchable(),
+                TextColumn::make('product.brand.name')
+                    ->label('Brand')
+                    ->placeholder('—'),
                 TextColumn::make('location.name')
                     ->label('Location')
                     ->sortable(),

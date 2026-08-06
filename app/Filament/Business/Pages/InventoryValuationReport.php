@@ -50,7 +50,7 @@ class InventoryValuationReport extends Page implements HasTable
     protected function baseQuery(): Builder
     {
         return ProductBatch::query()
-            ->with(['product', 'location'])
+            ->with(['product.brand', 'location'])
             ->where('product_batches.is_active', true)
             ->selectRaw('product_batches.product_id, product_batches.location_id, SUM(product_batches.quantity) as total_quantity, SUM(product_batches.quantity * product_batches.unit_cost) as total_value')
             ->groupBy('product_batches.product_id', 'product_batches.location_id');
@@ -64,6 +64,12 @@ class InventoryValuationReport extends Page implements HasTable
                 TextColumn::make('product.name')
                     ->label('Product')
                     ->searchable(),
+                TextColumn::make('product.sku')
+                    ->label('SKU')
+                    ->searchable(),
+                TextColumn::make('product.brand.name')
+                    ->label('Brand')
+                    ->placeholder('—'),
                 TextColumn::make('product.description')
                     ->label('Description')
                     ->limit(40)
@@ -114,7 +120,7 @@ class InventoryValuationReport extends Page implements HasTable
 
     protected function exportPdf(): StreamedResponse
     {
-        $rows = $this->getFilteredTableQuery()->with(['product', 'location'])->get();
+        $rows = $this->getFilteredTableQuery()->with(['product.brand', 'location'])->get();
 
         $pdf = Pdf::loadView('pdf.reports.inventory-valuation', [
             'title' => 'Inventory Valuation Report',

@@ -69,6 +69,12 @@ class SalesReport extends Page implements HasTable
                 TextColumn::make('product.name')
                     ->label('Product')
                     ->searchable(),
+                TextColumn::make('product.sku')
+                    ->label('SKU')
+                    ->searchable(),
+                TextColumn::make('product.brand.name')
+                    ->label('Brand')
+                    ->placeholder('—'),
                 TextColumn::make('product.category.name')
                     ->label('Category')
                     ->placeholder('—'),
@@ -158,7 +164,7 @@ class SalesReport extends Page implements HasTable
 
     protected function exportPdf(): StreamedResponse
     {
-        $items = $this->getFilteredTableQuery()->with(['product.category', 'sale.cashier'])->get();
+        $items = $this->getFilteredTableQuery()->with(['product.category', 'product.brand', 'sale.cashier'])->get();
 
         $pdf = Pdf::loadView('pdf.reports.sales', [
             'title' => 'Sales Report',

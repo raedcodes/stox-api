@@ -89,8 +89,38 @@ class Product extends Model
             ->sum('quantity');
     }
 
+    /**
+     * A category-prefixed, sequential SKU (e.g. "ELEC-001") when the user
+     * leaves the field blank — the prefix is derived from the category
+     * name so it stays meaningful for any category a business creates, not
+     * a fixed list. Falls back to "GEN" with no category or a name with no
+     * letters in it. The sequence is the highest existing number under that
+     * prefix, not a plain count, so a deleted product never causes a
+     * collision with the unique constraint on sku.
+     */
+    protected static function generateSku(?int $categoryId): string
+    {
+        $categoryName = $categoryId ? Category::find($categoryId)?->name : null;
+        $letters = strtoupper(preg_replace('/[^A-Za-z]/', '', $categoryName ?? ''));
+        $prefix = substr($letters, 0, 4) ?: 'GEN';
+
+        $lastNumber = static::query()
+            ->where('sku', 'like', "{$prefix}-%")
+            ->pluck('sku')
+            ->map(fn (string $sku) => (int) substr($sku, strlen($prefix) + 1))
+            ->max() ?? 0;
+
+        return sprintf('%s-%03d', $prefix, $lastNumber + 1);
+    }
+
     protected static function booted(): void
     {
+        static::creating(function (self $product) {
+            if (blank($product->sku)) {
+                $product->sku = static::generateSku($product->category_id);
+            }
+        });
+
         static::created(function (self $product) {
             $product->variants()->create([
                 'is_default' => true,

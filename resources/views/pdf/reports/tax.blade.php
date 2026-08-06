@@ -7,6 +7,8 @@
                 <th>Date</th>
                 <th>Invoice #</th>
                 <th>Product</th>
+                <th>SKU</th>
+                <th>Brand</th>
                 <th class="num">Taxable subtotal</th>
                 <th class="num">Tax collected</th>
             </tr>
@@ -17,6 +19,8 @@
                     <td>{{ $item->sale->sale_date->format('Y-m-d') }}</td>
                     <td>{{ $item->sale->sale_number }}</td>
                     <td>{{ $item->product->name }}</td>
+                    <td>{{ $item->product->sku }}</td>
+                    <td>{{ $item->product->brand?->name ?? '—' }}</td>
                     <td class="num">{{ $currency }} {{ number_format($item->subtotal(), 2) }}</td>
                     <td class="num">{{ $currency }} {{ number_format($item->taxAmount(), 2) }}</td>
                 </tr>

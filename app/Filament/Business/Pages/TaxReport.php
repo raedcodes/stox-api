@@ -64,6 +64,11 @@ class TaxReport extends Page implements HasTable
                     ->label('Invoice #'),
                 TextColumn::make('product.name')
                     ->label('Product'),
+                TextColumn::make('product.sku')
+                    ->label('SKU'),
+                TextColumn::make('product.brand.name')
+                    ->label('Brand')
+                    ->placeholder('—'),
                 TextColumn::make('subtotal')
                     ->label('Taxable subtotal')
                     ->state(fn (SaleItem $record) => $record->subtotal())
@@ -115,7 +120,7 @@ class TaxReport extends Page implements HasTable
 
     protected function exportPdf(): StreamedResponse
     {
-        $items = $this->getFilteredTableQuery()->with(['product', 'sale'])->get();
+        $items = $this->getFilteredTableQuery()->with(['product.brand', 'sale'])->get();
 
         $pdf = Pdf::loadView('pdf.reports.tax', [
             'title' => 'Tax Report',

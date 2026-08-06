@@ -19,8 +19,13 @@ class ProductForm
                     ->required(),
                 TextInput::make('sku')
                     ->label('SKU')
-                    ->required()
-                    ->unique(table: 'products', column: 'sku', ignoreRecord: true),
+                    // Only required on edit — Product::generateSku() fills
+                    // it in automatically on create if left blank.
+                    ->required(fn (string $operation): bool => $operation === 'edit')
+                    ->unique(table: 'products', column: 'sku', ignoreRecord: true)
+                    ->helperText(fn (string $operation): ?string => $operation === 'create'
+                        ? 'Leave blank to auto-generate from the category, e.g. ELEC-001.'
+                        : null),
                 TextInput::make('barcode')
                     ->unique(table: 'products', column: 'barcode', ignoreRecord: true),
                 Textarea::make('description')

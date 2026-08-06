@@ -22,12 +22,12 @@ class InventoryValuationReportExport implements FromCollection, WithHeadings, Wi
      */
     public function collection(): Collection
     {
-        return $this->query->get();
+        return $this->query->with(['product.brand', 'location'])->get();
     }
 
     public function headings(): array
     {
-        return ['Product', 'Description', 'Location', 'On hand', 'Unit cost (avg)', 'Total Value'];
+        return ['Product', 'SKU', 'Brand', 'Description', 'Location', 'On hand', 'Unit cost (avg)', 'Total Value'];
     }
 
     public function map($row): array
@@ -38,6 +38,8 @@ class InventoryValuationReportExport implements FromCollection, WithHeadings, Wi
 
         return [
             $row->product->name,
+            $row->product->sku,
+            $row->product->brand?->name,
             $row->product->description,
             $row->location->name,
             $quantity,

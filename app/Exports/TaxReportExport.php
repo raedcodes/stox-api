@@ -14,12 +14,12 @@ class TaxReportExport implements FromQuery, WithHeadings, WithMapping
 
     public function query(): Builder
     {
-        return $this->query;
+        return $this->query->with(['product.brand']);
     }
 
     public function headings(): array
     {
-        return ['Date', 'Invoice #', 'Product', 'Taxable subtotal', 'Tax collected'];
+        return ['Date', 'Invoice #', 'Product', 'SKU', 'Brand', 'Taxable subtotal', 'Tax collected'];
     }
 
     public function map($saleItem): array
@@ -29,6 +29,8 @@ class TaxReportExport implements FromQuery, WithHeadings, WithMapping
             $saleItem->sale->sale_date->format('Y-m-d'),
             $saleItem->sale->sale_number,
             $saleItem->product->name,
+            $saleItem->product->sku,
+            $saleItem->product->brand?->name,
             $saleItem->subtotal(),
             $saleItem->taxAmount(),
         ];

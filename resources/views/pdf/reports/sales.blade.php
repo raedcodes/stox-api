@@ -7,6 +7,8 @@
                 <th>Date</th>
                 <th>Invoice #</th>
                 <th>Product</th>
+                <th>SKU</th>
+                <th>Brand</th>
                 <th>Category</th>
                 <th>Cashier</th>
                 <th class="num">Qty</th>
@@ -19,6 +21,8 @@
                     <td>{{ $item->sale->sale_date->format('Y-m-d') }}</td>
                     <td>{{ $item->sale->sale_number }}</td>
                     <td>{{ $item->product->name }}</td>
+                    <td>{{ $item->product->sku }}</td>
+                    <td>{{ $item->product->brand?->name ?? '—' }}</td>
                     <td>{{ $item->product->category?->name ?? '—' }}</td>
                     <td>{{ $item->sale->cashier?->name ?? '—' }}</td>
                     <td class="num">{{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}</td>

@@ -5,6 +5,8 @@
         <thead>
             <tr>
                 <th>Product</th>
+                <th>SKU</th>
+                <th>Brand</th>
                 <th>Description</th>
                 <th>Location</th>
                 <th class="num">On hand</th>
@@ -16,6 +18,8 @@
             @foreach ($rows as $row)
                 <tr>
                     <td>{{ $row->product->name }}</td>
+                    <td>{{ $row->product->sku }}</td>
+                    <td>{{ $row->product->brand?->name ?? '—' }}</td>
                     <td>{{ $row->product->description ?? '—' }}</td>
                     <td>{{ $row->location->name }}</td>
                     <td class="num">{{ rtrim(rtrim(number_format($row->total_quantity, 2), '0'), '.') }}</td>
