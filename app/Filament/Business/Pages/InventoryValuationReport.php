@@ -81,7 +81,7 @@ class InventoryValuationReport extends Page implements HasTable
                     ->money(fn () => tenant('currency')?->value)
                     ->tooltip('Weighted average cost across this product\'s batches at this location — batches can have different actual costs (e.g. landed costs vary by shipment).'),
                 TextColumn::make('total_value')
-                    ->label('Value')
+                    ->label('Total Value')
                     ->money(fn () => tenant('currency')?->value)
                     ->summarize(Sum::make()->money(fn () => tenant('currency')?->value)),
             ])

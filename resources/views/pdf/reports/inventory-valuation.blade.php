@@ -9,7 +9,7 @@
                 <th>Location</th>
                 <th class="num">On hand</th>
                 <th class="num">Unit cost (avg)</th>
-                <th class="num">Value</th>
+                <th class="num">Total Value</th>
             </tr>
         </thead>
         <tbody>
