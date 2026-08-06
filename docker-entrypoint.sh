@@ -18,6 +18,19 @@ if [ "$SEED_DEMO_DATA" = "true" ]; then
     php artisan tenants:seed --class="DemoDataSeeder" --force
 fi
 
+# One-off full reset, for when demo data goes stale (e.g. after seeder
+# changes) or needs to be rebuilt clean — there's no Render Shell on this
+# plan to run this by hand. Set RESET_ALL_TENANTS=true as a Render env var
+# to wipe and reseed EVERY tenant on this box, then unset it again before
+# the next deploy. No --tenants scoping here on purpose — this hits all of
+# them, so only set this when every tenant currently on staging is fine to
+# lose (e.g. no real prospective-buyer demo you need to keep).
+if [ "$RESET_ALL_TENANTS" = "true" ]; then
+    php artisan tenants:migrate-fresh --no-interaction
+    php artisan tenants:seed --class="TenantDatabaseSeeder" --force
+    php artisan tenants:seed --class="DemoDataSeeder" --force
+fi
+
 # Rendered to /tmp (not /etc/nginx) since the container runs as www-data,
 # which can't write into /etc/nginx. nginx.conf is a template because Render
 # only tells us the port to listen on at runtime, via $PORT — envsubst is
