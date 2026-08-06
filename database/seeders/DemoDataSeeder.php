@@ -118,14 +118,15 @@ class DemoDataSeeder extends Seeder
 
         foreach (\Database\Factories\ProductFactory::catalog() as $categoryName => $entries) {
             $category = $categoriesByName->get($categoryName);
+            $prefix = $this->skuPrefixFor($categoryName);
 
-            foreach ($entries as $entry) {
+            foreach ($entries as $index => $entry) {
                 $products->push(Product::firstOrCreate(
-                    ['sku' => 'DEMO-'.strtoupper(str()->slug($entry['name'], '')).substr(md5($entry['name']), 0, 4)],
+                    ['name' => $entry['name']],
                     [
-                        'name' => $entry['name'],
+                        'sku' => sprintf('%s-%03d', $prefix, $index + 1),
                         'description' => $entry['description'],
-                        'barcode' => null,
+                        'barcode' => $this->generateBarcode($entry['name']),
                         'cost_price' => $entry['cost'],
                         'selling_price' => $entry['price'],
                         'wsp' => round($entry['price'] * 0.85, 2),
@@ -154,6 +155,46 @@ class DemoDataSeeder extends Seeder
     }
 
     /**
+     * Short category codes for SKUs (e.g. "ELEC-001") — standard practice is
+     * a category/brand prefix plus a sequence number, not the full product
+     * name run together.
+     */
+    protected function skuPrefixFor(?string $categoryName): string
+    {
+        return match ($categoryName) {
+            'Electronics' => 'ELEC',
+            'Groceries & FMCG' => 'GRC',
+            'Pharmaceuticals' => 'PHR',
+            'Household Supplies' => 'HH',
+            'Beverages' => 'BEV',
+            'Personal Care' => 'PC',
+            default => 'GEN',
+        };
+    }
+
+    /**
+     * A real, valid EAN-13 (correct check digit) so barcode scan-to-cart in
+     * the demo POS actually has something scannable to demonstrate — not
+     * just a random-looking number. Deterministic per name, so re-running
+     * the seeder against an existing demo tenant doesn't reshuffle barcodes
+     * on products firstOrCreate() already found.
+     */
+    protected function generateBarcode(string $seed): string
+    {
+        $digits = str_pad((string) (crc32($seed) % 1_000_000_000_000), 12, '0', STR_PAD_LEFT);
+
+        $sum = 0;
+
+        foreach (str_split($digits) as $position => $digit) {
+            $sum += $position % 2 === 0 ? (int) $digit : (int) $digit * 3;
+        }
+
+        $checkDigit = (10 - ($sum % 10)) % 10;
+
+        return $digits.$checkDigit;
+    }
+
+    /**
      * @param  Collection<int, Product>  $products
      * @param  Collection<int, Location>  $locations
      */
@@ -168,17 +209,23 @@ class DemoDataSeeder extends Seeder
                 continue;
             }
 
+            // Each batch gets its own small variance off the product's cost
+            // price — real landed costs vary batch to batch (different
+            // shipments, exchange rates, freight), not a single flat number
+            // repeated everywhere.
+            $unitCost = fn () => round((float) $product->cost_price * fake()->randomFloat(2, 0.92, 1.08), 2);
+
             if ($perishable) {
-                ProductBatch::factory()->for($product)->for($warehouse, 'location')->expiringSoon()->create();
-                ProductBatch::factory()->for($product)->for($warehouse, 'location')->expiringSoonish()->create();
-                ProductBatch::factory()->for($product)->for($warehouse, 'location')->longDated()->create();
-                ProductBatch::factory()->for($product)->for($warehouse, 'location')->expired()->create();
-                ProductBatch::factory()->for($product)->for($store, 'location')->expiringSoonish()->create();
-                ProductBatch::factory()->for($product)->for($downtown, 'location')->longDated()->create();
+                ProductBatch::factory()->for($product)->for($warehouse, 'location')->expiringSoon()->create(['unit_cost' => $unitCost()]);
+                ProductBatch::factory()->for($product)->for($warehouse, 'location')->expiringSoonish()->create(['unit_cost' => $unitCost()]);
+                ProductBatch::factory()->for($product)->for($warehouse, 'location')->longDated()->create(['unit_cost' => $unitCost()]);
+                ProductBatch::factory()->for($product)->for($warehouse, 'location')->expired()->create(['unit_cost' => $unitCost()]);
+                ProductBatch::factory()->for($product)->for($store, 'location')->expiringSoonish()->create(['unit_cost' => $unitCost()]);
+                ProductBatch::factory()->for($product)->for($downtown, 'location')->longDated()->create(['unit_cost' => $unitCost()]);
             } else {
-                ProductBatch::factory()->for($product)->for($warehouse, 'location')->noExpiry()->create();
-                ProductBatch::factory()->for($product)->for($store, 'location')->noExpiry()->create();
-                ProductBatch::factory()->for($product)->for($downtown, 'location')->noExpiry()->create();
+                ProductBatch::factory()->for($product)->for($warehouse, 'location')->noExpiry()->create(['unit_cost' => $unitCost()]);
+                ProductBatch::factory()->for($product)->for($store, 'location')->noExpiry()->create(['unit_cost' => $unitCost()]);
+                ProductBatch::factory()->for($product)->for($downtown, 'location')->noExpiry()->create(['unit_cost' => $unitCost()]);
             }
         }
     }
