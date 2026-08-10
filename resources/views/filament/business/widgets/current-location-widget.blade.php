@@ -5,11 +5,11 @@
                 Working from
             </label>
 
-            <x-filament::input.wrapper class="max-w-sm">
+            <x-filament::input.wrapper class="w-72">
                 <select
                     id="current-location"
                     wire:model.live="locationId"
-                    class="fi-select-input block w-full appearance-none bg-transparent py-1.5 text-sm text-gray-950 outline-none dark:text-white"
+                    class="fi-select-input"
                 >
                     <option value="">All Locations</option>
                     @foreach ($this->getLocations() as $id => $name)
