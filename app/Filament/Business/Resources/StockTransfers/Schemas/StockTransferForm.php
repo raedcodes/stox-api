@@ -24,6 +24,7 @@ class StockTransferForm
                     ->relationship('fromLocation', 'name')
                     ->searchable()
                     ->preload()
+                    ->default(fn () => session('current_location_id'))
                     ->different('to_location_id')
                     ->required(),
                 Select::make('to_location_id')
@@ -36,6 +37,11 @@ class StockTransferForm
                 Select::make('status')
                     ->options(StockTransferStatus::options())
                     ->default(StockTransferStatus::Draft->value)
+                    // Read-only: every transition beyond Draft goes through
+                    // the dedicated Submit/Approve/Reject/Mark In Transit/
+                    // Receive/Cancel actions, which are the only things
+                    // allowed to move stock — not a free-form status edit.
+                    ->disabled()
                     ->required(),
                 DatePicker::make('transfer_date')
                     ->required()

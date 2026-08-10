@@ -3,6 +3,8 @@
 namespace App\Filament\Business\Resources\StockTransfers\Pages;
 
 use App\Enums\StockTransferStatus;
+use App\Filament\Business\Resources\StockTransfers\Actions\ReceiveTransferAction;
+use App\Filament\Business\Resources\StockTransfers\Actions\StockTransferWorkflowActions;
 use App\Filament\Business\Resources\StockTransfers\StockTransferResource;
 use App\Models\StockTransfer;
 use Filament\Actions\EditAction;
@@ -15,8 +17,14 @@ class ViewStockTransfer extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            StockTransferWorkflowActions::submitForApproval(),
+            StockTransferWorkflowActions::approve(),
+            StockTransferWorkflowActions::reject(),
+            StockTransferWorkflowActions::markInTransit(),
+            ReceiveTransferAction::make(),
+            StockTransferWorkflowActions::cancel(),
             EditAction::make()
-                ->visible(fn (StockTransfer $record) => in_array($record->status, StockTransferStatus::openStatuses(), true)),
+                ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::Draft),
         ];
     }
 }

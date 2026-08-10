@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Enums\NavigationGroup;
 use App\Filament\Business\Auth\BusinessLogin;
+use App\Filament\Business\Widgets\CurrentLocationWidget;
 use App\Filament\Business\Widgets\DashboardKpisWidget;
 use App\Filament\Business\Widgets\ExecutiveKpisWidget;
 use App\Filament\Business\Widgets\ExpiryAlertsWidget;
@@ -38,6 +39,9 @@ class BusinessPanelProvider extends PanelProvider
             ->id('business')
             ->path('app')
             ->brandName(fn () => tenant('name') ?? 'Stox')
+            ->brandLogo(fn () => tenant('logo') ? asset('storage/'.tenant('logo')) : null)
+            ->brandLogoHeight('2.5rem')
+            ->favicon(fn () => tenant('logo') ? asset('storage/'.tenant('logo')) : null)
             ->login(BusinessLogin::class)
             ->authGuard('business')
             ->profile()
@@ -52,6 +56,7 @@ class BusinessPanelProvider extends PanelProvider
             ])
             ->navigationGroups(NavigationGroup::class)
             ->widgets([
+                CurrentLocationWidget::class,
                 DashboardKpisWidget::class,
                 ExecutiveKpisWidget::class,
                 SalesRevenueTrendChart::class,

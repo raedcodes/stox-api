@@ -16,6 +16,7 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'customer_type',
+        'credit_limit',
         'is_walk_in',
         'email',
         'phone',
@@ -27,6 +28,7 @@ class Customer extends Model
     {
         return [
             'customer_type' => CustomerType::class,
+            'credit_limit' => 'decimal:2',
             'is_walk_in' => 'boolean',
             'is_active' => 'boolean',
         ];

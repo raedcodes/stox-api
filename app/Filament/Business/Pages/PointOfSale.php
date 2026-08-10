@@ -54,7 +54,7 @@ class PointOfSale extends Page
     {
         $this->form->fill([
             'customer_id' => Customer::walkIn()->id,
-            'location_id' => Location::query()->where('is_active', true)->first()?->id,
+            'location_id' => session('current_location_id') ?? Location::query()->where('is_active', true)->first()?->id,
             'payment_method' => PaymentMethod::Cash->value,
             'discount_type' => null,
             'discount_value' => null,
@@ -236,6 +236,7 @@ class PointOfSale extends Page
     {
         $this->lastAddedLabel = "{$matchedTerm} \u{2192} {$product->name}";
         $this->scanInput = '';
+        $this->dispatch('scan-input-focus');
     }
 
     public function checkout(): void
@@ -303,7 +304,8 @@ class PointOfSale extends Page
         return [
             Action::make('checkout')
                 ->label('Complete Sale')
-                ->submit('checkout'),
+                ->submit('checkout')
+                ->keyBindings(['mod+enter']),
         ];
     }
 

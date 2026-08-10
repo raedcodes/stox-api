@@ -14,12 +14,12 @@ class SalesReportExport implements FromQuery, WithHeadings, WithMapping
 
     public function query(): Builder
     {
-        return $this->query->with(['product.brand', 'product.category', 'sale.cashier']);
+        return $this->query->with(['product.brand', 'product.category', 'sale.cashier', 'sale.location']);
     }
 
     public function headings(): array
     {
-        return ['Date', 'Invoice #', 'Product', 'SKU', 'Brand', 'Category', 'Cashier', 'Quantity', 'Line total'];
+        return ['Date', 'Invoice #', 'Product', 'SKU', 'Brand', 'Category', 'Cashier', 'Location', 'Quantity', 'Line total'];
     }
 
     public function map($saleItem): array
@@ -33,6 +33,7 @@ class SalesReportExport implements FromQuery, WithHeadings, WithMapping
             $saleItem->product->brand?->name,
             $saleItem->product->category?->name,
             $saleItem->sale->cashier?->name,
+            $saleItem->sale->location?->name,
             (float) $saleItem->quantity,
             $saleItem->total(),
         ];

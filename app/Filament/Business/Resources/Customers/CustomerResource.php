@@ -87,6 +87,12 @@ class CustomerResource extends Resource
                     ->options(CustomerType::options())
                     ->default(CustomerType::B2C)
                     ->required(),
+                TextInput::make('credit_limit')
+                    ->label('Credit limit')
+                    ->numeric()
+                    ->minValue(0)
+                    ->prefix(fn () => tenant('currency')?->value)
+                    ->helperText('Leave blank for no limit. Blocks a credit sale from being completed once it would push this customer over the limit.'),
                 TextInput::make('email')
                     ->email(),
                 TextInput::make('phone')
@@ -123,6 +129,11 @@ class CustomerResource extends Resource
                     ->state(fn (Customer $record) => (float) ($record->credit_sales_sum ?? 0) - (float) ($record->reducing_sum ?? 0))
                     ->money(fn () => tenant('currency')?->value)
                     ->color(fn ($state) => (float) $state > 0 ? 'danger' : 'success'),
+                TextColumn::make('credit_limit')
+                    ->label('Credit limit')
+                    ->money(fn () => tenant('currency')?->value)
+                    ->placeholder('No limit')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')

@@ -16,6 +16,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
@@ -97,6 +98,36 @@ class ProfitAndLossReport extends Page
         $revenue = $this->revenue();
 
         return $revenue > 0 ? ($this->grossProfit() / $revenue) * 100 : 0;
+    }
+
+    /**
+     * The same figures broken out per location, so a multi-branch owner can
+     * see which location is actually profitable instead of only one
+     * combined number. Sorted highest gross profit first.
+     *
+     * @return Collection<int, array{location: ?\App\Models\Location, revenue: float, cogs: float, grossProfit: float, grossMarginPercent: float}>
+     */
+    public function byLocation(): Collection
+    {
+        return $this->saleItemsQuery()
+            ->with('sale.location')
+            ->get()
+            ->groupBy(fn (SaleItem $item) => $item->sale->location_id)
+            ->map(function (Collection $items) {
+                $revenue = $items->sum(fn (SaleItem $item) => $item->total());
+                $cogs = $items->sum(fn (SaleItem $item) => (float) $item->quantity * (float) $item->product->cost_price);
+                $grossProfit = $revenue - $cogs;
+
+                return [
+                    'location' => $items->first()->sale->location,
+                    'revenue' => $revenue,
+                    'cogs' => $cogs,
+                    'grossProfit' => $grossProfit,
+                    'grossMarginPercent' => $revenue > 0 ? ($grossProfit / $revenue) * 100 : 0,
+                ];
+            })
+            ->sortByDesc('grossProfit')
+            ->values();
     }
 
     protected function getHeaderActions(): array

@@ -81,16 +81,79 @@ class StockTransfer extends Model
         return $short;
     }
 
-    /**
-     * Move stock from the source to the destination location: FEFO-deduct
-     * from the source's batches, and for each batch actually consumed,
-     * carry its batch number and expiry date over to a matching batch at
-     * the destination (creating it if one doesn't already exist there) —
-     * a transfer shouldn't lose expiry lineage just because it crossed
-     * locations.
-     */
-    public function complete(): void
+    public function submitForApproval(): void
     {
+        if ($this->status !== StockTransferStatus::Draft) {
+            throw new RuntimeException('Only a draft transfer can be submitted for approval.');
+        }
+
+        if ($this->items()->doesntExist()) {
+            throw new RuntimeException('Add at least one item before submitting for approval.');
+        }
+
+        $this->update(['status' => StockTransferStatus::PendingApproval]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Stock transfer {$this->transfer_number} submitted for approval");
+    }
+
+    public function approve(): void
+    {
+        if ($this->status !== StockTransferStatus::PendingApproval) {
+            throw new RuntimeException('Only a transfer pending approval can be approved.');
+        }
+
+        $this->update(['status' => StockTransferStatus::Approved]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Stock transfer {$this->transfer_number} approved");
+    }
+
+    public function reject(?string $reason = null): void
+    {
+        if ($this->status !== StockTransferStatus::PendingApproval) {
+            throw new RuntimeException('Only a transfer pending approval can be rejected.');
+        }
+
+        $this->update([
+            'status' => StockTransferStatus::Rejected,
+            'notes' => trim(($this->notes ? $this->notes."\n" : '').'Rejected: '.($reason ?: 'no reason given')),
+        ]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Stock transfer {$this->transfer_number} rejected");
+    }
+
+    public function cancel(): void
+    {
+        if (! in_array($this->status, [StockTransferStatus::Draft, StockTransferStatus::PendingApproval, StockTransferStatus::Approved], true)) {
+            throw new RuntimeException('A transfer already in transit or completed cannot be cancelled — stock has already moved.');
+        }
+
+        $this->update(['status' => StockTransferStatus::Cancelled]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Stock transfer {$this->transfer_number} cancelled");
+    }
+
+    /**
+     * Ships the approved transfer: FEFO-deducts each item's full requested
+     * quantity from the source location right now — the goods have
+     * physically left — recording a TransferOut movement per source batch
+     * consumed. Nothing is credited to the destination yet; that only
+     * happens as receive() confirms what actually arrived, which can be
+     * less than what shipped. Each item's shipped cost/expiry is captured
+     * as a weighted average / earliest-expiry across whichever source
+     * batches FEFO consumed for it, so receive() can recreate the right
+     * cost basis at the destination without tracking every source batch
+     * individually through the transit leg.
+     */
+    public function markInTransit(): void
+    {
+        if ($this->status !== StockTransferStatus::Approved) {
+            throw new RuntimeException('Only an approved transfer can be marked in transit.');
+        }
+
         $short = $this->insufficientStockProducts();
 
         if ($short !== []) {
@@ -105,6 +168,10 @@ class StockTransfer extends Model
                     (float) $item->quantity,
                 );
 
+                $shippedQuantity = 0;
+                $costWeightedSum = 0;
+                $earliestExpiry = null;
+
                 foreach ($consumed as $entry) {
                     /** @var ProductBatch $sourceBatch */
                     $sourceBatch = $entry['batch'];
@@ -117,49 +184,99 @@ class StockTransfer extends Model
                         reference: $this,
                     );
 
-                    $destinationBatch = ProductBatch::firstOrNew([
-                        'product_id' => $item->product_id,
-                        'product_variant_id' => $item->product_variant_id,
-                        'location_id' => $this->to_location_id,
-                        'batch_number' => $sourceBatch->batch_number,
-                        'expiry_date' => $sourceBatch->expiry_date,
-                    ]);
+                    $shippedQuantity += $quantity;
+                    $costWeightedSum += $quantity * (float) $sourceBatch->unit_cost;
 
-                    // Preserve cost basis across the transfer — a moved batch is still
-                    // the same goods, so its cost shouldn't change. If merging into an
-                    // existing destination batch, weighted-average the two cost bases.
-                    $existingQuantity = $destinationBatch->exists ? (float) $destinationBatch->quantity : 0;
-                    $existingUnitCost = $destinationBatch->exists ? (float) $destinationBatch->unit_cost : 0;
-                    $sourceUnitCost = (float) $sourceBatch->unit_cost;
-
-                    $destinationBatch->unit_cost = ($existingQuantity + $quantity) > 0
-                        ? (($existingQuantity * $existingUnitCost) + ($quantity * $sourceUnitCost)) / ($existingQuantity + $quantity)
-                        : $sourceUnitCost;
-
-                    $destinationBatch->quantity = $existingQuantity + $quantity;
-                    $destinationBatch->is_active = true;
-                    $destinationBatch->save();
-
-                    StockMovement::record(
-                        batch: $destinationBatch,
-                        type: StockMovementType::TransferIn,
-                        quantityChange: $quantity,
-                        reference: $this,
-                    );
+                    if ($sourceBatch->expiry_date && (! $earliestExpiry || $sourceBatch->expiry_date->lt($earliestExpiry))) {
+                        $earliestExpiry = $sourceBatch->expiry_date;
+                    }
                 }
+
+                $item->update([
+                    'quantity_shipped' => $shippedQuantity,
+                    'shipped_unit_cost' => $shippedQuantity > 0 ? $costWeightedSum / $shippedQuantity : 0,
+                    'shipped_expiry_date' => $earliestExpiry,
+                ]);
             }
 
-            $this->update(['status' => StockTransferStatus::Completed]);
+            $this->update(['status' => StockTransferStatus::InTransit]);
 
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($this)
-                ->withProperties([
-                    'transfer_number' => $this->transfer_number,
-                    'from_location' => $this->fromLocation->name,
-                    'to_location' => $this->toLocation->name,
-                ])
-                ->log("Stock transfer {$this->transfer_number} completed");
+            activity()->causedBy(auth()->user())->performedOn($this)
+                ->withProperties(['transfer_number' => $this->transfer_number])
+                ->log("Stock transfer {$this->transfer_number} marked in transit");
+        });
+    }
+
+    /**
+     * Credits the destination location for whatever quantity actually
+     * arrived per item — can be less than shipped (loss/damage in
+     * transit). Moves to Completed once every item's received quantity
+     * matches what shipped, PartiallyReceived otherwise, so a short
+     * delivery doesn't silently look "done."
+     *
+     * @param  array<int, float>  $receivedQuantities  keyed by stock_transfer_item id
+     */
+    public function receive(array $receivedQuantities): void
+    {
+        if (! in_array($this->status, [StockTransferStatus::InTransit, StockTransferStatus::PartiallyReceived], true)) {
+            throw new RuntimeException('Only a transfer that is in transit can be received.');
+        }
+
+        DB::transaction(function () use ($receivedQuantities) {
+            foreach ($this->items as $item) {
+                $quantity = (float) ($receivedQuantities[$item->id] ?? 0);
+
+                if ($quantity <= 0) {
+                    continue;
+                }
+
+                $remaining = $item->remainingToReceive();
+
+                if ($quantity > $remaining) {
+                    throw new RuntimeException("Cannot receive more than the {$remaining} still outstanding for {$item->product->name}.");
+                }
+
+                $destinationBatch = ProductBatch::firstOrNew([
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'location_id' => $this->to_location_id,
+                    'batch_number' => null,
+                    'expiry_date' => $item->shipped_expiry_date,
+                ]);
+
+                $existingQuantity = $destinationBatch->exists ? (float) $destinationBatch->quantity : 0;
+                $existingUnitCost = $destinationBatch->exists ? (float) $destinationBatch->unit_cost : 0;
+                $shippedUnitCost = (float) $item->shipped_unit_cost;
+
+                $destinationBatch->unit_cost = ($existingQuantity + $quantity) > 0
+                    ? (($existingQuantity * $existingUnitCost) + ($quantity * $shippedUnitCost)) / ($existingQuantity + $quantity)
+                    : $shippedUnitCost;
+
+                $destinationBatch->quantity = $existingQuantity + $quantity;
+                $destinationBatch->is_active = true;
+                $destinationBatch->save();
+
+                StockMovement::record(
+                    batch: $destinationBatch,
+                    type: StockMovementType::TransferIn,
+                    quantityChange: $quantity,
+                    reference: $this,
+                );
+
+                $item->increment('quantity_received', $quantity);
+            }
+
+            $allReceived = $this->items()->get()->every(
+                fn (StockTransferItem $item) => (float) $item->quantity_received >= (float) $item->quantity_shipped
+            );
+
+            $this->update(['status' => $allReceived ? StockTransferStatus::Completed : StockTransferStatus::PartiallyReceived]);
+
+            activity()->causedBy(auth()->user())->performedOn($this)
+                ->withProperties(['transfer_number' => $this->transfer_number])
+                ->log($allReceived
+                    ? "Stock transfer {$this->transfer_number} completed"
+                    : "Stock transfer {$this->transfer_number} partially received");
         });
     }
 }

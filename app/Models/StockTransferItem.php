@@ -15,13 +15,30 @@ class StockTransferItem extends Model
         'product_id',
         'product_variant_id',
         'quantity',
+        'quantity_shipped',
+        'quantity_received',
+        'shipped_unit_cost',
+        'shipped_expiry_date',
     ];
 
     protected function casts(): array
     {
         return [
             'quantity' => 'decimal:2',
+            'quantity_shipped' => 'decimal:2',
+            'quantity_received' => 'decimal:2',
+            'shipped_unit_cost' => 'decimal:2',
+            'shipped_expiry_date' => 'date',
         ];
+    }
+
+    /**
+     * Still outstanding on this item — shipped but not yet confirmed
+     * arrived at the destination.
+     */
+    public function remainingToReceive(): float
+    {
+        return (float) $this->quantity_shipped - (float) $this->quantity_received;
     }
 
     public function stockTransfer(): BelongsTo

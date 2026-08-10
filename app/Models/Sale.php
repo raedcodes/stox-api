@@ -149,6 +149,17 @@ class Sale extends Model
             throw new RuntimeException('Insufficient stock: '.implode(', ', $short));
         }
 
+        if ($this->payment_method === PaymentMethod::Credit) {
+            $creditLimit = $this->customer->credit_limit;
+
+            if ($creditLimit !== null && ($this->customer->balance() + $this->total()) > (float) $creditLimit) {
+                throw new RuntimeException(
+                    "This sale would put {$this->customer->name} over their credit limit ".
+                    "(currently owed: {$this->customer->balance()}, limit: {$creditLimit})."
+                );
+            }
+        }
+
         DB::transaction(function () {
             $taxRate = (float) TaxSetting::current()->rate;
 

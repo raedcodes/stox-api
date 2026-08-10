@@ -30,6 +30,7 @@ class PurchaseOrderForm
                     ->relationship('location', 'name')
                     ->searchable()
                     ->preload()
+                    ->default(fn () => session('current_location_id'))
                     ->required(),
                 Select::make('status')
                     ->options(PurchaseOrderStatus::options())

@@ -43,6 +43,7 @@ class StockAdjustmentForm
                     ->relationship('location', 'name')
                     ->searchable()
                     ->preload()
+                    ->default(fn () => session('current_location_id'))
                     ->live()
                     ->afterStateUpdated(fn (Get $get, $set) => $set('product_batch_id', null))
                     ->required(),

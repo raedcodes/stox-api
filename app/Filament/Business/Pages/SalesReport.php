@@ -7,6 +7,7 @@ use App\Enums\SaleStatus;
 use App\Enums\UserRole;
 use App\Exports\SalesReportExport;
 use App\Models\Category;
+use App\Models\Location;
 use App\Models\Product;
 use App\Models\SaleItem;
 use App\Models\Staff;
@@ -81,6 +82,9 @@ class SalesReport extends Page implements HasTable
                 TextColumn::make('sale.cashier.name')
                     ->label('Cashier')
                     ->placeholder('—'),
+                TextColumn::make('sale.location.name')
+                    ->label('Location')
+                    ->placeholder('—'),
                 TextColumn::make('quantity'),
                 TextColumn::make('total')
                     ->label('Line total')
@@ -97,6 +101,8 @@ class SalesReport extends Page implements HasTable
                     ->label('Category'),
                 Group::make('sale.cashier.name')
                     ->label('Cashier'),
+                Group::make('sale.location.name')
+                    ->label('Location'),
             ])
             ->filters([
                 Filter::make('date_range')
@@ -113,6 +119,13 @@ class SalesReport extends Page implements HasTable
                 SelectFilter::make('product_id')
                     ->label('Product')
                     ->options(fn () => Product::query()->pluck('name', 'id')),
+                SelectFilter::make('location_id')
+                    ->label('Location')
+                    ->options(fn () => Location::query()->pluck('name', 'id'))
+                    ->query(fn (Builder $query, array $data) => $query->when(
+                        $data['value'] ?? null,
+                        fn ($q, $locationId) => $q->where('sales.location_id', $locationId)
+                    )),
                 SelectFilter::make('category_id')
                     ->label('Category')
                     ->options(fn () => Category::query()->pluck('name', 'id'))
@@ -164,7 +177,7 @@ class SalesReport extends Page implements HasTable
 
     protected function exportPdf(): StreamedResponse
     {
-        $items = $this->getFilteredTableQuery()->with(['product.category', 'product.brand', 'sale.cashier'])->get();
+        $items = $this->getFilteredTableQuery()->with(['product.category', 'product.brand', 'sale.cashier', 'sale.location'])->get();
 
         $pdf = Pdf::loadView('pdf.reports.sales', [
             'title' => 'Sales Report',

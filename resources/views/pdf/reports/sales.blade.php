@@ -11,6 +11,7 @@
                 <th>Brand</th>
                 <th>Category</th>
                 <th>Cashier</th>
+                <th>Location</th>
                 <th class="num">Qty</th>
                 <th class="num">Line total</th>
             </tr>
@@ -25,6 +26,7 @@
                     <td>{{ $item->product->brand?->name ?? '—' }}</td>
                     <td>{{ $item->product->category?->name ?? '—' }}</td>
                     <td>{{ $item->sale->cashier?->name ?? '—' }}</td>
+                    <td>{{ $item->sale->location?->name ?? '—' }}</td>
                     <td class="num">{{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}</td>
                     <td class="num">{{ $currency }} {{ number_format($item->total(), 2) }}</td>
                 </tr>
