@@ -24,12 +24,15 @@ class ExpiryAlertsWidget extends TableWidget
     {
         return $table
             ->query(
+                // Null means "All Locations" (the CurrentLocationWidget
+                // default) — stays unscoped in that case.
                 fn (): Builder => ProductBatch::query()
                     ->with(['product', 'location'])
                     ->where('is_active', true)
                     ->where('quantity', '>', 0)
                     ->whereNotNull('expiry_date')
                     ->where('expiry_date', '<=', now()->addDays(30))
+                    ->when(session('current_location_id'), fn ($query, $locationId) => $query->where('location_id', $locationId))
             )
             ->columns([
                 TextColumn::make('product.name')

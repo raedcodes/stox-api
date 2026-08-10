@@ -21,29 +21,39 @@ class DashboardKpisWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        // Null means "All Locations" (the CurrentLocationWidget default) —
+        // every query below stays unscoped in that case, exactly today's
+        // combined-total behavior.
+        $locationId = session('current_location_id');
+
         // ->total() reads $this->items (and each item's ->product), so both
         // must be eager-loaded here — otherwise every sale summed below
         // triggers its own lazy-loaded items + product queries.
         $todaysSales = Sale::query()
             ->where('status', SaleStatus::Completed)
             ->whereDate('sale_date', today())
+            ->when($locationId, fn ($query, $locationId) => $query->where('location_id', $locationId))
             ->with('items.product')
             ->get();
 
         $yesterdaysSales = Sale::query()
             ->where('status', SaleStatus::Completed)
             ->whereDate('sale_date', today()->subDay())
+            ->when($locationId, fn ($query, $locationId) => $query->where('location_id', $locationId))
             ->with('items.product')
             ->get();
 
         $todaysRevenue = $todaysSales->sum(fn (Sale $sale) => $sale->total());
         $yesterdaysRevenue = $yesterdaysSales->sum(fn (Sale $sale) => $sale->total());
 
+        $locationClause = $locationId ? ' and product_batches.location_id = ?' : '';
+
         $lowStockCount = Product::query()
             ->where('is_active', true)
             ->whereRaw(
-                '(select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1) <= 0
-                or (reorder_level is not null and (select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1) <= reorder_level)'
+                "(select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= 0
+                or (reorder_level is not null and (select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= reorder_level)",
+                $locationId ? [$locationId, $locationId] : []
             )
             ->count();
 

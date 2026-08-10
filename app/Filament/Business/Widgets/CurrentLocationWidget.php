@@ -7,9 +7,12 @@ use Filament\Widgets\Widget;
 
 /**
  * A session-level "acting as [Location]" preference, set once and
- * defaulted into POS/Purchase Order/Stock Transfer forms thereafter
- * (still fully overridable per-form) — staff no longer have to re-pick
- * their branch on every single form.
+ * defaulted into POS/Purchase Order/Stock Transfer/Stock Adjustment forms
+ * thereafter (still fully overridable per-form) — staff no longer have to
+ * re-pick their branch on every single form. Also scopes the dashboard's
+ * own widgets (DashboardKpisWidget, LowStockWidget, ExpiryAlertsWidget) to
+ * this location. Null means "All Locations" — an explicit option, not
+ * just an empty state, so an Owner can pull back to the combined view.
  */
 class CurrentLocationWidget extends Widget
 {
@@ -21,12 +24,14 @@ class CurrentLocationWidget extends Widget
 
     public function mount(): void
     {
-        $this->locationId = session('current_location_id')
-            ?? Location::query()->where('is_active', true)->orderBy('name')->first()?->id;
+        // ->has() treats a null value as "not set" (isset() semantics) —
+        // wrong here, since null is the deliberate "All Locations" choice,
+        // not an absent one. ->exists() checks true key presence instead.
+        $this->locationId = session()->exists('current_location_id')
+            ? session('current_location_id')
+            : Location::query()->where('is_active', true)->orderBy('name')->first()?->id;
 
-        if ($this->locationId) {
-            session(['current_location_id' => $this->locationId]);
-        }
+        session(['current_location_id' => $this->locationId]);
     }
 
     public function updatedLocationId(): void
