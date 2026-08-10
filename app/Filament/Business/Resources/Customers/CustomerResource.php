@@ -7,6 +7,7 @@ use App\Enums\CustomerType;
 use App\Enums\NavigationGroup;
 use App\Enums\UserRole;
 use App\Filament\Business\Concerns\RestrictedToRoles;
+use App\Filament\Business\Resources\Customers\Actions\RecordCustomerPaymentAction;
 use App\Filament\Business\Resources\Customers\Pages\ManageCustomers;
 use App\Models\Customer;
 use BackedEnum;
@@ -142,6 +143,7 @@ class CustomerResource extends Resource
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                RecordCustomerPaymentAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
                     ->visible(fn (Customer $record) => ! $record->is_walk_in),

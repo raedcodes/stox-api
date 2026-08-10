@@ -6,6 +6,7 @@ use App\Enums\CustomerTransactionType;
 use App\Enums\NavigationGroup;
 use App\Enums\UserRole;
 use App\Exports\CustomerStatementExport;
+use App\Filament\Business\Resources\Customers\Actions\RecordCustomerPaymentAction;
 use App\Models\Customer;
 use App\Models\CustomerTransaction;
 use App\Models\Tenant;
@@ -143,6 +144,9 @@ class CustomerStatement extends Page
     protected function getHeaderActions(): array
     {
         return [
+            RecordCustomerPaymentAction::make()
+                ->record($this->customer())
+                ->after(fn () => $this->dispatch('$refresh')),
             Action::make('exportPdf')
                 ->label('Export PDF')
                 ->icon('heroicon-o-document')
