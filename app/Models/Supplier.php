@@ -36,6 +36,11 @@ class Supplier extends Model
         return $this->hasMany(SupplierTransaction::class);
     }
 
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
     /**
      * Current balance owed to this supplier: total charges minus total
      * payments and returns (both reduce what's owed, whether or not cash

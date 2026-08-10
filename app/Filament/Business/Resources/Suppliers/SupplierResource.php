@@ -4,6 +4,7 @@ namespace App\Filament\Business\Resources\Suppliers;
 
 use App\Enums\NavigationGroup;
 use App\Enums\PaymentTerms;
+use App\Enums\PurchaseOrderStatus;
 use App\Enums\SupplierTransactionType;
 use App\Enums\UserRole;
 use App\Filament\Business\Concerns\RestrictedToRoles;
@@ -103,7 +104,8 @@ class SupplierResource extends Resource
                 // time it's called — twice per row here, once for the state
                 // and once for the color).
                 ->withSum(['transactions as charges_sum' => fn (Builder $query) => $query->where('type', SupplierTransactionType::Charge)], 'amount')
-                ->withSum(['transactions as reducing_sum' => fn (Builder $query) => $query->whereIn('type', array_map(fn (SupplierTransactionType $type) => $type->value, SupplierTransactionType::reducingTypes()))], 'amount'))
+                ->withSum(['transactions as reducing_sum' => fn (Builder $query) => $query->whereIn('type', array_map(fn (SupplierTransactionType $type) => $type->value, SupplierTransactionType::reducingTypes()))], 'amount')
+                ->withCount(['purchaseOrders as open_purchase_orders_count' => fn (Builder $query) => $query->whereIn('status', [PurchaseOrderStatus::Ordered, PurchaseOrderStatus::PartiallyReceived])]))
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
@@ -113,9 +115,21 @@ class SupplierResource extends Resource
                     ->placeholder('—'),
                 TextColumn::make('phone')
                     ->placeholder('—'),
+                TextColumn::make('address')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('payment_terms')
                     ->label('Payment terms')
                     ->placeholder('—'),
+                TextColumn::make('open_purchase_orders_count')
+                    ->label('Open POs')
+                    ->badge()
+                    ->color(fn ($state) => (int) $state > 0 ? 'warning' : 'gray'),
+                TextColumn::make('total_purchases')
+                    ->label('Total purchases')
+                    ->state(fn (Supplier $record) => (float) ($record->charges_sum ?? 0))
+                    ->money(fn () => tenant('currency')?->value)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('balance')
                     ->state(fn (Supplier $record) => (float) ($record->charges_sum ?? 0) - (float) ($record->reducing_sum ?? 0))
                     ->money(fn () => tenant('currency')?->value)
@@ -125,7 +139,8 @@ class SupplierResource extends Resource
                 TextColumn::make('created_at')
                     ->label('Created at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at_since')
                     ->label('Since')
                     ->state(fn (Supplier $record) => $record->created_at)
