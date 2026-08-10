@@ -11,6 +11,7 @@ use App\Filament\Business\Resources\Customers\Actions\RecordCustomerPaymentActio
 use App\Filament\Business\Resources\Customers\Pages\ManageCustomers;
 use App\Models\Customer;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -144,11 +145,13 @@ class CustomerResource extends Resource
             ])
             ->recordActions([
                 RecordCustomerPaymentAction::make(),
-                EditAction::make(),
-                DeleteAction::make()
-                    ->visible(fn (Customer $record) => ! $record->is_walk_in),
-                ForceDeleteAction::make(),
-                RestoreAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->visible(fn (Customer $record) => ! $record->is_walk_in),
+                    ForceDeleteAction::make(),
+                    RestoreAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
