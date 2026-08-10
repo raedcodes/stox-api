@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
 use App\Enums\UserRole;
 use App\Exports\ProfitAndLossReportExport;
+use App\Models\Expense;
 use App\Models\SaleItem;
 use App\Models\Tenant;
 use BackedEnum;
@@ -100,12 +101,35 @@ class ProfitAndLossReport extends Page
         return $revenue > 0 ? ($this->grossProfit() / $revenue) * 100 : 0;
     }
 
+    protected function expensesQuery(): Builder
+    {
+        return Expense::query()
+            ->when($this->data['from'] ?? null, fn ($q, $date) => $q->whereDate('expense_date', '>=', $date))
+            ->when($this->data['until'] ?? null, fn ($q, $date) => $q->whereDate('expense_date', '<=', $date));
+    }
+
+    public function expenses(): float
+    {
+        return (float) $this->expensesQuery()->sum('amount');
+    }
+
+    public function netProfit(): float
+    {
+        return $this->grossProfit() - $this->expenses();
+    }
+
     /**
      * The same figures broken out per location, so a multi-branch owner can
      * see which location is actually profitable instead of only one
      * combined number. Sorted highest gross profit first.
      *
-     * @return Collection<int, array{location: ?\App\Models\Location, revenue: float, cogs: float, grossProfit: float, grossMarginPercent: float}>
+     * Expenses per location only include expenses directly attributed to
+     * that location (via its location_id) — company-wide expenses are
+     * excluded here and only appear in the combined totals above, since
+     * allocating shared costs across locations isn't a figure this report
+     * attempts to compute.
+     *
+     * @return Collection<int, array{location: ?\App\Models\Location, revenue: float, cogs: float, grossProfit: float, grossMarginPercent: float, expenses: float, netProfit: float}>
      */
     public function byLocation(): Collection
     {
@@ -117,6 +141,8 @@ class ProfitAndLossReport extends Page
                 $revenue = $items->sum(fn (SaleItem $item) => $item->total());
                 $cogs = $items->sum(fn (SaleItem $item) => (float) $item->quantity * (float) $item->product->cost_price);
                 $grossProfit = $revenue - $cogs;
+                $locationId = $items->first()->sale->location_id;
+                $expenses = $locationId ? (float) $this->expensesQuery()->where('location_id', $locationId)->sum('amount') : 0.0;
 
                 return [
                     'location' => $items->first()->sale->location,
@@ -124,6 +150,8 @@ class ProfitAndLossReport extends Page
                     'cogs' => $cogs,
                     'grossProfit' => $grossProfit,
                     'grossMarginPercent' => $revenue > 0 ? ($grossProfit / $revenue) * 100 : 0,
+                    'expenses' => $expenses,
+                    'netProfit' => $grossProfit - $expenses,
                 ];
             })
             ->sortByDesc('grossProfit')
@@ -156,6 +184,8 @@ class ProfitAndLossReport extends Page
             'cogs' => $this->cogs(),
             'grossProfit' => $this->grossProfit(),
             'grossMarginPercent' => $this->grossMarginPercent(),
+            'expenses' => $this->expenses(),
+            'netProfit' => $this->netProfit(),
         ]);
 
         return response()->streamDownload(fn () => print ($pdf->output()), 'profit-and-loss-report.pdf');
@@ -164,7 +194,14 @@ class ProfitAndLossReport extends Page
     protected function exportExcel(): mixed
     {
         return Excel::download(
-            new ProfitAndLossReportExport($this->revenue(), $this->cogs(), $this->grossProfit(), $this->grossMarginPercent()),
+            new ProfitAndLossReportExport(
+                $this->revenue(),
+                $this->cogs(),
+                $this->grossProfit(),
+                $this->grossMarginPercent(),
+                $this->expenses(),
+                $this->netProfit(),
+            ),
             'profit-and-loss-report.xlsx'
         );
     }

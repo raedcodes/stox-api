@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Resources\PurchaseOrders\Tables;
 
 use App\Enums\PurchaseOrderStatus;
+use App\Filament\Business\Resources\PurchaseOrders\Actions\PurchaseOrderWorkflowActions;
 use App\Filament\Business\Resources\PurchaseOrders\Actions\ReceiveStockAction;
 use App\Filament\Business\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\Location;
@@ -76,9 +77,14 @@ class PurchaseOrdersTable
                     ->color('gray')
                     ->url(fn (PurchaseOrder $record) => route('business.purchase-orders.pdf', $record))
                     ->openUrlInNewTab(),
+                PurchaseOrderWorkflowActions::submitForApproval(),
+                PurchaseOrderWorkflowActions::approve(),
+                PurchaseOrderWorkflowActions::reject(),
+                ReceiveStockAction::make(),
                 ActionGroup::make([
-                    ReceiveStockAction::make(),
-                    EditAction::make(),
+                    PurchaseOrderWorkflowActions::cancel(),
+                    EditAction::make()
+                        ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::Draft),
                     DeleteAction::make()
                         ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::Draft),
                 ]),

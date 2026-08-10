@@ -17,15 +17,19 @@
                 <td class="w-1/2 py-2.5 pe-4 font-semibold text-gray-950 dark:text-white">Gross profit</td>
                 <td class="py-2.5 ps-4 text-right font-semibold tabular-nums text-gray-950 dark:text-white">{{ tenant('currency')?->value }} {{ number_format($this->grossProfit(), 2) }}</td>
             </tr>
-            <tr>
+            <tr class="border-b border-gray-200 dark:border-white/10">
                 <td class="w-1/2 py-2.5 pe-4 text-gray-500 dark:text-gray-400">Gross margin</td>
                 <td class="py-2.5 ps-4 text-right font-medium tabular-nums text-gray-950 dark:text-white">{{ number_format($this->grossMarginPercent(), 1) }}%</td>
             </tr>
+            <tr class="border-b border-gray-200 dark:border-white/10">
+                <td class="w-1/2 py-2.5 pe-4 text-gray-500 dark:text-gray-400">Expenses</td>
+                <td class="py-2.5 ps-4 text-right font-medium tabular-nums text-gray-950 dark:text-white">-{{ tenant('currency')?->value }} {{ number_format($this->expenses(), 2) }}</td>
+            </tr>
+            <tr>
+                <td class="w-1/2 py-2.5 pe-4 font-semibold text-gray-950 dark:text-white">Net profit</td>
+                <td class="py-2.5 ps-4 text-right font-semibold tabular-nums text-gray-950 dark:text-white">{{ tenant('currency')?->value }} {{ number_format($this->netProfit(), 2) }}</td>
+            </tr>
         </table>
-
-        <p class="mt-4 text-xs text-gray-400 dark:text-gray-500">
-            This is a gross profit figure (revenue minus cost of goods sold). It does not include operating expenses, which are not tracked in the system.
-        </p>
     </div>
 
     @php $byLocation = $this->byLocation(); @endphp
@@ -39,7 +43,9 @@
                         <th class="py-2 pe-4 text-right font-medium">Revenue</th>
                         <th class="py-2 pe-4 text-right font-medium">COGS</th>
                         <th class="py-2 pe-4 text-right font-medium">Gross profit</th>
-                        <th class="py-2 text-right font-medium">Margin</th>
+                        <th class="py-2 pe-4 text-right font-medium">Margin</th>
+                        <th class="py-2 pe-4 text-right font-medium">Expenses</th>
+                        <th class="py-2 text-right font-medium">Net profit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,11 +55,16 @@
                             <td class="py-2 pe-4 text-right tabular-nums text-gray-950 dark:text-white">{{ tenant('currency')?->value }} {{ number_format($row['revenue'], 2) }}</td>
                             <td class="py-2 pe-4 text-right tabular-nums text-gray-950 dark:text-white">-{{ tenant('currency')?->value }} {{ number_format($row['cogs'], 2) }}</td>
                             <td class="py-2 pe-4 text-right font-medium tabular-nums text-gray-950 dark:text-white">{{ tenant('currency')?->value }} {{ number_format($row['grossProfit'], 2) }}</td>
-                            <td class="py-2 text-right tabular-nums text-gray-950 dark:text-white">{{ number_format($row['grossMarginPercent'], 1) }}%</td>
+                            <td class="py-2 pe-4 text-right tabular-nums text-gray-950 dark:text-white">{{ number_format($row['grossMarginPercent'], 1) }}%</td>
+                            <td class="py-2 pe-4 text-right tabular-nums text-gray-950 dark:text-white">-{{ tenant('currency')?->value }} {{ number_format($row['expenses'], 2) }}</td>
+                            <td class="py-2 text-right font-medium tabular-nums text-gray-950 dark:text-white">{{ tenant('currency')?->value }} {{ number_format($row['netProfit'], 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+            <p class="mt-3 text-xs text-gray-400 dark:text-gray-500">
+                Only expenses directly assigned to a location are included in that location's row. Company-wide expenses are only reflected in the combined totals above.
+            </p>
         </div>
     @endif
 </x-filament-panels::page>

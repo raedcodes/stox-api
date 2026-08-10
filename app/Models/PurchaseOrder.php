@@ -6,6 +6,7 @@ use App\Enums\PurchaseOrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use RuntimeException;
 
 class PurchaseOrder extends Model
 {
@@ -97,14 +98,80 @@ class PurchaseOrder extends Model
         return $this->subtotal() + $this->landedCostTotal();
     }
 
+    public function submitForApproval(): void
+    {
+        if ($this->status !== PurchaseOrderStatus::Draft) {
+            throw new RuntimeException('Only a draft order can be submitted for approval.');
+        }
+
+        if ($this->items()->doesntExist()) {
+            throw new RuntimeException('Add at least one item before submitting for approval.');
+        }
+
+        $this->update(['status' => PurchaseOrderStatus::PendingApproval]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Purchase order {$this->po_number} submitted for approval");
+    }
+
+    /**
+     * Approving IS placing the order with the supplier — there's no
+     * separate "place order" step distinct from approval, matching how
+     * this system has always treated Ordered as "the order is active."
+     */
+    public function approve(): void
+    {
+        if ($this->status !== PurchaseOrderStatus::PendingApproval) {
+            throw new RuntimeException('Only an order pending approval can be approved.');
+        }
+
+        $this->update(['status' => PurchaseOrderStatus::Ordered]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Purchase order {$this->po_number} approved");
+    }
+
+    public function reject(?string $reason = null): void
+    {
+        if ($this->status !== PurchaseOrderStatus::PendingApproval) {
+            throw new RuntimeException('Only an order pending approval can be rejected.');
+        }
+
+        $this->update([
+            'status' => PurchaseOrderStatus::Rejected,
+            'notes' => trim(($this->notes ? $this->notes."\n" : '').'Rejected: '.($reason ?: 'no reason given')),
+        ]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Purchase order {$this->po_number} rejected");
+    }
+
+    public function cancel(): void
+    {
+        if (! in_array($this->status, [PurchaseOrderStatus::Draft, PurchaseOrderStatus::PendingApproval, PurchaseOrderStatus::Ordered], true)) {
+            throw new RuntimeException('An order that has already received stock, or is already rejected/cancelled, cannot be cancelled.');
+        }
+
+        $this->update(['status' => PurchaseOrderStatus::Cancelled]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->log("Purchase order {$this->po_number} cancelled");
+    }
+
     /**
      * Recompute status from each item's received-vs-ordered quantity. Only
-     * touches Ordered/Partially Received/Received — never overrides Draft
-     * or Cancelled, which are set explicitly.
+     * touches Ordered/Partially Received/Received — never overrides Draft,
+     * PendingApproval, Rejected, or Cancelled, which are only ever set by
+     * the explicit workflow actions above.
      */
     public function recomputeStatus(): void
     {
-        if (in_array($this->status, [PurchaseOrderStatus::Draft, PurchaseOrderStatus::Cancelled], true)) {
+        if (in_array($this->status, [
+            PurchaseOrderStatus::Draft,
+            PurchaseOrderStatus::PendingApproval,
+            PurchaseOrderStatus::Rejected,
+            PurchaseOrderStatus::Cancelled,
+        ], true)) {
             return;
         }
 

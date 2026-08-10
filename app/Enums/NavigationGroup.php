@@ -10,6 +10,7 @@ enum NavigationGroup implements HasLabel
     case Purchasing;
     case Catalog;
     case Inventory;
+    case Finance;
     case Reports;
     case Settings;
     case System;
@@ -21,6 +22,7 @@ enum NavigationGroup implements HasLabel
             self::Purchasing => 'Purchasing',
             self::Catalog => 'Catalog',
             self::Inventory => 'Inventory',
+            self::Finance => 'Finance',
             self::Reports => 'Reports',
             self::Settings => 'Settings',
             self::System => 'System',

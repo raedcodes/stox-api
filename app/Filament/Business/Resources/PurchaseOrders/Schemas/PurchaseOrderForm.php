@@ -35,6 +35,11 @@ class PurchaseOrderForm
                 Select::make('status')
                     ->options(PurchaseOrderStatus::options())
                     ->default(PurchaseOrderStatus::Draft->value)
+                    // Read-only: every transition beyond Draft goes through
+                    // the dedicated Submit/Approve/Reject/Receive/Cancel
+                    // actions, not a free-form status edit — see
+                    // PurchaseOrderWorkflowActions.
+                    ->disabled()
                     ->required(),
                 DatePicker::make('order_date')
                     ->required()

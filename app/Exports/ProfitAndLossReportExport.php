@@ -12,6 +12,8 @@ class ProfitAndLossReportExport implements FromArray, WithHeadings
         protected float $cogs,
         protected float $grossProfit,
         protected float $grossMarginPercent,
+        protected float $expenses,
+        protected float $netProfit,
     ) {}
 
     public function headings(): array
@@ -26,6 +28,8 @@ class ProfitAndLossReportExport implements FromArray, WithHeadings
             ['Cost of goods sold', -$this->cogs],
             ['Gross profit', $this->grossProfit],
             ['Gross margin %', round($this->grossMarginPercent, 1)],
+            ['Expenses', -$this->expenses],
+            ['Net profit', $this->netProfit],
         ];
     }
 }
