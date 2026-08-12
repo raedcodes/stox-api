@@ -33,7 +33,11 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Off: this disk's auto-registered route otherwise shadows the
+            // conventional /storage/{path} URL that the public disk's
+            // storage:link symlink relies on, since neither disk sets an
+            // explicit 'url' here — see the tenant-logo 403 diagnosis.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
