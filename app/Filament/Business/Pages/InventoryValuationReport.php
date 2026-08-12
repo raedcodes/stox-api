@@ -5,6 +5,7 @@ namespace App\Filament\Business\Pages;
 use App\Enums\NavigationGroup;
 use App\Enums\UserRole;
 use App\Exports\InventoryValuationReportExport;
+use App\Filament\Business\Concerns\HasStructuredAiSummary;
 use App\Models\Location;
 use App\Models\ProductBatch;
 use App\Models\Tenant;
@@ -27,7 +28,23 @@ use UnitEnum;
 
 class InventoryValuationReport extends Page implements HasTable
 {
+    use HasStructuredAiSummary;
     use InteractsWithTable;
+
+    public function mount(): void
+    {
+        $this->loadCachedAiSummary();
+    }
+
+    /**
+     * Keeps the displayed summary in sync with the currently applied
+     * filters instead of leaving a stale summary from a different filter
+     * set on screen.
+     */
+    public function updatedTableFilters(): void
+    {
+        $this->loadCachedAiSummary();
+    }
 
     public static function canAccess(): bool
     {
@@ -103,6 +120,11 @@ class InventoryValuationReport extends Page implements HasTable
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('generateAiSummary')
+                ->label(fn () => $this->aiSummary ? 'Regenerate AI Summary' : 'Generate AI Summary')
+                ->icon('heroicon-o-sparkles')
+                ->color('gray')
+                ->action(fn () => $this->generateAiSummary()),
             Action::make('exportPdf')
                 ->label('Export PDF')
                 ->icon('heroicon-o-document')
@@ -116,6 +138,73 @@ class InventoryValuationReport extends Page implements HasTable
                     'inventory-valuation-report.xlsx'
                 )),
         ];
+    }
+
+    protected function aiSummaryCacheKey(): string
+    {
+        return 'inventory-valuation-ai-summary:'.tenant('id').':'.md5(json_encode($this->tableFilters ?? []));
+    }
+
+    protected function aiSummarySystemInstruction(): string
+    {
+        return 'You are an inventory analyst summarizing a stock valuation snapshot for a busy owner. Be concise and specific. Use the exact figures given — especially any percentages already computed for you — rather than computing your own.';
+    }
+
+    /**
+     * Shared by aiSummaryKpis() (every render) and buildAiSummaryPrompt()
+     * (only when generating) so both work from identical figures without
+     * duplicating the aggregation logic.
+     *
+     * @return array{rows: \Illuminate\Support\Collection, totalValue: float, totalQuantity: float, productsTracked: int, topByValue: \Illuminate\Support\Collection}
+     */
+    protected function aiSummaryFigures(): array
+    {
+        $rows = $this->getFilteredTableQuery()->with(['product', 'location'])->get();
+
+        $totalValue = $rows->sum('total_value');
+        $totalQuantity = $rows->sum('total_quantity');
+        $productsTracked = $rows->pluck('product_id')->unique()->count();
+        $topByValue = $rows->sortByDesc('total_value')->take(5)->values();
+
+        return compact('rows', 'totalValue', 'totalQuantity', 'productsTracked', 'topByValue');
+    }
+
+    public function aiSummaryKpis(): array
+    {
+        $currency = tenant('currency')?->value;
+        $figures = $this->aiSummaryFigures();
+
+        return [
+            ['label' => 'Total Stock Value', 'value' => $currency.' '.number_format($figures['totalValue'], 2)],
+            ['label' => 'Products Tracked', 'value' => number_format($figures['productsTracked'])],
+            ['label' => 'Total Units On Hand', 'value' => number_format($figures['totalQuantity'])],
+        ];
+    }
+
+    protected function buildAiSummaryPrompt(): string
+    {
+        $currency = tenant('currency')?->value;
+        $figures = $this->aiSummaryFigures();
+
+        $lines = [
+            "Inventory valuation snapshot — {$figures['rows']->count()} product/location rows, {$figures['productsTracked']} distinct products.",
+            "Total stock value: {$currency} ".number_format($figures['totalValue'], 2),
+            'Total units on hand: '.number_format($figures['totalQuantity'], 0),
+            'Highest-value holdings:',
+        ];
+
+        foreach ($figures['topByValue'] as $row) {
+            $lines[] = '- '.($row->product?->name ?? 'Unknown product').' at '.($row->location?->name ?? 'Unknown location').': '.$currency.' '.number_format($row->total_value, 2).' ('.number_format($row->total_quantity, 0).' units)';
+        }
+
+        $topValue = $figures['topByValue']->sum('total_value');
+
+        if ($figures['totalValue'] > 0 && $figures['topByValue']->isNotEmpty()) {
+            $topPercent = ($topValue / $figures['totalValue']) * 100;
+            $lines[] = 'Those top '.$figures['topByValue']->count()." holdings by value account for {$currency} ".number_format($topValue, 2).' ('.number_format($topPercent, 1).'%) of total stock value.';
+        }
+
+        return implode("\n", $lines);
     }
 
     protected function exportPdf(): StreamedResponse

@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
 use App\Enums\UserRole;
 use App\Exports\SalesReportExport;
+use App\Filament\Business\Concerns\HasStructuredAiSummary;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\Product;
@@ -33,7 +34,23 @@ use UnitEnum;
 
 class SalesReport extends Page implements HasTable
 {
+    use HasStructuredAiSummary;
     use InteractsWithTable;
+
+    public function mount(): void
+    {
+        $this->loadCachedAiSummary();
+    }
+
+    /**
+     * Keeps the displayed summary in sync with the currently applied
+     * filters instead of leaving a stale summary from a different filter
+     * set on screen.
+     */
+    public function updatedTableFilters(): void
+    {
+        $this->loadCachedAiSummary();
+    }
 
     public static function canAccess(): bool
     {
@@ -160,6 +177,11 @@ class SalesReport extends Page implements HasTable
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('generateAiSummary')
+                ->label(fn () => $this->aiSummary ? 'Regenerate AI Summary' : 'Generate AI Summary')
+                ->icon('heroicon-o-sparkles')
+                ->color('gray')
+                ->action(fn () => $this->generateAiSummary()),
             Action::make('exportPdf')
                 ->label('Export PDF')
                 ->icon('heroicon-o-document')
@@ -173,6 +195,83 @@ class SalesReport extends Page implements HasTable
                     'sales-report.xlsx'
                 )),
         ];
+    }
+
+    protected function aiSummaryCacheKey(): string
+    {
+        return 'sales-report-ai-summary:'.tenant('id').':'.md5(json_encode($this->tableFilters ?? []));
+    }
+
+    protected function aiSummarySystemInstruction(): string
+    {
+        return 'You are a retail analyst summarizing a filtered sales report for a busy owner. Be concise and specific. Use the exact figures given — especially any percentages or averages already computed for you — rather than computing your own.';
+    }
+
+    /**
+     * Shared by aiSummaryKpis() (every render) and buildAiSummaryPrompt()
+     * (only when generating) so both work from identical figures without
+     * duplicating the aggregation logic.
+     *
+     * @return array{items: \Illuminate\Support\Collection<int, SaleItem>, revenue: float, salesCount: int, totalQuantity: float, averageOrderValue: float, topProducts: \Illuminate\Support\Collection<int, array{name: string, revenue: float, quantity: float}>}
+     */
+    protected function aiSummaryFigures(): array
+    {
+        $items = $this->getFilteredTableQuery()->with('product')->get();
+
+        $revenue = $items->sum(fn (SaleItem $item) => $item->total());
+        $salesCount = $items->pluck('sale_id')->unique()->count();
+        $totalQuantity = (float) $items->sum('quantity');
+        $averageOrderValue = $salesCount > 0 ? $revenue / $salesCount : 0.0;
+
+        $topProducts = $items->groupBy('product_id')
+            ->map(fn ($group) => [
+                'name' => $group->first()->product?->name ?? 'Unknown product',
+                'revenue' => $group->sum(fn (SaleItem $item) => $item->total()),
+                'quantity' => (float) $group->sum('quantity'),
+            ])
+            ->sortByDesc('revenue')
+            ->take(5)
+            ->values();
+
+        return compact('items', 'revenue', 'salesCount', 'totalQuantity', 'averageOrderValue', 'topProducts');
+    }
+
+    public function aiSummaryKpis(): array
+    {
+        $currency = tenant('currency')?->value;
+        $figures = $this->aiSummaryFigures();
+
+        return [
+            ['label' => 'Total Revenue', 'value' => $currency.' '.number_format($figures['revenue'], 2)],
+            ['label' => 'Total Sales', 'value' => number_format($figures['salesCount'])],
+            ['label' => 'Total Items Sold', 'value' => number_format($figures['totalQuantity'])],
+        ];
+    }
+
+    protected function buildAiSummaryPrompt(): string
+    {
+        $currency = tenant('currency')?->value;
+        $figures = $this->aiSummaryFigures();
+
+        $lines = [
+            "Filtered sales report — {$figures['salesCount']} sales, {$figures['items']->count()} line items, ".number_format($figures['totalQuantity'])." total units sold.",
+            "Total revenue: {$currency} ".number_format($figures['revenue'], 2),
+            "Average order value: {$currency} ".number_format($figures['averageOrderValue'], 2),
+            'Top products by revenue:',
+        ];
+
+        foreach ($figures['topProducts'] as $product) {
+            $lines[] = '- '.$product['name'].': '.$currency.' '.number_format($product['revenue'], 2).' ('.number_format($product['quantity'], 0).' units)';
+        }
+
+        $topRevenue = $figures['topProducts']->sum('revenue');
+
+        if ($figures['revenue'] > 0 && $figures['topProducts']->isNotEmpty()) {
+            $topPercent = ($topRevenue / $figures['revenue']) * 100;
+            $lines[] = 'Top '.$figures['topProducts']->count()." products by revenue generated {$currency} ".number_format($topRevenue, 2).' ('.number_format($topPercent, 1).'%) of total revenue.';
+        }
+
+        return implode("\n", $lines);
     }
 
     protected function exportPdf(): StreamedResponse

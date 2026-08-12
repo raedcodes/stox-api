@@ -32,6 +32,8 @@
         </table>
     </div>
 
+    @include('filament.business.components.ai-summary-card')
+
     @php $byLocation = $this->byLocation(); @endphp
     @if ($byLocation->count() > 1)
         <div class="fi-section rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">

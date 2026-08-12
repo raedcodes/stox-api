@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Enums\SaleStatus;
 use App\Enums\UserRole;
 use App\Exports\ProfitAndLossReportExport;
+use App\Filament\Business\Concerns\HasStructuredAiSummary;
 use App\Models\Expense;
 use App\Models\SaleItem;
 use App\Models\Tenant;
@@ -24,6 +25,8 @@ use UnitEnum;
 
 class ProfitAndLossReport extends Page
 {
+    use HasStructuredAiSummary;
+
     public static function canAccess(): bool
     {
         return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
@@ -48,6 +51,20 @@ class ProfitAndLossReport extends Page
             'from' => now()->startOfMonth()->toDateString(),
             'until' => now()->endOfMonth()->toDateString(),
         ]);
+
+        $this->loadCachedAiSummary();
+    }
+
+    /**
+     * Keeps the displayed summary in sync with whatever's cached for the
+     * newly selected range (or clears it) instead of leaving a stale
+     * summary from the previous date range on screen.
+     */
+    public function updated(string $name): void
+    {
+        if (in_array($name, ['data.from', 'data.until'], true)) {
+            $this->loadCachedAiSummary();
+        }
     }
 
     public function defaultForm(Schema $schema): Schema
@@ -161,6 +178,11 @@ class ProfitAndLossReport extends Page
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('generateAiSummary')
+                ->label(fn () => $this->aiSummary ? 'Regenerate AI Summary' : 'Generate AI Summary')
+                ->icon('heroicon-o-sparkles')
+                ->color('gray')
+                ->action(fn () => $this->generateAiSummary()),
             Action::make('exportPdf')
                 ->label('Export PDF')
                 ->icon('heroicon-o-document')
@@ -171,6 +193,59 @@ class ProfitAndLossReport extends Page
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(fn () => $this->exportExcel()),
         ];
+    }
+
+    protected function aiSummaryCacheKey(): string
+    {
+        return 'pl-ai-summary:'.tenant('id').':'.($this->data['from'] ?? '').':'.($this->data['until'] ?? '');
+    }
+
+    protected function aiSummarySystemInstruction(): string
+    {
+        return "You are a financial analyst summarizing a small business's profit & loss figures for a busy owner. Be concise and specific. Use the exact figures given — especially any percentages already computed for you — rather than computing your own.";
+    }
+
+    public function netMarginPercent(): float
+    {
+        $revenue = $this->revenue();
+
+        return $revenue > 0 ? ($this->netProfit() / $revenue) * 100 : 0;
+    }
+
+    public function aiSummaryKpis(): array
+    {
+        $currency = tenant('currency')?->value;
+
+        return [
+            ['label' => 'Total Revenue', 'value' => $currency.' '.number_format($this->revenue(), 2)],
+            ['label' => 'Net Profit', 'value' => $currency.' '.number_format($this->netProfit(), 2)],
+            ['label' => 'Net Margin', 'value' => number_format($this->netMarginPercent(), 1).'%'],
+        ];
+    }
+
+    protected function buildAiSummaryPrompt(): string
+    {
+        $currency = tenant('currency')?->value;
+        $byLocation = $this->byLocation();
+
+        $lines = [
+            "Period: {$this->data['from']} to {$this->data['until']}",
+            "Revenue: {$currency} ".number_format($this->revenue(), 2),
+            "Cost of goods sold: {$currency} ".number_format($this->cogs(), 2),
+            'Gross profit: '.$currency.' '.number_format($this->grossProfit(), 2).' ('.number_format($this->grossMarginPercent(), 1).'% margin)',
+            "Expenses: {$currency} ".number_format($this->expenses(), 2),
+            'Net profit: '.$currency.' '.number_format($this->netProfit(), 2).' ('.number_format($this->netMarginPercent(), 1).'% net margin)',
+        ];
+
+        if ($byLocation->count() > 1) {
+            $lines[] = 'By location (net profit):';
+
+            foreach ($byLocation as $row) {
+                $lines[] = '- '.($row['location']?->name ?? 'Unassigned').': '.$currency.' '.number_format($row['netProfit'], 2);
+            }
+        }
+
+        return implode("\n", $lines);
     }
 
     protected function exportPdf(): StreamedResponse
