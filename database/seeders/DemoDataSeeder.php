@@ -466,9 +466,16 @@ class DemoDataSeeder extends Seeder
                 continue;
             }
 
-            // Leave the last route as an open Draft, the rest completed.
+            // Leave the last route as an open Draft, the rest completed —
+            // there's no single-call shortcut, so walk the real workflow:
+            // Draft -> PendingApproval -> Approved -> InTransit -> Completed.
             if ($index < count($routes) - 1) {
-                $transfer->complete();
+                $transfer->submitForApproval();
+                $transfer->approve();
+                $transfer->markInTransit();
+                $transfer->receive(
+                    $transfer->items()->get()->mapWithKeys(fn ($item) => [$item->id => (float) $item->quantity])->all()
+                );
             }
         }
     }
