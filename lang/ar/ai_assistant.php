@@ -14,7 +14,8 @@ return [
     'suggested_questions' => [
         'top_products' => 'ما هي أفضل منتجاتي مبيعاً؟',
         'low_stock' => 'ما هي المنتجات المنخفضة في المخزون؟',
-        'recent_sales' => 'حلّل مبيعاتي الأخيرة',
+        'profit_this_month' => 'ما هو ربحي هذا الشهر؟',
+        'expiring_batches' => 'هل توجد دفعات ستنتهي صلاحيتها قريباً؟',
         'business_summary' => 'أعطني ملخصاً عن أعمالي',
     ],
 

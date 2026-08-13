@@ -14,7 +14,8 @@ return [
     'suggested_questions' => [
         'top_products' => 'What are my top-selling products?',
         'low_stock' => 'Which products are low in stock?',
-        'recent_sales' => 'Analyze my recent sales',
+        'profit_this_month' => "What's my profit this month?",
+        'expiring_batches' => 'Do I have any batches expiring soon?',
         'business_summary' => 'Give me a business summary',
     ],
 

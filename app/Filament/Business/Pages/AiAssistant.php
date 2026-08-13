@@ -71,7 +71,7 @@ class AiAssistant extends Page
     /**
      * @var array<int, string>
      */
-    protected const SUGGESTED_QUESTION_KEYS = ['top_products', 'low_stock', 'recent_sales', 'business_summary'];
+    protected const SUGGESTED_QUESTION_KEYS = ['top_products', 'low_stock', 'profit_this_month', 'expiring_batches', 'business_summary'];
 
     /**
      * @return array<string, string>
