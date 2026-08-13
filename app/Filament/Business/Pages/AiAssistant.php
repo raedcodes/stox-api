@@ -84,17 +84,24 @@ class AiAssistant extends Page
     }
 
     /**
-     * Gemini's plain-text answers sometimes include basic markdown (mainly
-     * **bold**) even though this chat has no markdown renderer — the raw
-     * asterisks were showing up literally. Escapes first (never trust
-     * AI-echoed content as safe HTML — e.g. a customer name it reads back
-     * from a tool result could contain arbitrary text), then converts only
-     * the fixed **bold** pattern into a real tag. Deliberately not a full
-     * markdown parser — narrow and predictable rather than open-ended.
+     * Gemini's plain-text answers sometimes include basic markdown
+     * (**bold**, "* " bullet lines, *italic* emphasis) even though this
+     * chat has no markdown renderer — the raw asterisks were showing up
+     * literally. Escapes first (never trust AI-echoed content as safe HTML
+     * — e.g. a customer name it reads back from a tool result could
+     * contain arbitrary text), then converts each pattern in turn: bold
+     * before bullets before italics, so a line's leading "* " marker is
+     * already gone before the italic pass runs and can't be mistaken for
+     * an opening emphasis delimiter. Deliberately not a full markdown
+     * parser — narrow and predictable rather than open-ended.
      */
     public function formatAssistantMessage(string $content): string
     {
-        return preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', e($content));
+        $withBold = preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', e($content));
+
+        $withBullets = preg_replace('/^[ \t]*\*[ \t]+/m', '• ', $withBold);
+
+        return preg_replace('/\*(.+?)\*/s', '<em>$1</em>', $withBullets);
     }
 
     /**
