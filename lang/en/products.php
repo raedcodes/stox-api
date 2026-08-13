@@ -43,6 +43,8 @@ return [
     'actions' => [
         'view_variants' => 'View Variants',
         'close' => 'Close',
+        'import_excel' => 'Import Excel',
+        'download_import_template' => 'Download Template',
     ],
 
     'variant_helper_create' => 'Leave blank to auto-generate from the product SKU and size/color.',
@@ -52,6 +54,20 @@ return [
         'variant_needs_one' => 'A product must have at least one variant.',
         'variant_has_batches' => 'This variant still has stock batches — deactivate it instead.',
         'variant_has_history' => "This variant has transaction history (sales, purchases, or stock movements) and can't be deleted. Deactivate it instead.",
+    ],
+
+    'import' => [
+        'file_helper' => 'Upload a CSV or Excel file. Download the template above for the expected columns.',
+        'unit_not_found' => 'Unit ":unit" was not found. Available units: :available.',
+        'duplicate_sku_in_file' => 'SKU ":value" appears more than once in this file.',
+        'duplicate_barcode_in_file' => 'Barcode ":value" appears more than once in this file.',
+        'success_title' => 'Import complete',
+        'success_body' => ':count product(s) imported.',
+        'partial_title' => 'Import completed with errors — :imported imported, :failed failed',
+        'all_failed_title' => 'Import failed — 0 rows imported',
+        'row_error' => 'Row :row: :message',
+        'more_errors' => 'and :count more',
+        'failed_title' => 'Import failed',
     ],
 
 ];

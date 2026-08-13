@@ -5,6 +5,9 @@ namespace App\Filament\Business\Pages;
 use App\Enums\NavigationGroup;
 use App\Enums\StockMovementType;
 use App\Enums\UserRole;
+use App\Exports\ImportTemplateExport;
+use App\Filament\Business\Concerns\HandlesExcelImportNotifications;
+use App\Imports\OpeningStockImport;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductBatch;
@@ -12,6 +15,7 @@ use App\Models\StockMovement;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,10 +27,15 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 use UnitEnum;
 
 class OpeningStockEntry extends Page
 {
+    use HandlesExcelImportNotifications;
+
     public static function canAccess(): bool
     {
         return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]);
@@ -140,6 +149,50 @@ class OpeningStockEntry extends Page
             Action::make('save')
                 ->label(__('common.actions.save'))
                 ->submit('save'),
+        ];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('downloadOpeningStockImportTemplate')
+                ->label(__('opening_stock_entry.actions.download_import_template'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->action(fn () => Excel::download(
+                    new ImportTemplateExport(
+                        ['SKU', 'Location', 'Quantity', 'Batch number', 'Expiry date'],
+                        [['SKU-0001', 'Main Warehouse', 100, 'BATCH-001', '2027-01-01']],
+                    ),
+                    'opening-stock-import-template.xlsx'
+                )),
+            Action::make('importOpeningStock')
+                ->label(__('opening_stock_entry.actions.import_excel'))
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('gray')
+                ->schema([
+                    FileUpload::make('file')
+                        ->label(__('common.fields.file'))
+                        ->required()
+                        ->disk('local')
+                        ->directory('imports/'.tenant('id'))
+                        ->acceptedFileTypes(['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                        ->maxSize(5120)
+                        ->helperText(__('opening_stock_entry.import.file_helper')),
+                ])
+                ->action(function (array $data): void {
+                    $path = $data['file'];
+                    $import = new OpeningStockImport();
+
+                    try {
+                        Excel::import($import, $path, 'local');
+                        $this->notifyImportResult('opening_stock_entry.import', $import->importedCount(), $import->failures());
+                    } catch (Throwable $e) {
+                        $this->notifyImportException('opening_stock_entry.import', $e);
+                    } finally {
+                        Storage::disk('local')->delete($path);
+                    }
+                }),
         ];
     }
 

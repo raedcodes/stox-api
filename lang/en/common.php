@@ -58,6 +58,7 @@ return [
         'month' => 'Month',
         'from' => 'From',
         'until' => 'Until',
+        'file' => 'File',
     ],
 
     'actions' => [

@@ -43,6 +43,8 @@ return [
     'actions' => [
         'view_variants' => 'عرض المتغيرات',
         'close' => 'إغلاق',
+        'import_excel' => 'استيراد Excel',
+        'download_import_template' => 'تحميل القالب',
     ],
 
     'variant_helper_create' => 'اتركه فارغاً للإنشاء التلقائي من رمز المنتج والمقاس/اللون.',
@@ -52,6 +54,20 @@ return [
         'variant_needs_one' => 'يجب أن يحتوي المنتج على متغيّر واحد على الأقل.',
         'variant_has_batches' => 'لا يزال هذا المتغيّر يحتوي على دفعات مخزون — قم بتعطيله بدلاً من حذفه.',
         'variant_has_history' => 'هذا المتغيّر له سجل معاملات (مبيعات أو مشتريات أو حركات مخزون) ولا يمكن حذفه. قم بتعطيله بدلاً من ذلك.',
+    ],
+
+    'import' => [
+        'file_helper' => 'قم بتحميل ملف CSV أو Excel. حمّل القالب أعلاه لمعرفة الأعمدة المطلوبة.',
+        'unit_not_found' => 'الوحدة ":unit" غير موجودة. الوحدات المتوفرة: :available.',
+        'duplicate_sku_in_file' => 'رمز SKU ":value" مكرر في هذا الملف.',
+        'duplicate_barcode_in_file' => 'الرمز الشريطي ":value" مكرر في هذا الملف.',
+        'success_title' => 'اكتمل الاستيراد',
+        'success_body' => 'تم استيراد :count منتج/منتجات.',
+        'partial_title' => 'اكتمل الاستيراد مع وجود أخطاء — تم استيراد :imported وفشل :failed',
+        'all_failed_title' => 'فشل الاستيراد — لم يتم استيراد أي صف',
+        'row_error' => 'الصف :row: :message',
+        'more_errors' => 'و :count أخرى',
+        'failed_title' => 'فشل الاستيراد',
     ],
 
 ];

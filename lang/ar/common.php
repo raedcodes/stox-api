@@ -58,6 +58,7 @@ return [
         'month' => 'الشهر',
         'from' => 'من',
         'until' => 'إلى',
+        'file' => 'ملف',
     ],
 
     'actions' => [
