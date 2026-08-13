@@ -35,22 +35,25 @@ class PurchaseReturnsTable
                 ) as computed_total'))
             ->columns([
                 TextColumn::make('purchaseOrder.po_number')
-                    ->label('PO #')
+                    ->label(__('common.fields.po_number'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('purchaseOrder.supplier.name')
-                    ->label('Supplier'),
+                    ->label(__('common.fields.supplier')),
                 TextColumn::make('return_date')
+                    ->label(__('common.fields.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('reason')
+                    ->label(__('common.fields.reason'))
                     ->placeholder('—')
                     ->limit(40),
                 TextColumn::make('total')
+                    ->label(__('common.fields.total'))
                     ->state(fn (PurchaseReturn $record) => $record->computed_total)
                     ->money(fn () => tenant('currency')?->value),
                 IconColumn::make('processed_at')
-                    ->label('Processed')
+                    ->label(__('common.fields.processed'))
                     ->boolean()
                     ->getStateUsing(fn (PurchaseReturn $record) => $record->processed_at !== null),
             ])
@@ -58,13 +61,13 @@ class PurchaseReturnsTable
             ->defaultSort('return_date', 'desc')
             ->filters([
                 SelectFilter::make('purchase_order_id')
-                    ->label('Purchase order')
+                    ->label(__('purchase_returns.fields.purchase_order'))
                     ->options(fn () => PurchaseOrder::query()->pluck('po_number', 'id')),
             ])
             ->recordActions([
                 ActionGroup::make([
                     Action::make('process')
-                        ->label('Process Return')
+                        ->label(__('common.actions.process_return'))
                         ->icon('heroicon-o-arrow-uturn-left')
                         ->color('success')
                         ->requiresConfirmation()
@@ -74,12 +77,12 @@ class PurchaseReturnsTable
                                 $record->process();
 
                                 Notification::make()
-                                    ->title('Return processed')
+                                    ->title(__('common.notifications.return_processed'))
                                     ->success()
                                     ->send();
                             } catch (RuntimeException $e) {
                                 Notification::make()
-                                    ->title('Cannot process return')
+                                    ->title(__('common.notifications.cannot_process_return'))
                                     ->body($e->getMessage())
                                     ->danger()
                                     ->send();

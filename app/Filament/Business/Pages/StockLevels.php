@@ -36,6 +36,16 @@ class StockLevels extends Page implements HasTable
 
     protected string $view = 'filament.business.pages.stock-levels';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('stock_levels.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('stock_levels.navigation_label');
+    }
+
     public function getTableRecordKey(Model|array $record): string
     {
         return "{$record->product_id}-{$record->location_id}";
@@ -62,53 +72,53 @@ class StockLevels extends Page implements HasTable
             )
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('product.sku')
-                    ->label('SKU')
+                    ->label(__('common.fields.sku'))
                     ->searchable(),
                 TextColumn::make('product.brand.name')
-                    ->label('Brand')
+                    ->label(__('common.fields.brand'))
                     ->placeholder('—'),
                 TextColumn::make('location.name')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->sortable(),
                 TextColumn::make('total_quantity')
-                    ->label('On hand')
+                    ->label(__('dashboard.columns.on_hand'))
                     ->sortable(),
                 TextColumn::make('on_order_quantity')
-                    ->label('On order')
+                    ->label(__('stock_levels.fields.on_order'))
                     ->placeholder('—')
                     ->sortable(),
                 TextColumn::make('product.reorder_level')
-                    ->label('Reorder at')
+                    ->label(__('products.fields.reorder_at'))
                     ->placeholder('—'),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label(__('common.fields.status'))
                     ->state(function (ProductBatch $record) {
                         $onHand = (float) $record->total_quantity;
                         $reorderLevel = $record->product?->reorder_level;
 
                         return match (true) {
-                            $onHand <= 0 => 'Out of stock',
-                            $reorderLevel !== null && $onHand <= (float) $reorderLevel => 'Low stock',
-                            default => 'OK',
+                            $onHand <= 0 => __('stock_levels.status.out_of_stock'),
+                            $reorderLevel !== null && $onHand <= (float) $reorderLevel => __('stock_levels.status.low_stock'),
+                            default => __('stock_levels.status.ok'),
                         };
                     })
                     ->badge()
                     ->color(fn (string $state) => match ($state) {
-                        'Out of stock' => 'danger',
-                        'Low stock' => 'warning',
+                        __('stock_levels.status.out_of_stock') => 'danger',
+                        __('stock_levels.status.low_stock') => 'warning',
                         default => 'success',
                     }),
             ])
             ->filters([
                 SelectFilter::make('product_id')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->options(fn () => Product::query()->pluck('name', 'id')),
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
             ])
             ->defaultSort('total_quantity', 'asc')

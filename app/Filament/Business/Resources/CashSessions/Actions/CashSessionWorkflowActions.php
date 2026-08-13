@@ -23,33 +23,33 @@ class CashSessionWorkflowActions
     public static function openTill(): Action
     {
         return Action::make('openTill')
-            ->label('Open Till')
+            ->label(__('cash_sessions.actions.open_till'))
             ->icon('heroicon-o-lock-open')
             ->color('success')
             ->schema([
                 Select::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->where('is_active', true)->pluck('name', 'id'))
                     ->default(fn () => session('current_location_id'))
                     ->searchable()
                     ->required(),
                 TextInput::make('opening_float')
-                    ->label('Opening float')
+                    ->label(__('cash_sessions.fields.opening_float'))
                     ->numeric()
                     ->minValue(0)
                     ->required()
                     ->default(0)
                     ->prefix(fn () => tenant('currency')?->value)
-                    ->helperText('The cash already in the drawer before any sales are rung up.'),
+                    ->helperText(__('cash_sessions.opening_float_helper')),
             ])
             ->action(function (array $data) {
                 try {
                     CashSession::openAt((int) $data['location_id'], (float) $data['opening_float']);
 
-                    Notification::make()->title('Till opened')->success()->send();
+                    Notification::make()->title(__('cash_sessions.notifications.opened'))->success()->send();
                 } catch (RuntimeException $e) {
                     Notification::make()
-                        ->title('Cannot open till')
+                        ->title(__('cash_sessions.notifications.cannot_open'))
                         ->body($e->getMessage())
                         ->danger()
                         ->send();
@@ -60,33 +60,33 @@ class CashSessionWorkflowActions
     public static function closeTill(): Action
     {
         return Action::make('closeTill')
-            ->label('Close Till')
+            ->label(__('cash_sessions.actions.close_till'))
             ->icon('heroicon-o-lock-closed')
             ->color('warning')
             ->visible(fn (CashSession $record) => $record->status === CashSessionStatus::Open)
             ->schema(fn (CashSession $record) => [
                 Placeholder::make('expected_cash_preview')
-                    ->label('Expected cash right now')
+                    ->label(__('cash_sessions.fields.expected_cash_now'))
                     ->content(fn () => ($record->location->name).': '.tenant('currency')?->value.' '.number_format($record->expectedCash(), 2)),
                 TextInput::make('counted_cash')
-                    ->label('Counted cash')
+                    ->label(__('cash_sessions.fields.counted_cash'))
                     ->numeric()
                     ->minValue(0)
                     ->required()
                     ->prefix(fn () => tenant('currency')?->value),
                 Textarea::make('notes')
-                    ->label('Notes')
+                    ->label(__('common.fields.notes'))
                     ->rows(2)
-                    ->helperText('Explain any discrepancy between counted and expected cash, if there is one.'),
+                    ->helperText(__('cash_sessions.notes_helper')),
             ])
             ->action(function (array $data, CashSession $record) {
                 try {
                     $record->close((float) $data['counted_cash'], $data['notes'] ?? null);
 
-                    Notification::make()->title('Till closed')->success()->send();
+                    Notification::make()->title(__('cash_sessions.notifications.closed'))->success()->send();
                 } catch (RuntimeException $e) {
                     Notification::make()
-                        ->title('Cannot close till')
+                        ->title(__('cash_sessions.notifications.cannot_close'))
                         ->body($e->getMessage())
                         ->danger()
                         ->send();

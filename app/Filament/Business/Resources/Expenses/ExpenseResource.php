@@ -48,31 +48,44 @@ class ExpenseResource extends Resource
 
     protected static ?int $navigationSort = 60;
 
+    public static function getModelLabel(): string
+    {
+        return __('expenses.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('expenses.plural_model_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('category')
+                    ->label(__('expenses.fields.category'))
                     ->options(ExpenseCategory::options())
                     ->default(ExpenseCategory::Other->value)
                     ->required(),
-                TextInput::make('description'),
+                TextInput::make('description')
+                    ->label(__('common.fields.description')),
                 TextInput::make('amount')
+                    ->label(__('common.fields.amount'))
                     ->numeric()
                     ->minValue(0.01)
                     ->required()
                     ->prefix(fn () => tenant('currency')?->value),
                 DatePicker::make('expense_date')
-                    ->label('Date')
+                    ->label(__('common.fields.date'))
                     ->required()
                     ->default(now()),
                 Select::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->relationship('location', 'name')
                     ->searchable()
                     ->preload()
                     ->default(fn () => session('current_location_id'))
-                    ->helperText('Leave blank for a company-wide expense not tied to one location.'),
+                    ->helperText(__('expenses.fields.location_helper')),
             ]);
     }
 
@@ -82,27 +95,31 @@ class ExpenseResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with('location'))
             ->columns([
                 TextColumn::make('expense_date')
-                    ->label('Date')
+                    ->label(__('common.fields.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('category')
+                    ->label(__('expenses.fields.category'))
                     ->badge(),
                 TextColumn::make('description')
+                    ->label(__('common.fields.description'))
                     ->placeholder('—')
                     ->limit(40),
                 TextColumn::make('location.name')
-                    ->label('Location')
-                    ->placeholder('Company-wide'),
+                    ->label(__('common.fields.location'))
+                    ->placeholder(__('expenses.company_wide')),
                 TextColumn::make('amount')
+                    ->label(__('common.fields.amount'))
                     ->money(fn () => tenant('currency')?->value)
                     ->sortable(),
             ])
             ->defaultSort('expense_date', 'desc')
             ->filters([
                 SelectFilter::make('category')
+                    ->label(__('expenses.fields.category'))
                     ->options(ExpenseCategory::options()),
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
                 TrashedFilter::make(),
             ])

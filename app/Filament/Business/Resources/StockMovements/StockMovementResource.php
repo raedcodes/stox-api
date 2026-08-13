@@ -34,7 +34,22 @@ class StockMovementResource extends Resource
 
     protected static ?int $navigationSort = 42;
 
-    protected static ?string $navigationLabel = 'Stock Movements';
+    protected static ?string $navigationLabel = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('stock_movements.plural_model_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('stock_movements.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('stock_movements.plural_model_label');
+    }
 
     public static function infolist(Schema $schema): Schema
     {

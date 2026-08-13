@@ -37,6 +37,16 @@ class BusinessProfile extends Page
 
     protected string $view = 'filament.business.pages.business-profile';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('settings.business_profile.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('settings.business_profile.navigation_label');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -73,29 +83,32 @@ class BusinessProfile extends Page
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Business name')
+                    ->label(__('settings.business_profile.fields.business_name'))
                     ->required(),
                 FileUpload::make('logo')
                     ->image()
                     ->directory(fn () => 'tenant-logos/'.tenant('id'))
                     ->visibility('public'),
                 Textarea::make('address')
+                    ->label(__('common.fields.address'))
                     ->rows(2),
                 TextInput::make('tax_number')
-                    ->label('Tax number'),
+                    ->label(__('settings.business_profile.fields.tax_number')),
                 Select::make('business_type')
-                    ->label('Business type')
+                    ->label(__('settings.business_profile.fields.business_type'))
                     ->options(BusinessType::options())
                     ->required(),
                 Select::make('currency')
+                    ->label(__('settings.business_profile.fields.currency'))
                     ->options(Currency::options())
                     ->required(),
                 Select::make('timezone')
+                    ->label(__('settings.business_profile.fields.timezone'))
                     ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
                     ->searchable()
                     ->required(),
                 TextInput::make('domain')
-                    ->label('Subdomain')
+                    ->label(__('settings.business_profile.fields.subdomain'))
                     ->disabled(),
             ]);
     }
@@ -116,7 +129,7 @@ class BusinessProfile extends Page
         ]);
 
         Notification::make()
-            ->title('Business profile saved')
+            ->title(__('settings.business_profile.saved'))
             ->success()
             ->send();
     }
@@ -125,7 +138,7 @@ class BusinessProfile extends Page
     {
         return [
             Action::make('save')
-                ->label('Save')
+                ->label(__('common.actions.save'))
                 ->submit('save'),
         ];
     }

@@ -34,7 +34,22 @@ class ActivityLogResource extends Resource
 
     protected static ?int $navigationSort = 70;
 
-    protected static ?string $navigationLabel = 'Activity Log';
+    protected static ?string $navigationLabel = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('activity_logs.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('activity_logs.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('activity_logs.plural_model_label');
+    }
 
     public static function infolist(Schema $schema): Schema
     {

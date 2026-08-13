@@ -7,16 +7,16 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-gray-200 bg-gray-50 text-left text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
-                    <th class="px-3 py-2 font-semibold">Date</th>
-                    <th class="px-3 py-2 font-semibold">Type</th>
-                    <th class="px-3 py-2 font-semibold">Description</th>
-                    <th class="px-3 py-2 text-right font-semibold">Amount</th>
-                    <th class="px-3 py-2 text-right font-semibold">Balance</th>
+                    <th class="px-3 py-2 font-semibold">{{ __('common.fields.date') }}</th>
+                    <th class="px-3 py-2 font-semibold">{{ __('common.fields.type') }}</th>
+                    <th class="px-3 py-2 font-semibold">{{ __('common.fields.description') }}</th>
+                    <th class="px-3 py-2 text-right font-semibold">{{ __('common.fields.amount') }}</th>
+                    <th class="px-3 py-2 text-right font-semibold">{{ __('common.fields.balance') }}</th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="border-b border-gray-200 italic text-gray-500 dark:border-white/10 dark:text-gray-400">
-                    <td class="px-3 py-2.5" colspan="4">Opening balance</td>
+                    <td class="px-3 py-2.5" colspan="4">{{ __('common.fields.opening_balance') }}</td>
                     <td class="px-3 py-2.5 text-right tabular-nums">{{ tenant('currency')?->value }} {{ number_format($this->openingBalance(), 2) }}</td>
                 </tr>
                 @forelse ($this->rows() as $row)
@@ -29,14 +29,14 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="px-3 py-4 text-gray-400" colspan="5">Select a customer to see their statement.</td>
+                        <td class="px-3 py-4 text-gray-400" colspan="5">{{ __('customer_statement.empty_state') }}</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
 
         <div class="mt-4 flex justify-end border-t-2 border-gray-950 pt-2 font-semibold tabular-nums text-gray-950 dark:border-white dark:text-white">
-            Closing balance: {{ tenant('currency')?->value }} {{ number_format($this->closingBalance(), 2) }}
+            {{ __('common.fields.closing_balance') }}: {{ tenant('currency')?->value }} {{ number_format($this->closingBalance(), 2) }}
         </div>
     </div>
 </x-filament-panels::page>

@@ -20,26 +20,27 @@ class RecordCustomerPaymentAction
     public static function make(): Action
     {
         return Action::make('recordPayment')
-            ->label('Record Payment')
+            ->label(__('customers.actions.record_payment'))
             ->icon('heroicon-o-banknotes')
             ->color('success')
             ->visible(fn (?Customer $record) => $record !== null && ! $record->is_walk_in)
             ->schema(fn (Customer $record) => [
                 Placeholder::make('current_balance')
-                    ->label('Current balance')
+                    ->label(__('customers.fields.current_balance'))
                     ->content(fn () => tenant('currency')?->value.' '.number_format($record->balance(), 2)),
                 TextInput::make('amount')
+                    ->label(__('common.fields.amount'))
                     ->numeric()
                     ->minValue(0.01)
                     ->required()
                     ->prefix(fn () => tenant('currency')?->value),
                 DatePicker::make('transaction_date')
-                    ->label('Date')
+                    ->label(__('common.fields.date'))
                     ->required()
                     ->default(now()),
                 TextInput::make('description')
-                    ->label('Reference')
-                    ->helperText('e.g. receipt or reference number.'),
+                    ->label(__('common.fields.reference'))
+                    ->helperText(__('customers.reference_helper')),
             ])
             ->action(function (array $data, Customer $record) {
                 $balance = $record->balance();
@@ -53,8 +54,8 @@ class RecordCustomerPaymentAction
 
                 if ((float) $data['amount'] > $balance) {
                     Notification::make()
-                        ->title('Payment recorded')
-                        ->body('This exceeds the outstanding balance — the difference is now a credit on the account.')
+                        ->title(__('customers.notifications.payment_recorded'))
+                        ->body(__('customers.notifications.exceeds_balance'))
                         ->warning()
                         ->send();
 
@@ -62,7 +63,7 @@ class RecordCustomerPaymentAction
                 }
 
                 Notification::make()
-                    ->title('Payment recorded')
+                    ->title(__('customers.notifications.payment_recorded'))
                     ->success()
                     ->send();
             });

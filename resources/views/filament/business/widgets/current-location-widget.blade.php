@@ -16,7 +16,7 @@
                 class="text-sm font-medium text-gray-950 dark:text-white"
                 style="display: block;"
             >
-                Working from
+                {{ __('dashboard.working_from') }}
             </label>
 
             <x-filament::input.wrapper style="display: block; width: 20rem; max-width: 100%;">
@@ -26,7 +26,7 @@
                     class="fi-select-input"
                     style="width: 100%;"
                 >
-                    <option value="">All Locations</option>
+                    <option value="">{{ __('dashboard.all_locations') }}</option>
                     @foreach ($this->getLocations() as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
@@ -37,7 +37,7 @@
                 class="text-xs text-gray-400 dark:text-gray-500"
                 style="display: block; margin: 0;"
             >
-                Scopes this dashboard and defaults into POS, purchase orders, and transfers — still changeable per form.
+                {{ __('dashboard.location_helper') }}
             </p>
         </div>
     </x-filament::section>

@@ -34,11 +34,19 @@ class AiAssistant extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static ?string $navigationLabel = 'Ask Stox';
+    protected static ?string $navigationLabel = null;
 
-    // Filament otherwise derives the page heading from the class name
-    // ("AiAssistant" -> "Ai Assistant") — set explicitly for correct casing.
-    protected static ?string $title = 'AI Assistant';
+    protected static ?string $title = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('ai_assistant.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('ai_assistant.title');
+    }
 
     protected static UnitEnum|string|null $navigationGroup = null;
 
@@ -61,21 +69,18 @@ class AiAssistant extends Page
     public string $question = '';
 
     /**
-     * @var array<string, string>
+     * @var array<int, string>
      */
-    protected const SUGGESTED_QUESTIONS = [
-        'top_products' => 'What are my top-selling products?',
-        'low_stock' => 'Which products are low in stock?',
-        'recent_sales' => 'Analyze my recent sales',
-        'business_summary' => 'Give me a business summary',
-    ];
+    protected const SUGGESTED_QUESTION_KEYS = ['top_products', 'low_stock', 'recent_sales', 'business_summary'];
 
     /**
      * @return array<string, string>
      */
     public function suggestedQuestions(): array
     {
-        return self::SUGGESTED_QUESTIONS;
+        return collect(self::SUGGESTED_QUESTION_KEYS)
+            ->mapWithKeys(fn (string $key) => [$key => __('ai_assistant.suggested_questions.'.$key)])
+            ->all();
     }
 
     /**
@@ -99,13 +104,11 @@ class AiAssistant extends Page
      */
     public function askSuggestion(string $key): void
     {
-        $question = self::SUGGESTED_QUESTIONS[$key] ?? null;
-
-        if ($question === null) {
+        if (! in_array($key, self::SUGGESTED_QUESTION_KEYS, true)) {
             return;
         }
 
-        $this->question = $question;
+        $this->question = __('ai_assistant.suggested_questions.'.$key);
         $this->ask();
     }
 
@@ -113,7 +116,7 @@ class AiAssistant extends Page
     {
         return [
             Action::make('clearConversation')
-                ->label('Clear Conversation')
+                ->label(__('ai_assistant.clear_conversation'))
                 ->icon('heroicon-o-trash')
                 ->color('gray')
                 ->visible(fn () => ! empty($this->conversation))
@@ -144,7 +147,7 @@ class AiAssistant extends Page
             $answer = $this->runConversationLoop();
             $this->conversation[] = ['role' => 'assistant', 'content' => $answer];
         } catch (RuntimeException $e) {
-            $this->conversation[] = ['role' => 'assistant', 'content' => "Sorry, I couldn't answer that: {$e->getMessage()}"];
+            $this->conversation[] = ['role' => 'assistant', 'content' => __('ai_assistant.error_prefix', ['message' => $e->getMessage()])];
         }
     }
 

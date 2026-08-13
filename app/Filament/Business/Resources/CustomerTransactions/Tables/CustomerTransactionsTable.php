@@ -22,24 +22,28 @@ class CustomerTransactionsTable
         return $table
             ->columns([
                 TextColumn::make('transaction_number')
-                    ->label('Transaction #')
+                    ->label(__('common.fields.transaction_number'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('customer.name')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('type'),
+                TextColumn::make('type')
+                    ->label(__('common.fields.type')),
                 TextColumn::make('amount')
+                    ->label(__('common.fields.amount'))
                     ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('referenceLabel')
-                    ->label('Reference')
+                    ->label(__('common.fields.reference'))
                     ->state(fn (CustomerTransaction $record) => $record->referenceLabel())
                     ->placeholder('—'),
                 TextColumn::make('description')
+                    ->label(__('common.fields.description'))
                     ->placeholder('—')
                     ->limit(40),
                 TextColumn::make('transaction_date')
+                    ->label(__('common.fields.date'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -47,9 +51,10 @@ class CustomerTransactionsTable
             ->defaultSort('transaction_date', 'desc')
             ->filters([
                 SelectFilter::make('customer_id')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->options(fn () => Customer::query()->pluck('name', 'id')),
                 SelectFilter::make('type')
+                    ->label(__('common.fields.type'))
                     ->options(CustomerTransactionType::options()),
             ])
             ->recordActions([

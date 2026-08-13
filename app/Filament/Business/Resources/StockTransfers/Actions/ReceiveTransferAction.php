@@ -23,7 +23,7 @@ class ReceiveTransferAction
     public static function make(): Action
     {
         return Action::make('receiveTransfer')
-            ->label('Receive')
+            ->label(__('stock_transfers.actions.receive'))
             ->icon('heroicon-o-inbox-arrow-down')
             ->color('success')
             ->visible(fn (StockTransfer $record) => in_array(
@@ -33,19 +33,19 @@ class ReceiveTransferAction
             ))
             ->schema(fn (StockTransfer $record) => [
                 Repeater::make('lines')
-                    ->label('Items to receive')
+                    ->label(__('stock_transfers.fields.items_to_receive'))
                     ->schema([
                         Hidden::make('stock_transfer_item_id'),
                         TextInput::make('product_name')
-                            ->label('Product')
+                            ->label(__('common.fields.product'))
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('remaining')
-                            ->label('Remaining')
+                            ->label(__('stock_transfers.fields.remaining'))
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('quantity_received')
-                            ->label('Receive now')
+                            ->label(__('stock_transfers.fields.receive_now'))
                             ->numeric()
                             ->minValue(0)
                             ->maxValue(fn (Get $get) => (float) $get('remaining'))
@@ -71,7 +71,7 @@ class ReceiveTransferAction
 
                 if ($lines->isEmpty()) {
                     Notification::make()
-                        ->title('Nothing to receive')
+                        ->title(__('stock_transfers.notifications.nothing_to_receive'))
                         ->warning()
                         ->send();
 
@@ -86,12 +86,12 @@ class ReceiveTransferAction
                     );
 
                     Notification::make()
-                        ->title('Transfer received')
+                        ->title(__('stock_transfers.notifications.received'))
                         ->success()
                         ->send();
                 } catch (RuntimeException $e) {
                     Notification::make()
-                        ->title('Cannot receive transfer')
+                        ->title(__('stock_transfers.notifications.cannot_receive'))
                         ->body($e->getMessage())
                         ->danger()
                         ->send();

@@ -18,7 +18,6 @@ class LowStockWidget extends TableWidget
         return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]);
     }
 
-    protected static ?string $heading = 'Low & out-of-stock products';
 
     public function table(Table $table): Table
     {
@@ -28,6 +27,7 @@ class LowStockWidget extends TableWidget
         $locationClause = $locationId ? ' and product_batches.location_id = ?' : '';
 
         return $table
+            ->heading(__('dashboard.widgets.low_stock_heading'))
             ->query(
                 fn (): Builder => Product::query()
                     ->where('is_active', true)
@@ -42,21 +42,21 @@ class LowStockWidget extends TableWidget
             )
             ->columns([
                 TextColumn::make('name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable(),
                 TextColumn::make('sku')
-                    ->label('SKU'),
+                    ->label(__('common.fields.sku')),
                 TextColumn::make('stock_on_hand')
-                    ->label('On hand')
+                    ->label(__('dashboard.columns.on_hand'))
                     ->color(fn ($state) => (float) $state <= 0 ? 'danger' : 'warning')
                     ->badge(),
                 TextColumn::make('reorder_level')
-                    ->label('Reorder at')
+                    ->label(__('products.fields.reorder_at'))
                     ->placeholder('—'),
             ])
             ->recordActions([
                 Action::make('createPurchaseOrder')
-                    ->label('Create PO')
+                    ->label(__('dashboard.actions.create_po'))
                     ->icon('heroicon-o-plus-circle')
                     ->color('warning')
                     ->visible(fn () => auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]) ?? false)

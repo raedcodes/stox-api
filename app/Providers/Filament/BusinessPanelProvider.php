@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Enums\NavigationGroup;
+use App\Filament\Business\Auth\BusinessEditProfile;
+use Filament\Navigation\NavigationGroup as FilamentNavigationGroup;
 use App\Filament\Business\Auth\BusinessLogin;
 use App\Filament\Business\Widgets\CurrentLocationWidget;
 use App\Filament\Business\Widgets\DashboardKpisWidget;
@@ -14,6 +16,7 @@ use App\Filament\Business\Widgets\SalesRevenueTrendChart;
 use App\Filament\Business\Widgets\StockExpiryTimelineChart;
 use App\Filament\Business\Widgets\TopProductsChart;
 use App\Filament\Business\Widgets\TopProductsWidget;
+use App\Http\Middleware\SetLocale;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -44,7 +47,7 @@ class BusinessPanelProvider extends PanelProvider
             ->favicon(fn () => tenant('logo') ? asset('storage/'.tenant('logo')) : null)
             ->login(BusinessLogin::class)
             ->authGuard('business')
-            ->profile()
+            ->profile(BusinessEditProfile::class)
             ->viteTheme('resources/css/filament/business/theme.css')
             ->colors([
                 'primary' => Color::Amber,
@@ -54,7 +57,20 @@ class BusinessPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-            ->navigationGroups(NavigationGroup::class)
+            ->navigationGroups(
+                // Built manually (rather than passing NavigationGroup::class
+                // directly) so each group's label is a lazy closure. Passing
+                // the enum class makes Filament resolve ->getLabel() once,
+                // eagerly, at panel-boot time — before SetLocale's middleware
+                // has run for the request — permanently baking in whatever
+                // the default locale was, regardless of the user's actual
+                // preference.
+                collect(NavigationGroup::cases())
+                    ->mapWithKeys(fn (NavigationGroup $case) => [
+                        $case->name => FilamentNavigationGroup::make(fn () => $case->getLabel()),
+                    ])
+                    ->all()
+            )
             ->widgets([
                 CurrentLocationWidget::class,
                 DashboardKpisWidget::class,
@@ -88,6 +104,7 @@ class BusinessPanelProvider extends PanelProvider
             ->resourceEditPageRedirect('index')
             ->authMiddleware([
                 Authenticate::class,
+                SetLocale::class,
             ]);
     }
 }

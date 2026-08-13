@@ -40,6 +40,16 @@ class OpeningStockEntry extends Page
 
     protected string $view = 'filament.business.pages.opening-stock-entry';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('opening_stock_entry.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('opening_stock_entry.navigation_label');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -62,31 +72,33 @@ class OpeningStockEntry extends Page
         return $schema
             ->components([
                 Repeater::make('lines')
-                    ->label('Opening stock')
+                    ->label(__('opening_stock_entry.navigation_label'))
                     ->schema([
                         Select::make('product_id')
-                            ->label('Product')
+                            ->label(__('common.fields.product'))
                             ->options(fn () => Product::query()->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->required(),
                         Select::make('location_id')
-                            ->label('Location')
+                            ->label(__('common.fields.location'))
                             ->options(fn () => Location::query()->where('is_active', true)->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->required(),
                         TextInput::make('quantity')
+                            ->label(__('common.fields.quantity'))
                             ->numeric()
                             ->minValue(0.01)
                             ->required(),
                         TextInput::make('batch_number')
-                            ->label('Batch #'),
+                            ->label(__('purchase_orders.fields.batch_number')),
                         DatePicker::make('expiry_date')
-                            ->helperText('Leave empty if this batch doesn\'t expire.'),
+                            ->label(__('product_batches.fields.expiry_date'))
+                            ->helperText(__('product_batches.expiry_date_helper')),
                     ])
                     ->columns(5)
-                    ->addActionLabel('Add product')
+                    ->addActionLabel(__('common.fields.add_product'))
                     ->minItems(1)
                     ->required(),
             ]);
@@ -115,7 +127,7 @@ class OpeningStockEntry extends Page
         });
 
         Notification::make()
-            ->title('Opening stock recorded')
+            ->title(__('opening_stock_entry.saved'))
             ->success()
             ->send();
 
@@ -126,7 +138,7 @@ class OpeningStockEntry extends Page
     {
         return [
             Action::make('save')
-                ->label('Save')
+                ->label(__('common.actions.save'))
                 ->submit('save'),
         ];
     }

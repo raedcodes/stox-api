@@ -13,24 +13,28 @@ class SupplierTransactionInfolist
     {
         return $schema
             ->components([
-                Section::make('Transaction details')
+                Section::make(__('supplier_transactions.section_title'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('transaction_number')
-                            ->label('Transaction #'),
+                            ->label(__('common.fields.transaction_number')),
                         TextEntry::make('supplier.name')
-                            ->label('Supplier'),
+                            ->label(__('common.fields.supplier')),
                         TextEntry::make('type')
+                            ->label(__('common.fields.type'))
                             ->badge(),
                         TextEntry::make('amount')
+                            ->label(__('common.fields.amount'))
                             ->money(fn () => tenant('currency')?->value),
                         TextEntry::make('referenceLabel')
-                            ->label('Reference')
+                            ->label(__('common.fields.reference'))
                             ->state(fn (SupplierTransaction $record) => $record->referenceLabel())
                             ->placeholder('—'),
                         TextEntry::make('transaction_date')
+                            ->label(__('common.fields.date'))
                             ->date(),
                         TextEntry::make('description')
+                            ->label(__('common.fields.description'))
                             ->placeholder('—')
                             ->columnSpanFull(),
                     ]),

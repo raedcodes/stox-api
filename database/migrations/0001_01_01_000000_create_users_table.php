@@ -19,6 +19,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('is_active')->default(true);
+            // Nullable: falls back to config('app.locale') when unset. Only
+            // 'en'/'ar' are meaningful today (see SetLocale middleware).
+            $table->string('locale', 5)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

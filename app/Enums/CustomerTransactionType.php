@@ -14,12 +14,7 @@ enum CustomerTransactionType: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::CreditSale => 'Sale on account (owed)',
-            self::Payment => 'Payment received',
-            self::Return => 'Return (credit)',
-            self::SaleCancelled => 'Sale cancelled (voided)',
-        };
+        return __('enums.customer_transaction_type.'.$this->value);
     }
 
     public function getColor(): string

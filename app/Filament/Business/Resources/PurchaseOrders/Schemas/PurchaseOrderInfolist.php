@@ -16,85 +16,89 @@ class PurchaseOrderInfolist
     {
         return $schema
             ->components([
-                Section::make('Purchase order details')
+                Section::make(__('purchase_orders.section_title'))
                     ->columns(3)
                     ->schema([
                         TextEntry::make('po_number')
-                            ->label('PO #'),
+                            ->label(__('common.fields.po_number')),
                         TextEntry::make('status')
+                            ->label(__('common.fields.status'))
                             ->badge(),
                         TextEntry::make('supplier.name')
-                            ->label('Supplier'),
+                            ->label(__('common.fields.supplier')),
                         TextEntry::make('location.name')
-                            ->label('Deliver to'),
+                            ->label(__('purchase_orders.fields.deliver_to')),
                         TextEntry::make('order_date')
+                            ->label(__('common.fields.date'))
                             ->date(),
                         TextEntry::make('expected_date')
-                            ->label('Expected delivery date')
+                            ->label(__('purchase_orders.fields.expected_date'))
                             ->date()
                             ->placeholder('—'),
                         TextEntry::make('notes')
+                            ->label(__('common.fields.notes'))
                             ->placeholder('—')
                             ->columnSpanFull(),
                     ]),
-                Section::make('Items')
+                Section::make(__('purchase_orders.items_section_title'))
                     ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
                             ->table([
-                                TableColumn::make('Product'),
-                                TableColumn::make('Ordered'),
-                                TableColumn::make('Received'),
-                                TableColumn::make('Unit cost'),
-                                TableColumn::make('Line total'),
+                                TableColumn::make(__('common.fields.product')),
+                                TableColumn::make(__('purchase_orders.fields.ordered')),
+                                TableColumn::make(__('purchase_orders.fields.received')),
+                                TableColumn::make(__('common.fields.unit_cost')),
+                                TableColumn::make(__('common.fields.line_total')),
                             ])
                             ->schema([
                                 TextEntry::make('product.name')
-                                    ->label('Product'),
+                                    ->label(__('common.fields.product')),
                                 TextEntry::make('quantity_ordered')
-                                    ->label('Ordered'),
+                                    ->label(__('purchase_orders.fields.ordered')),
                                 TextEntry::make('quantity_received')
-                                    ->label('Received'),
+                                    ->label(__('purchase_orders.fields.received')),
                                 TextEntry::make('unit_cost')
-                                    ->label('Unit cost')
+                                    ->label(__('common.fields.unit_cost'))
                                     ->money(fn () => tenant('currency')?->value),
                                 TextEntry::make('lineTotal')
-                                    ->label('Line total')
+                                    ->label(__('common.fields.line_total'))
                                     ->state(fn (PurchaseOrderItem $record) => $record->quantity_ordered * $record->unit_cost)
                                     ->money(fn () => tenant('currency')?->value),
                             ]),
                     ]),
-                Section::make('Landed costs')
+                Section::make(__('purchase_orders.landed_costs_section_title'))
                     ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('charges')
                             ->hiddenLabel()
                             ->table([
-                                TableColumn::make('Description'),
-                                TableColumn::make('Amount'),
+                                TableColumn::make(__('common.fields.description')),
+                                TableColumn::make(__('common.fields.amount')),
                             ])
                             ->schema([
                                 TextEntry::make('description')
-                                    ->label('Description'),
+                                    ->label(__('common.fields.description')),
                                 TextEntry::make('amount')
-                                    ->label('Amount')
+                                    ->label(__('common.fields.amount'))
                                     ->money(fn () => tenant('currency')?->value),
                             ]),
                     ])
                     ->visible(fn (PurchaseOrder $record) => $record->charges()->exists()),
-                Section::make('Totals')
+                Section::make(__('purchase_orders.totals_section_title'))
                     ->columns(3)
                     ->schema([
                         TextEntry::make('subtotal')
+                            ->label(__('common.fields.subtotal'))
                             ->state(fn (PurchaseOrder $record) => $record->subtotal())
                             ->money(fn () => tenant('currency')?->value),
                         TextEntry::make('landedCostTotal')
-                            ->label('Landed costs')
+                            ->label(__('purchase_orders.fields.landed_costs'))
                             ->state(fn (PurchaseOrder $record) => $record->landedCostTotal())
                             ->money(fn () => tenant('currency')?->value),
                         TextEntry::make('total')
-                            ->label('Total')
+                            ->label(__('common.fields.total'))
                             ->weight('bold')
                             ->state(fn (PurchaseOrder $record) => $record->total())
                             ->money(fn () => tenant('currency')?->value),

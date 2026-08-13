@@ -20,57 +20,57 @@ class StockTransferWorkflowActions
     public static function submitForApproval(): Action
     {
         return Action::make('submitForApproval')
-            ->label('Submit for Approval')
+            ->label(__('stock_transfers.actions.submit_for_approval'))
             ->icon('heroicon-o-paper-airplane')
             ->color('gray')
             ->requiresConfirmation()
             ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::Draft)
-            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->submitForApproval(), 'Submitted for approval', 'Cannot submit'));
+            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->submitForApproval(), __('stock_transfers.notifications.submitted'), __('stock_transfers.notifications.cannot_submit')));
     }
 
     public static function approve(): Action
     {
         return Action::make('approve')
-            ->label('Approve')
+            ->label(__('stock_transfers.actions.approve'))
             ->icon('heroicon-o-check-circle')
             ->color('success')
             ->requiresConfirmation()
             ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::PendingApproval)
-            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->approve(), 'Transfer approved', 'Cannot approve'));
+            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->approve(), __('stock_transfers.notifications.approved'), __('stock_transfers.notifications.cannot_approve')));
     }
 
     public static function reject(): Action
     {
         return Action::make('reject')
-            ->label('Reject')
+            ->label(__('stock_transfers.actions.reject'))
             ->icon('heroicon-o-x-circle')
             ->color('danger')
             ->requiresConfirmation()
             ->schema([
                 Textarea::make('reason')
-                    ->label('Reason')
+                    ->label(__('common.fields.reason'))
                     ->rows(2),
             ])
             ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::PendingApproval)
-            ->action(fn (array $data, StockTransfer $record) => self::run($record, fn () => $record->reject($data['reason'] ?? null), 'Transfer rejected', 'Cannot reject'));
+            ->action(fn (array $data, StockTransfer $record) => self::run($record, fn () => $record->reject($data['reason'] ?? null), __('stock_transfers.notifications.rejected'), __('stock_transfers.notifications.cannot_reject')));
     }
 
     public static function markInTransit(): Action
     {
         return Action::make('markInTransit')
-            ->label('Mark In Transit')
+            ->label(__('stock_transfers.actions.mark_in_transit'))
             ->icon('heroicon-o-truck')
             ->color('warning')
             ->requiresConfirmation()
-            ->modalDescription('This deducts stock from the source location now. The destination only receives it once you confirm arrival.')
+            ->modalDescription(__('stock_transfers.mark_in_transit_description'))
             ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::Approved)
-            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->markInTransit(), 'Transfer marked in transit', 'Cannot mark in transit'));
+            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->markInTransit(), __('stock_transfers.notifications.marked_in_transit'), __('stock_transfers.notifications.cannot_mark_in_transit')));
     }
 
     public static function cancel(): Action
     {
         return Action::make('cancel')
-            ->label('Cancel Transfer')
+            ->label(__('stock_transfers.actions.cancel_transfer'))
             ->icon('heroicon-o-no-symbol')
             ->color('danger')
             ->requiresConfirmation()
@@ -79,7 +79,7 @@ class StockTransferWorkflowActions
                 StockTransferStatus::PendingApproval,
                 StockTransferStatus::Approved,
             ], true))
-            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->cancel(), 'Transfer cancelled', 'Cannot cancel'));
+            ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->cancel(), __('stock_transfers.notifications.cancelled'), __('stock_transfers.notifications.cannot_cancel')));
     }
 
     protected static function run(StockTransfer $record, callable $transition, string $successTitle, string $failureTitle): void

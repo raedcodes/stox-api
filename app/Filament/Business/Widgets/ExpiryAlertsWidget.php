@@ -16,13 +16,12 @@ class ExpiryAlertsWidget extends TableWidget
         return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::StoreKeeper]);
     }
 
-    protected static ?string $heading = 'Expiring & expired batches';
-
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         return $table
+            ->heading(__('dashboard.widgets.expiry_alerts_heading'))
             ->query(
                 // Null means "All Locations" (the CurrentLocationWidget
                 // default) — stays unscoped in that case.
@@ -36,15 +35,17 @@ class ExpiryAlertsWidget extends TableWidget
             )
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable(),
                 TextColumn::make('location.name')
-                    ->label('Location'),
+                    ->label(__('common.fields.location')),
                 TextColumn::make('batch_number')
-                    ->label('Batch')
-                    ->placeholder('No batch #'),
-                TextColumn::make('quantity'),
+                    ->label(__('common.fields.batch'))
+                    ->placeholder(__('common.fields.no_batch_number')),
+                TextColumn::make('quantity')
+                    ->label(__('common.fields.quantity')),
                 TextColumn::make('expiry_date')
+                    ->label(__('product_batches.fields.expiry_date'))
                     ->date()
                     ->badge()
                     ->color(fn (ProductBatch $record) => $record->expiry_date->isPast() ? 'danger' : 'warning'),

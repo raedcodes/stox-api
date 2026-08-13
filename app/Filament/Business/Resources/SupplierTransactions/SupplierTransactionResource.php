@@ -37,6 +37,16 @@ class SupplierTransactionResource extends Resource
 
     protected static ?int $navigationSort = 23;
 
+    public static function getModelLabel(): string
+    {
+        return __('supplier_transactions.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('supplier_transactions.plural_model_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SupplierTransactionForm::configure($schema);

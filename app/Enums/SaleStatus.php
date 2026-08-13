@@ -13,11 +13,7 @@ enum SaleStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Draft => 'Draft',
-            self::Completed => 'Completed',
-            self::Cancelled => 'Cancelled',
-        };
+        return __('enums.sale_status.'.$this->value);
     }
 
     public function getColor(): string

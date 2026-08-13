@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -23,7 +24,7 @@ use Illuminate\Support\Collection;
  * version binds its Role model's connection globally (not per-instance),
  * which would silently break under multi-tenant connection switching.
  */
-class Staff extends Authenticatable implements FilamentUser
+class Staff extends Authenticatable implements FilamentUser, HasLocalePreference
 {
     use HasFactory, Notifiable;
 
@@ -36,6 +37,7 @@ class Staff extends Authenticatable implements FilamentUser
         'role',
         'is_active',
         'email_verified_at',
+        'locale',
     ];
 
     protected $hidden = [
@@ -102,5 +104,10 @@ class Staff extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_active && $panel->getId() === 'business';
+    }
+
+    public function preferredLocale(): ?string
+    {
+        return $this->locale;
     }
 }

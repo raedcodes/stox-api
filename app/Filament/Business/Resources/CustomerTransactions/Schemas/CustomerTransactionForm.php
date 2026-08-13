@@ -15,22 +15,26 @@ class CustomerTransactionForm
         return $schema
             ->components([
                 Select::make('customer_id')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->relationship('customer', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('type')
+                    ->label(__('common.fields.type'))
                     ->options(CustomerTransactionType::options())
                     ->required(),
                 TextInput::make('amount')
+                    ->label(__('common.fields.amount'))
                     ->numeric()
                     ->minValue(0.01)
                     ->required()
                     ->prefix(fn () => tenant('currency')?->value),
                 TextInput::make('description')
-                    ->helperText('e.g. invoice number or payment reference.'),
+                    ->label(__('common.fields.description'))
+                    ->helperText(__('customer_transactions.reference_helper')),
                 DatePicker::make('transaction_date')
+                    ->label(__('common.fields.date'))
                     ->required()
                     ->default(now()),
             ]);

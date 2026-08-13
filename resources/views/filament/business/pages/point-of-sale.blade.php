@@ -4,7 +4,7 @@
 >
     <div class="fi-section rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
         <label for="scanInput" class="mb-1 block text-sm font-medium text-gray-950 dark:text-white">
-            Scan or enter barcode / SKU
+            {{ __('pos.scan_label') }}
         </label>
         <div
             class="relative"
@@ -18,7 +18,7 @@
                     wire:model.live.debounce.300ms="scanInput"
                     autofocus
                     autocomplete="off"
-                    placeholder="Scan a barcode or type an SKU, then press Enter"
+                    placeholder="{{ __('pos.scan_placeholder') }}"
                     x-on:keydown.arrow-down.prevent="highlight = matchCount ? (highlight + 1) % matchCount : 0"
                     x-on:keydown.arrow-up.prevent="highlight = matchCount ? (highlight - 1 + matchCount) % matchCount : 0"
                     x-on:keydown.enter.prevent="matchCount ? document.querySelector('[data-match-index=' + highlight + ']')?.click() : $wire.addByScan()"
@@ -46,7 +46,7 @@
         </div>
 
         @if ($lastAddedLabel)
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Added: {{ $lastAddedLabel }}</p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('pos.added_prefix') }}: {{ $lastAddedLabel }}</p>
         @endif
     </div>
 

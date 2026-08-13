@@ -13,12 +13,7 @@ enum StockAdjustmentReason: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Damage => 'Damage',
-            self::Loss => 'Loss',
-            self::Correction => 'Correction',
-            self::Other => 'Other',
-        };
+        return __('enums.stock_adjustment_reason.'.$this->value);
     }
 
     public static function options(): array

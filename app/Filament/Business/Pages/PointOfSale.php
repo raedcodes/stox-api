@@ -41,6 +41,16 @@ class PointOfSale extends Page
 
     protected string $view = 'filament.business.pages.point-of-sale';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('pos.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pos.title');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -74,32 +84,33 @@ class PointOfSale extends Page
         return $schema
             ->components([
                 Select::make('customer_id')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->options(fn () => Customer::query()->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->where('is_active', true)->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('payment_method')
+                    ->label(__('common.fields.payment_method'))
                     ->options(PaymentMethod::options())
                     ->required(),
                 Select::make('discount_type')
-                    ->label('Invoice discount type')
+                    ->label(__('sales.fields.invoice_discount_type'))
                     ->options(DiscountType::options()),
                 TextInput::make('discount_value')
-                    ->label('Invoice discount value')
+                    ->label(__('sales.fields.invoice_discount_value'))
                     ->numeric()
                     ->minValue(0),
                 Repeater::make('items')
-                    ->label('Cart')
+                    ->label(__('pos.cart'))
                     ->schema([
                         Select::make('product_id')
-                            ->label('Product')
+                            ->label(__('common.fields.product'))
                             ->options(fn () => Product::query()->where('is_active', true)->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
@@ -110,30 +121,32 @@ class PointOfSale extends Page
                                 $set('product_variant_id', ProductVariant::soleActiveIdFor($state));
                             }),
                         Select::make('product_variant_id')
-                            ->label('Variant')
+                            ->label(__('common.fields.variant'))
                             ->options(fn (Get $get) => ProductVariant::activeOptionsFor($get('product_id')))
                             ->visible(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
                             ->required(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
                             ->dehydratedWhenHidden(),
                         TextInput::make('quantity')
+                            ->label(__('common.fields.quantity'))
                             ->numeric()
                             ->minValue(0.01)
                             ->required(),
                         TextInput::make('unit_price')
+                            ->label(__('common.fields.unit_price'))
                             ->numeric()
                             ->minValue(0)
                             ->required()
                             ->prefix(fn () => tenant('currency')?->value),
                         Select::make('discount_type')
-                            ->label('Discount type')
+                            ->label(__('common.fields.discount_type'))
                             ->options(DiscountType::options()),
                         TextInput::make('discount_value')
-                            ->label('Discount value')
+                            ->label(__('common.fields.discount_value'))
                             ->numeric()
                             ->minValue(0),
                     ])
                     ->columns(7)
-                    ->addActionLabel('Add product manually')
+                    ->addActionLabel(__('pos.add_product_manually'))
                     ->reorderable(false),
             ]);
     }
@@ -157,7 +170,7 @@ class PointOfSale extends Page
 
         if (! $product) {
             Notification::make()
-                ->title("No product found for \"{$term}\"")
+                ->title(__('pos.no_product_found', ['term' => $term]))
                 ->warning()
                 ->send();
 
@@ -245,7 +258,7 @@ class PointOfSale extends Page
 
         if (empty($state['items'])) {
             Notification::make()
-                ->title('Cart is empty')
+                ->title(__('pos.cart_empty'))
                 ->warning()
                 ->send();
 
@@ -281,7 +294,7 @@ class PointOfSale extends Page
             });
         } catch (RuntimeException $e) {
             Notification::make()
-                ->title('Cannot complete sale')
+                ->title(__('sales.notifications.cannot_complete'))
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
@@ -290,7 +303,7 @@ class PointOfSale extends Page
         }
 
         Notification::make()
-            ->title("Sale {$sale->sale_number} completed")
+            ->title(__('pos.sale_completed', ['number' => $sale->sale_number]))
             ->success()
             ->send();
 
@@ -303,7 +316,7 @@ class PointOfSale extends Page
     {
         return [
             Action::make('checkout')
-                ->label('Complete Sale')
+                ->label(__('pos.complete_sale'))
                 ->submit('checkout')
                 ->keyBindings(['mod+enter']),
         ];

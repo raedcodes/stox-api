@@ -48,6 +48,16 @@ class LocationResource extends Resource
 
     protected static ?int $navigationSort = 45;
 
+    public static function getModelLabel(): string
+    {
+        return __('locations.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('locations.plural_model_label');
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
@@ -59,11 +69,14 @@ class LocationResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('common.fields.name'))
                     ->required(),
                 Select::make('type')
+                    ->label(__('common.fields.type'))
                     ->options(LocationType::options())
                     ->required(),
                 Checkbox::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->default(true),
             ]);
     }
@@ -73,16 +86,19 @@ class LocationResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('common.fields.name'))
                     ->searchable(),
-                TextColumn::make('type'),
+                TextColumn::make('type')
+                    ->label(__('common.fields.type')),
                 IconColumn::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label('Created at')
+                    ->label(__('common.fields.created_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('created_at_since')
-                    ->label('Since')
+                    ->label(__('common.fields.since'))
                     ->state(fn (Location $record) => $record->created_at)
                     ->since()
                     ->dateTooltip()

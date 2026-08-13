@@ -56,6 +56,16 @@ class SupplierResource extends Resource
 
     protected static ?int $navigationSort = 22;
 
+    public static function getModelLabel(): string
+    {
+        return __('suppliers.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('suppliers.plural_model_label');
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
@@ -70,8 +80,8 @@ class SupplierResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Phone' => $record->phone,
-            'Email' => $record->email,
+            __('common.fields.phone') => $record->phone,
+            __('common.fields.email') => $record->email,
         ];
     }
 
@@ -80,17 +90,24 @@ class SupplierResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('common.fields.name'))
                     ->required(),
-                TextInput::make('contact_person'),
+                TextInput::make('contact_person')
+                    ->label(__('suppliers.fields.contact_person')),
                 TextInput::make('email')
+                    ->label(__('common.fields.email'))
                     ->email(),
                 TextInput::make('phone')
+                    ->label(__('common.fields.phone'))
                     ->tel(),
                 Textarea::make('address')
+                    ->label(__('common.fields.address'))
                     ->rows(2),
                 Select::make('payment_terms')
+                    ->label(__('suppliers.fields.payment_terms'))
                     ->options(PaymentTerms::options()),
                 Checkbox::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->default(true),
             ]);
     }
@@ -108,41 +125,48 @@ class SupplierResource extends Resource
                 ->withCount(['purchaseOrders as open_purchase_orders_count' => fn (Builder $query) => $query->whereIn('status', [PurchaseOrderStatus::Ordered, PurchaseOrderStatus::PartiallyReceived])]))
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('common.fields.name'))
                     ->searchable(),
                 TextColumn::make('contact_person')
+                    ->label(__('suppliers.fields.contact_person'))
                     ->placeholder('—'),
                 TextColumn::make('email')
+                    ->label(__('common.fields.email'))
                     ->placeholder('—'),
                 TextColumn::make('phone')
+                    ->label(__('common.fields.phone'))
                     ->placeholder('—'),
                 TextColumn::make('address')
+                    ->label(__('common.fields.address'))
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('payment_terms')
-                    ->label('Payment terms')
+                    ->label(__('suppliers.fields.payment_terms'))
                     ->placeholder('—'),
                 TextColumn::make('open_purchase_orders_count')
-                    ->label('Open POs')
+                    ->label(__('suppliers.columns.open_purchase_orders'))
                     ->badge()
                     ->color(fn ($state) => (int) $state > 0 ? 'warning' : 'gray'),
                 TextColumn::make('total_purchases')
-                    ->label('Total purchases')
+                    ->label(__('suppliers.columns.total_purchases'))
                     ->state(fn (Supplier $record) => (float) ($record->charges_sum ?? 0))
                     ->money(fn () => tenant('currency')?->value)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('balance')
+                    ->label(__('suppliers.columns.balance'))
                     ->state(fn (Supplier $record) => (float) ($record->charges_sum ?? 0) - (float) ($record->reducing_sum ?? 0))
                     ->money(fn () => tenant('currency')?->value)
                     ->color(fn ($state) => (float) $state > 0 ? 'danger' : 'success'),
                 IconColumn::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label('Created at')
+                    ->label(__('common.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at_since')
-                    ->label('Since')
+                    ->label(__('common.fields.since'))
                     ->state(fn (Supplier $record) => $record->created_at)
                     ->since()
                     ->dateTooltip()
@@ -150,8 +174,10 @@ class SupplierResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('payment_terms')
+                    ->label(__('suppliers.fields.payment_terms'))
                     ->options(PaymentTerms::options()),
-                TernaryFilter::make('is_active'),
+                TernaryFilter::make('is_active')
+                    ->label(__('common.fields.is_active')),
                 TrashedFilter::make(),
             ])
             ->recordActions([

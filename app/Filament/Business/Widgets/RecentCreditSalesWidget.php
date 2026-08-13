@@ -17,8 +17,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RecentCreditSalesWidget extends TableWidget
 {
-    protected static ?string $heading = 'Recent credit sales';
-
     protected int|string|array $columnSpan = 'full';
 
     public static function canView(): bool
@@ -29,6 +27,7 @@ class RecentCreditSalesWidget extends TableWidget
     public function table(Table $table): Table
     {
         return $table
+            ->heading(__('dashboard.widgets.recent_credit_sales_heading'))
             ->query(
                 fn (): Builder => Sale::query()
                     ->where('status', SaleStatus::Completed)
@@ -44,18 +43,19 @@ class RecentCreditSalesWidget extends TableWidget
             )
             ->columns([
                 TextColumn::make('sale_number')
-                    ->label('Invoice #'),
+                    ->label(__('common.fields.invoice_number')),
                 TextColumn::make('customer.name')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->searchable(),
                 TextColumn::make('sale_date')
+                    ->label(__('common.fields.date'))
                     ->dateTime(),
                 TextColumn::make('total')
-                    ->label('Amount')
+                    ->label(__('dashboard.columns.amount'))
                     ->state(fn (Sale $record) => $record->total())
                     ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('customer_balance')
-                    ->label('Customer owes (total)')
+                    ->label(__('dashboard.columns.customer_owes_total'))
                     ->state(fn (Sale $record) => $record->customer
                         ? (float) ($record->customer->credit_sales_sum ?? 0) - (float) ($record->customer->reducing_sum ?? 0)
                         : null)

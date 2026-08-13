@@ -43,6 +43,16 @@ class TaxReport extends Page implements HasTable
 
     protected string $view = 'filament.business.pages.tax-report';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('tax_report.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('tax_report.navigation_label');
+    }
+
     protected function baseQuery(): Builder
     {
         return SaleItem::query()
@@ -57,36 +67,36 @@ class TaxReport extends Page implements HasTable
             ->query(fn (): Builder => $this->baseQuery())
             ->columns([
                 TextColumn::make('sale.sale_date')
-                    ->label('Date')
+                    ->label(__('common.fields.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('sale.sale_number')
-                    ->label('Invoice #'),
+                    ->label(__('common.fields.invoice_number')),
                 TextColumn::make('product.name')
-                    ->label('Product'),
+                    ->label(__('common.fields.product')),
                 TextColumn::make('product.sku')
-                    ->label('SKU'),
+                    ->label(__('common.fields.sku')),
                 TextColumn::make('product.brand.name')
-                    ->label('Brand')
+                    ->label(__('common.fields.brand'))
                     ->placeholder('—'),
                 TextColumn::make('subtotal')
-                    ->label('Taxable subtotal')
+                    ->label(__('tax_report.fields.taxable_subtotal'))
                     ->state(fn (SaleItem $record) => $record->subtotal())
                     ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('taxAmount')
-                    ->label('Tax collected')
+                    ->label(__('tax_report.fields.tax_collected'))
                     ->state(fn (SaleItem $record) => $record->taxAmount())
                     ->money(fn () => tenant('currency')?->value),
             ])
             ->groups([
                 Group::make('sale.sale_date')
-                    ->label('Month')
+                    ->label(__('common.fields.month'))
                     ->getKeyFromRecordUsing(fn (SaleItem $record) => $record->sale->sale_date->format('Y-m'))
-                    ->getTitleFromRecordUsing(fn (SaleItem $record) => $record->sale->sale_date->format('F Y')),
+                    ->getTitleFromRecordUsing(fn (SaleItem $record) => $record->sale->sale_date->translatedFormat('F Y')),
             ])
             ->filters([
                 Filter::make('date_range')
-                    ->label('Date range')
+                    ->label(__('common.fields.date_range'))
                     ->schema([
                         DatePicker::make('from'),
                         DatePicker::make('until'),
@@ -104,12 +114,12 @@ class TaxReport extends Page implements HasTable
     {
         return [
             Action::make('exportPdf')
-                ->label('Export PDF')
+                ->label(__('common.actions.export_pdf'))
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
             Action::make('exportExcel')
-                ->label('Export Excel')
+                ->label(__('common.fields.export_excel'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(fn () => Excel::download(
                     new TaxReportExport($this->getFilteredTableQuery()),

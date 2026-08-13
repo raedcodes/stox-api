@@ -11,16 +11,20 @@ trait HasTrendComparison
     protected function trendDescription(float $current, float $previous, string $label = 'previous period'): string
     {
         if ($current == $previous) {
-            return "Same as {$label}";
+            return __('dashboard.trend.same_as', ['label' => $label]);
         }
 
         if ($previous == 0.0) {
-            return "Up from zero {$label}";
+            return __('dashboard.trend.up_from_zero', ['label' => $label]);
         }
 
         $percent = (($current - $previous) / $previous) * 100;
 
-        return number_format(abs($percent), 1).'% '.($percent >= 0 ? 'up' : 'down')." vs. {$label}";
+        return __('dashboard.trend.vs', [
+            'percent' => number_format(abs($percent), 1),
+            'direction' => $percent >= 0 ? __('dashboard.trend.up') : __('dashboard.trend.down'),
+            'label' => $label,
+        ]);
     }
 
     protected function trendIcon(float $current, float $previous): string

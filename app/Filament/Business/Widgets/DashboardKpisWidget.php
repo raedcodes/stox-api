@@ -58,15 +58,15 @@ class DashboardKpisWidget extends StatsOverviewWidget
             ->count();
 
         return [
-            Stat::make("Today's sales", $todaysSales->count())
-                ->description($this->trendDescription($todaysSales->count(), $yesterdaysSales->count(), 'yesterday'))
+            Stat::make(__('dashboard.kpis.todays_sales'), $todaysSales->count())
+                ->description($this->trendDescription($todaysSales->count(), $yesterdaysSales->count(), __('dashboard.trend.yesterday')))
                 ->descriptionIcon($this->trendIcon($todaysSales->count(), $yesterdaysSales->count()))
                 ->descriptionColor($this->trendColor($todaysSales->count(), $yesterdaysSales->count())),
-            Stat::make('Today\'s revenue', tenant('currency')?->value.' '.number_format($todaysRevenue, 2))
-                ->description($this->trendDescription($todaysRevenue, $yesterdaysRevenue, 'yesterday'))
+            Stat::make(__('dashboard.kpis.todays_revenue'), tenant('currency')?->value.' '.number_format($todaysRevenue, 2))
+                ->description($this->trendDescription($todaysRevenue, $yesterdaysRevenue, __('dashboard.trend.yesterday')))
                 ->descriptionIcon($this->trendIcon($todaysRevenue, $yesterdaysRevenue))
                 ->descriptionColor($this->trendColor($todaysRevenue, $yesterdaysRevenue)),
-            Stat::make('Low / out of stock', $lowStockCount)
+            Stat::make(__('dashboard.kpis.low_out_of_stock'), $lowStockCount)
                 ->color($lowStockCount > 0 ? 'danger' : 'success'),
         ];
     }

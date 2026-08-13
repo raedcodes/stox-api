@@ -50,6 +50,16 @@ class CategoryResource extends Resource
 
     protected static ?int $navigationSort = 31;
 
+    public static function getModelLabel(): string
+    {
+        return __('categories.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('categories.plural_model_label');
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
@@ -61,16 +71,18 @@ class CategoryResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('common.fields.name'))
                     ->required(),
                 Select::make('parent_id')
-                    ->label('Parent category')
+                    ->label(__('categories.fields.parent_id'))
                     ->searchable()
                     ->options(fn (?Category $record) => Category::query()
                         ->whereNull('parent_id')
                         ->when($record, fn ($query) => $query->whereKeyNot($record->id))
                         ->pluck('name', 'id'))
-                    ->helperText('Leave empty for a top-level category.'),
+                    ->helperText(__('categories.fields.parent_id_helper')),
                 Checkbox::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->default(true),
             ]);
     }
@@ -92,7 +104,7 @@ class CategoryResource extends Resource
                 ->orderBy('categories.name'))
             ->columns([
                 TextColumn::make('name')
-                    ->label('Category')
+                    ->label(__('categories.columns.category'))
                     ->searchable()
                     ->weight(fn (Category $record) => $record->parent_id ? 'normal' : 'bold')
                     ->html()
@@ -100,21 +112,23 @@ class CategoryResource extends Resource
                         ? '<span style="padding-left: 1.5rem;">└─ '.e($state).'</span>'
                         : e($state)),
                 IconColumn::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('products_count')
-                    ->label('Products'),
+                    ->label(__('categories.columns.products')),
                 TextColumn::make('children_count')
-                    ->label('Subcategories')
+                    ->label(__('categories.columns.subcategories'))
                     ->placeholder('0'),
             ])
             ->filters([
                 Filter::make('top_level')
-                    ->label('Top-level only')
+                    ->label(__('categories.filters.top_level'))
                     ->query(fn (Builder $query) => $query->whereNull('parent_id')),
                 SelectFilter::make('parent_id')
-                    ->label('Parent category')
+                    ->label(__('categories.filters.parent_id'))
                     ->options(fn () => Category::query()->whereNull('parent_id')->pluck('name', 'id')),
-                TernaryFilter::make('is_active'),
+                TernaryFilter::make('is_active')
+                    ->label(__('common.fields.is_active')),
                 TrashedFilter::make(),
             ])
             ->recordActions([

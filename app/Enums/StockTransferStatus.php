@@ -18,16 +18,7 @@ enum StockTransferStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Draft => 'Draft',
-            self::PendingApproval => 'Pending approval',
-            self::Approved => 'Approved',
-            self::InTransit => 'In transit',
-            self::PartiallyReceived => 'Partially received',
-            self::Completed => 'Completed',
-            self::Cancelled => 'Cancelled',
-            self::Rejected => 'Rejected',
-        };
+        return __('enums.stock_transfer_status.'.$this->value);
     }
 
     public function getColor(): string

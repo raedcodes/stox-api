@@ -34,6 +34,16 @@ class BarcodeSettings extends Page
 
     protected string $view = 'filament.business.pages.barcode-settings';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('settings.barcode.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('settings.barcode.navigation_label');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -60,19 +70,19 @@ class BarcodeSettings extends Page
         return $schema
             ->components([
                 Select::make('format')
-                    ->label('Barcode format')
+                    ->label(__('settings.barcode.fields.format'))
                     ->options(BarcodeFormat::options())
                     ->required(),
                 TextInput::make('prefix')
-                    ->label('Prefix')
+                    ->label(__('settings.barcode.fields.prefix'))
                     ->maxLength(20)
-                    ->helperText('Optional prefix included at the start of every generated barcode.'),
+                    ->helperText(__('settings.barcode.prefix_helper')),
                 TextInput::make('next_number')
-                    ->label('Next number')
+                    ->label(__('settings.barcode.fields.next_number'))
                     ->numeric()
                     ->minValue(1)
                     ->required()
-                    ->helperText('The sequence number the next generated barcode will use.'),
+                    ->helperText(__('settings.barcode.next_number_helper')),
             ]);
     }
 
@@ -87,7 +97,7 @@ class BarcodeSettings extends Page
         ]);
 
         Notification::make()
-            ->title('Barcode settings saved')
+            ->title(__('settings.barcode.saved'))
             ->success()
             ->send();
     }
@@ -96,7 +106,7 @@ class BarcodeSettings extends Page
     {
         return [
             Action::make('save')
-                ->label('Save')
+                ->label(__('common.actions.save'))
                 ->submit('save'),
         ];
     }

@@ -17,7 +17,7 @@ class ProductBatchForm
         return $schema
             ->components([
                 Select::make('product_id')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->relationship('product', 'name')
                     ->searchable()
                     ->preload()
@@ -25,32 +25,34 @@ class ProductBatchForm
                     ->afterStateUpdated(fn (?string $state, Set $set) => $set('unit_cost', Product::find($state)?->cost_price))
                     ->required(),
                 Select::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->relationship('location', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 TextInput::make('batch_number')
-                    ->label('Batch / lot number')
+                    ->label(__('product_batches.fields.batch_number'))
                     ->required(),
                 TextInput::make('quantity')
+                    ->label(__('common.fields.quantity'))
                     ->numeric()
                     ->minValue(0)
                     ->required(),
                 TextInput::make('unit_cost')
-                    ->label('Unit cost')
+                    ->label(__('product_batches.fields.unit_cost'))
                     ->numeric()
                     ->minValue(0)
                     ->prefix(fn () => tenant('currency')?->value)
-                    ->helperText('Defaults to the product\'s cost price — override if this batch\'s actual cost differs (e.g. landed costs).'),
+                    ->helperText(__('product_batches.unit_cost_helper')),
                 DatePicker::make('manufactured_date')
-                    ->label('Manufactured date'),
+                    ->label(__('product_batches.fields.manufactured_date')),
                 DatePicker::make('expiry_date')
-                    ->helperText('Leave empty if this batch doesn\'t expire.'),
+                    ->label(__('product_batches.fields.expiry_date'))
+                    ->helperText(__('product_batches.expiry_date_helper')),
                 Checkbox::make('is_active')
-                    ->label('Active')
+                    ->label(__('common.fields.is_active'))
                     ->default(true)
-                    ->helperText('Turn off for a batch that\'s been written off, recalled, or fully used.'),
+                    ->helperText(__('product_batches.is_active_helper')),
             ]);
     }
 }

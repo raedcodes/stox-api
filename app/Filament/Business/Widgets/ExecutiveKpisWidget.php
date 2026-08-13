@@ -78,26 +78,26 @@ class ExecutiveKpisWidget extends StatsOverviewWidget
             ->value('total');
 
         return [
-            Stat::make('Sales this month', $thisMonthSales->count())
-                ->description($this->trendDescription($thisMonthSales->count(), $lastMonthSales->count(), 'last month'))
+            Stat::make(__('dashboard.kpis.sales_this_month'), $thisMonthSales->count())
+                ->description($this->trendDescription($thisMonthSales->count(), $lastMonthSales->count(), __('dashboard.trend.last_month')))
                 ->descriptionIcon($this->trendIcon($thisMonthSales->count(), $lastMonthSales->count()))
                 ->descriptionColor($this->trendColor($thisMonthSales->count(), $lastMonthSales->count())),
-            Stat::make('Revenue this month', "{$currency} ".number_format($thisMonthRevenue, 2))
-                ->description($this->trendDescription($thisMonthRevenue, $lastMonthRevenue, 'last month'))
+            Stat::make(__('dashboard.kpis.revenue_this_month'), "{$currency} ".number_format($thisMonthRevenue, 2))
+                ->description($this->trendDescription($thisMonthRevenue, $lastMonthRevenue, __('dashboard.trend.last_month')))
                 ->descriptionIcon($this->trendIcon($thisMonthRevenue, $lastMonthRevenue))
                 ->descriptionColor($this->trendColor($thisMonthRevenue, $lastMonthRevenue)),
-            Stat::make('Gross profit this month', "{$currency} ".number_format($grossProfit, 2))
-                ->description(number_format($grossMarginPercent, 1).'% margin')
+            Stat::make(__('dashboard.kpis.gross_profit_this_month'), "{$currency} ".number_format($grossProfit, 2))
+                ->description(__('dashboard.kpis.margin', ['percent' => number_format($grossMarginPercent, 1)]))
                 ->descriptionColor($grossMarginPercent >= 0 ? 'success' : 'danger')
                 ->color($grossProfit >= 0 ? 'success' : 'danger'),
-            Stat::make('Accounts receivable', "{$currency} ".number_format($accountsReceivable, 2))
-                ->description('Owed by customers')
+            Stat::make(__('dashboard.kpis.accounts_receivable'), "{$currency} ".number_format($accountsReceivable, 2))
+                ->description(__('dashboard.kpis.owed_by_customers'))
                 ->color($accountsReceivable > 0 ? 'warning' : 'success'),
-            Stat::make('Accounts payable', "{$currency} ".number_format($accountsPayable, 2))
-                ->description('Owed to suppliers')
+            Stat::make(__('dashboard.kpis.accounts_payable'), "{$currency} ".number_format($accountsPayable, 2))
+                ->description(__('dashboard.kpis.owed_to_suppliers'))
                 ->color($accountsPayable > 0 ? 'warning' : 'success'),
-            Stat::make('Inventory value', "{$currency} ".number_format($inventoryValue, 2))
-                ->description('Current stock, at cost'),
+            Stat::make(__('dashboard.kpis.inventory_value'), "{$currency} ".number_format($inventoryValue, 2))
+                ->description(__('dashboard.kpis.inventory_value_description')),
         ];
     }
 

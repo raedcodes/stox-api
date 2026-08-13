@@ -17,52 +17,54 @@ class SaleReturnInfolist
     {
         return $schema
             ->components([
-                Section::make('Return details')
+                Section::make(__('sale_returns.section_title'))
                     ->columns(3)
                     ->schema([
                         TextEntry::make('sale.sale_number')
-                            ->label('Invoice #'),
+                            ->label(__('common.fields.invoice_number')),
                         TextEntry::make('sale.customer.name')
-                            ->label('Customer'),
+                            ->label(__('common.fields.customer')),
                         TextEntry::make('return_date')
+                            ->label(__('common.fields.date'))
                             ->date(),
                         IconEntry::make('processed_at')
-                            ->label('Processed')
+                            ->label(__('common.fields.processed'))
                             ->boolean()
                             ->state(fn (SaleReturn $record) => $record->processed_at !== null),
                         TextEntry::make('reason')
+                            ->label(__('common.fields.reason'))
                             ->placeholder('—')
                             ->columnSpanFull(),
                     ]),
-                Section::make('Total')
+                Section::make(__('common.fields.total'))
                     ->schema([
                         TextEntry::make('total')
-                            ->label('Total')
+                            ->label(__('common.fields.total'))
                             ->weight('bold')
                             ->state(fn (SaleReturn $record) => $record->total())
                             ->money(fn () => tenant('currency')?->value),
                     ]),
-                Section::make('Items')
+                Section::make(__('sale_returns.items_section_title'))
                     ->columnSpanFull()
                     ->schema([
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
                             ->table([
-                                TableColumn::make('Product'),
-                                TableColumn::make('Qty'),
-                                TableColumn::make('Unit price'),
-                                TableColumn::make('Line total'),
+                                TableColumn::make(__('common.fields.product')),
+                                TableColumn::make(__('common.fields.qty')),
+                                TableColumn::make(__('common.fields.unit_price')),
+                                TableColumn::make(__('common.fields.line_total')),
                             ])
                             ->schema([
                                 TextEntry::make('product.name')
-                                    ->label('Product'),
+                                    ->label(__('common.fields.product')),
                                 TextEntry::make('quantity')
-                                    ->label('Qty'),
+                                    ->label(__('common.fields.qty')),
                                 TextEntry::make('unit_price')
-                                    ->label('Unit price')
+                                    ->label(__('common.fields.unit_price'))
                                     ->money(fn () => tenant('currency')?->value),
                                 TextEntry::make('lineTotal')
-                                    ->label('Line total')
+                                    ->label(__('common.fields.line_total'))
                                     ->state(fn (SaleReturnItem $record) => $record->quantity * $record->unit_price)
                                     ->money(fn () => tenant('currency')?->value),
                             ]),

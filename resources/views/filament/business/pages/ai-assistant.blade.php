@@ -22,7 +22,7 @@
                 <div class="flex flex-col items-center gap-3 py-10 text-center">
                     <x-filament::icon icon="heroicon-o-sparkles" class="h-8 w-8 text-gray-300 dark:text-gray-600" />
                     <p class="max-w-sm text-sm text-gray-500 dark:text-gray-400">
-                        Ask about sales, profit, stock, or a customer's balance — or try one of these:
+                        {{ __('ai_assistant.empty_state_prompt') }}
                     </p>
                     <div class="flex flex-wrap items-center justify-center gap-2">
                         @foreach ($this->suggestedQuestions() as $key => $label)
@@ -43,7 +43,7 @@
             <div wire:loading wire:target="ask,askSuggestion" class="flex justify-start">
                 <div class="flex items-center gap-2 rounded-xl border-s-4 border-indigo-300 bg-indigo-50/40 px-4 py-2.5 text-sm text-gray-500 dark:border-indigo-500/50 dark:bg-indigo-500/5 dark:text-gray-400">
                     <x-filament::icon icon="heroicon-o-arrow-path" class="h-4 w-4 flex-shrink-0 animate-spin text-indigo-500" />
-                    Thinking&hellip;
+                    {{ __('ai_assistant.thinking') }}
                 </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
         <textarea
             wire:model="question"
             rows="1"
-            placeholder="Ask a question about your business…"
+            placeholder="{{ __('ai_assistant.input_placeholder') }}"
             class="fi-input block w-full resize-none rounded-lg border-none bg-gray-50 px-3 py-2.5 text-sm text-gray-950 ring-1 ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-400 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-gray-500"
             @keydown.enter.prevent="if (!$event.shiftKey) $wire.ask()"
         ></textarea>
@@ -65,7 +65,7 @@
             wire:target="ask,askSuggestion"
             class="flex-shrink-0"
         >
-            Send
+            {{ __('ai_assistant.send') }}
         </x-filament::button>
     </form>
 </x-filament-panels::page>

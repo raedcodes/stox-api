@@ -28,7 +28,7 @@
 
 <div wire:loading.flex wire:target="mountAction('generateAiSummary')" class="fi-section items-center gap-3 rounded-xl border-s-4 border-indigo-300 bg-indigo-50/40 p-4 dark:border-indigo-500/50 dark:bg-indigo-500/5">
     <x-filament::icon icon="heroicon-o-arrow-path" class="h-4 w-4 flex-shrink-0 animate-spin text-indigo-500" />
-    <p class="text-sm text-gray-600 dark:text-gray-300">Generating AI insights&hellip;</p>
+    <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('ai_summary.generating') }}</p>
 </div>
 
 <div wire:loading.remove wire:target="mountAction('generateAiSummary')">
@@ -36,7 +36,7 @@
         <div class="fi-section flex items-start gap-3 rounded-xl border-s-4 border-danger-400 bg-danger-50/60 p-4 dark:border-danger-500 dark:bg-danger-500/10">
             <x-filament::icon icon="heroicon-o-exclamation-triangle" class="mt-0.5 h-4 w-4 flex-shrink-0 text-danger-500" />
             <div>
-                <p class="text-sm font-medium text-danger-700 dark:text-danger-400">Couldn't generate the AI summary</p>
+                <p class="text-sm font-medium text-danger-700 dark:text-danger-400">{{ __('ai_summary.error_title') }}</p>
                 <p class="mt-0.5 text-xs text-danger-600/80 dark:text-danger-400/70">{{ $aiSummaryError }}</p>
             </div>
         </div>
@@ -45,13 +45,13 @@
             <div class="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                 <h3 class="flex items-center gap-1.5 text-sm font-semibold text-gray-950 dark:text-white">
                     <x-filament::icon icon="heroicon-o-sparkles" class="h-4 w-4 text-indigo-500" />
-                    AI Summary
+                    {{ __('ai_summary.title') }}
                 </h3>
 
                 @if ($aiSummary['generated_at'] ?? null)
                     <span class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
                         <x-filament::icon icon="heroicon-o-clock" class="h-3.5 w-3.5" />
-                        Generated {{ \Illuminate\Support\Carbon::parse($aiSummary['generated_at'])->diffForHumans() }}
+                        {{ __('ai_summary.generated', ['time' => \Illuminate\Support\Carbon::parse($aiSummary['generated_at'])->diffForHumans()]) }}
                     </span>
                 @endif
             </div>
@@ -64,7 +64,7 @@
                 <div class="mt-4">
                     <h4 class="mb-1.5 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         <x-filament::icon icon="heroicon-o-light-bulb" class="h-3.5 w-3.5" />
-                        Key insights
+                        {{ __('ai_summary.key_insights') }}
                     </h4>
                     <ul class="space-y-1.5">
                         @foreach ($aiSummary['key_insights'] as $insight)
@@ -90,7 +90,7 @@
                 <div class="mt-4">
                     <h4 class="mb-1.5 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         <x-filament::icon icon="heroicon-o-exclamation-triangle" class="h-3.5 w-3.5" />
-                        Attention needed
+                        {{ __('ai_summary.attention_needed') }}
                     </h4>
                     <ul class="space-y-1.5">
                         @foreach ($aiSummary['warnings'] as $warning)
@@ -123,7 +123,7 @@
                 <div class="mt-4">
                     <h4 class="mb-1.5 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         <x-filament::icon icon="heroicon-o-check-circle" class="h-3.5 w-3.5" />
-                        Recommendations
+                        {{ __('ai_summary.recommendations') }}
                     </h4>
                     <ul class="space-y-1.5">
                         @foreach ($aiSummary['recommendations'] as $recommendation)
@@ -139,7 +139,7 @@
     @else
         <div class="fi-section flex flex-wrap items-center gap-3 rounded-xl border border-dashed border-gray-300 p-4 dark:border-white/10">
             <x-filament::icon icon="heroicon-o-sparkles" class="h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
-            <p class="text-sm text-gray-500 dark:text-gray-400">No AI summary yet — click "Generate AI Summary" above for an instant read on these figures.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('ai_summary.empty_state') }}</p>
         </div>
     @endif
 </div>

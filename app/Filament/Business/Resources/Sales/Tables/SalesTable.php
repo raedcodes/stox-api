@@ -28,26 +28,30 @@ class SalesTable
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['customer', 'location', 'cashier', 'items.product']))
             ->columns([
                 TextColumn::make('sale_number')
-                    ->label('Invoice #')
+                    ->label(__('common.fields.invoice_number'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('customer.name')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->searchable(),
                 TextColumn::make('location.name')
-                    ->label('Location'),
+                    ->label(__('common.fields.location')),
                 TextColumn::make('status')
+                    ->label(__('common.fields.status'))
                     ->badge(),
                 TextColumn::make('payment_method')
+                    ->label(__('common.fields.payment_method'))
                     ->placeholder('—'),
                 TextColumn::make('sale_date')
+                    ->label(__('common.fields.date'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('total')
+                    ->label(__('common.fields.total'))
                     ->state(fn (Sale $record) => $record->total())
                     ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('cashier.name')
-                    ->label('Cashier')
+                    ->label(__('common.fields.cashier'))
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -55,18 +59,19 @@ class SalesTable
             ->defaultSort('sale_date', 'desc')
             ->filters([
                 SelectFilter::make('customer_id')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->options(fn () => Customer::query()->pluck('name', 'id')),
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
                 SelectFilter::make('status')
+                    ->label(__('common.fields.status'))
                     ->options(SaleStatus::options()),
             ])
             ->recordActions([
                 ActionGroup::make([
                     Action::make('complete')
-                        ->label('Complete Sale')
+                        ->label(__('sales.actions.complete_sale'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
@@ -76,42 +81,42 @@ class SalesTable
                                 $record->complete();
 
                                 Notification::make()
-                                    ->title('Sale completed')
+                                    ->title(__('sales.notifications.completed'))
                                     ->success()
                                     ->send();
                             } catch (RuntimeException $e) {
                                 Notification::make()
-                                    ->title('Cannot complete sale')
+                                    ->title(__('sales.notifications.cannot_complete'))
                                     ->body($e->getMessage())
                                     ->danger()
                                     ->send();
                             }
                         }),
                     Action::make('printInvoice')
-                        ->label('Print Invoice')
+                        ->label(__('sales.actions.print_invoice'))
                         ->icon('heroicon-o-printer')
                         ->color('gray')
                         ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
                         ->url(fn (Sale $record) => route('business.sales.invoice', $record))
                         ->openUrlInNewTab(),
                     Action::make('cancel')
-                        ->label('Cancel Sale')
+                        ->label(__('sales.actions.cancel_sale'))
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->modalDescription('This restocks everything on the invoice and reverses any charge to the customer\'s account. This cannot be undone.')
+                        ->modalDescription(__('sales.cancel_sale_description'))
                         ->visible(fn (Sale $record) => $record->status === SaleStatus::Completed)
                         ->action(function (Sale $record) {
                             try {
                                 $record->cancel();
 
                                 Notification::make()
-                                    ->title('Sale cancelled')
+                                    ->title(__('sales.notifications.cancelled'))
                                     ->success()
                                     ->send();
                             } catch (RuntimeException $e) {
                                 Notification::make()
-                                    ->title('Cannot cancel sale')
+                                    ->title(__('sales.notifications.cannot_cancel'))
                                     ->body($e->getMessage())
                                     ->danger()
                                     ->send();

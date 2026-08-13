@@ -18,14 +18,14 @@ enum NavigationGroup implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Sales => 'Sales',
-            self::Purchasing => 'Purchasing',
-            self::Catalog => 'Catalog',
-            self::Inventory => 'Inventory',
-            self::Finance => 'Finance',
-            self::Reports => 'Reports',
-            self::Settings => 'Settings',
-            self::System => 'System',
+            self::Sales => __('enums.navigation_group.sales'),
+            self::Purchasing => __('enums.navigation_group.purchasing'),
+            self::Catalog => __('enums.navigation_group.catalog'),
+            self::Inventory => __('enums.navigation_group.inventory'),
+            self::Finance => __('enums.navigation_group.finance'),
+            self::Reports => __('enums.navigation_group.reports'),
+            self::Settings => __('enums.navigation_group.settings'),
+            self::System => __('enums.navigation_group.system'),
         };
     }
 }

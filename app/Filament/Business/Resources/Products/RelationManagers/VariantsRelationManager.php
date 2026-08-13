@@ -25,18 +25,22 @@ class VariantsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('size'),
-                TextInput::make('color'),
+                TextInput::make('size')
+                    ->label(__('products.fields.size')),
+                TextInput::make('color')
+                    ->label(__('products.fields.color')),
                 TextInput::make('sku')
-                    ->label('SKU')
+                    ->label(__('common.fields.sku'))
                     ->required(fn (string $operation): bool => $operation === 'edit')
                     ->unique(table: 'product_variants', column: 'sku', ignoreRecord: true)
                     ->helperText(fn (string $operation): ?string => $operation === 'create'
-                        ? 'Leave blank to auto-generate from the product SKU and size/color.'
+                        ? __('products.variant_helper_create')
                         : null),
                 TextInput::make('barcode')
+                    ->label(__('common.fields.barcode'))
                     ->unique(table: 'product_variants', column: 'barcode', ignoreRecord: true),
                 Checkbox::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->default(true),
             ]);
     }
@@ -46,22 +50,25 @@ class VariantsRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('size')
+                    ->label(__('products.fields.size'))
                     ->placeholder('—'),
                 TextColumn::make('color')
+                    ->label(__('products.fields.color'))
                     ->placeholder('—'),
                 TextColumn::make('sku')
-                    ->label('SKU')
+                    ->label(__('common.fields.sku'))
                     ->searchable(),
                 TextColumn::make('barcode')
+                    ->label(__('common.fields.barcode'))
                     ->placeholder('—'),
                 IconColumn::make('is_default')
-                    ->label('Default')
+                    ->label(__('products.fields.is_default'))
                     ->boolean(),
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('common.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('stock')
-                    ->label('Stock on hand')
+                    ->label(__('products.fields.stock_on_hand'))
                     ->state(fn (ProductVariant $record) => $record->stockOnHand()),
             ])
             ->defaultSort('is_default', 'desc')
@@ -74,29 +81,29 @@ class VariantsRelationManager extends RelationManager
                     ->action(function (ProductVariant $record) {
                         try {
                             if ($record->product->variants()->count() <= 1) {
-                                throw new RuntimeException('A product must have at least one variant.');
+                                throw new RuntimeException(__('products.notifications.variant_needs_one'));
                             }
 
                             if ($record->batches()->exists()) {
-                                throw new RuntimeException('This variant still has stock batches — deactivate it instead.');
+                                throw new RuntimeException(__('products.notifications.variant_has_batches'));
                             }
 
                             $record->delete();
 
                             Notification::make()
-                                ->title('Variant deleted')
+                                ->title(__('products.notifications.variant_deleted'))
                                 ->success()
                                 ->send();
                         } catch (RuntimeException $e) {
                             Notification::make()
-                                ->title('Cannot delete variant')
+                                ->title(__('products.notifications.cannot_delete_variant'))
                                 ->body($e->getMessage())
                                 ->danger()
                                 ->send();
                         } catch (QueryException $e) {
                             Notification::make()
-                                ->title('Cannot delete variant')
-                                ->body('This variant has transaction history (sales, purchases, or stock movements) and can\'t be deleted. Deactivate it instead.')
+                                ->title(__('products.notifications.cannot_delete_variant'))
+                                ->body(__('products.notifications.variant_has_history'))
                                 ->danger()
                                 ->send();
                         }

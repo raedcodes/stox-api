@@ -17,15 +17,7 @@ enum PurchaseOrderStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Draft => 'Draft',
-            self::PendingApproval => 'Pending approval',
-            self::Ordered => 'Ordered',
-            self::PartiallyReceived => 'Partially received',
-            self::Received => 'Received',
-            self::Rejected => 'Rejected',
-            self::Cancelled => 'Cancelled',
-        };
+        return __('enums.purchase_order_status.'.$this->value);
     }
 
     public function getColor(): string

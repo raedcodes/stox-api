@@ -37,6 +37,16 @@ class SaleReturnResource extends Resource
 
     protected static ?int $navigationSort = 11;
 
+    public static function getModelLabel(): string
+    {
+        return __('sale_returns.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('sale_returns.plural_model_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SaleReturnForm::configure($schema);

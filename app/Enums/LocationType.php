@@ -11,10 +11,7 @@ enum LocationType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Warehouse => 'Warehouse',
-            self::Store => 'Store',
-        };
+        return __('enums.location_type.'.$this->value);
     }
 
     /**

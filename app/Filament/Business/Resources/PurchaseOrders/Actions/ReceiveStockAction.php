@@ -23,7 +23,7 @@ class ReceiveStockAction
     public static function make(): Action
     {
         return Action::make('receive')
-            ->label('Receive Stock')
+            ->label(__('purchase_orders.actions.receive_stock'))
             ->icon('heroicon-o-truck')
             ->visible(fn (PurchaseOrder $record) => in_array($record->status, [
                 PurchaseOrderStatus::Ordered,
@@ -31,29 +31,31 @@ class ReceiveStockAction
             ], true))
             ->schema(fn (PurchaseOrder $record) => [
                 DatePicker::make('received_date')
+                    ->label(__('common.fields.date'))
                     ->required()
                     ->default(now()),
                 Repeater::make('lines')
-                    ->label('Items to receive')
+                    ->label(__('purchase_orders.fields.items_to_receive'))
                     ->schema([
                         Hidden::make('purchase_order_item_id'),
                         TextInput::make('product_name')
-                            ->label('Product')
+                            ->label(__('common.fields.product'))
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('remaining')
-                            ->label('Remaining')
+                            ->label(__('purchase_orders.fields.remaining'))
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('quantity_received')
-                            ->label('Receive now')
+                            ->label(__('purchase_orders.fields.receive_now'))
                             ->numeric()
                             ->minValue(0)
                             ->maxValue(fn (Get $get) => (float) $get('remaining'))
                             ->required(),
                         TextInput::make('batch_number')
-                            ->label('Batch #'),
-                        DatePicker::make('expiry_date'),
+                            ->label(__('purchase_orders.fields.batch_number')),
+                        DatePicker::make('expiry_date')
+                            ->label(__('product_batches.fields.expiry_date')),
                     ])
                     ->default(fn () => $record->items
                         ->filter(fn (PurchaseOrderItem $item) => $item->remainingQuantity() > 0)
@@ -77,7 +79,7 @@ class ReceiveStockAction
 
                 if ($lines->isEmpty()) {
                     Notification::make()
-                        ->title('Nothing to receive')
+                        ->title(__('purchase_orders.notifications.nothing_to_receive'))
                         ->warning()
                         ->send();
 
@@ -177,7 +179,7 @@ class ReceiveStockAction
                 });
 
                 Notification::make()
-                    ->title('Stock received')
+                    ->title(__('purchase_orders.notifications.received'))
                     ->success()
                     ->send();
             });

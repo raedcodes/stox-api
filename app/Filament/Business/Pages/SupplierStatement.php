@@ -38,6 +38,16 @@ class SupplierStatement extends Page
 
     protected string $view = 'filament.business.pages.supplier-statement';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('supplier_statement.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('supplier_statement.navigation_label');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -62,15 +72,17 @@ class SupplierStatement extends Page
         return $schema
             ->components([
                 Select::make('supplier_id')
-                    ->label('Supplier')
+                    ->label(__('common.fields.supplier'))
                     ->options(fn () => Supplier::query()->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
                     ->live(),
                 DatePicker::make('from')
+                    ->label(__('common.fields.from'))
                     ->required()
                     ->live(),
                 DatePicker::make('until')
+                    ->label(__('common.fields.until'))
                     ->required()
                     ->live(),
             ]);
@@ -144,12 +156,12 @@ class SupplierStatement extends Page
     {
         return [
             Action::make('exportPdf')
-                ->label('Export PDF')
+                ->label(__('common.actions.export_pdf'))
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
             Action::make('exportExcel')
-                ->label('Export Excel')
+                ->label(__('common.fields.export_excel'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(fn () => $this->exportExcel()),
         ];
@@ -161,7 +173,7 @@ class SupplierStatement extends Page
 
         if (! $supplier) {
             Notification::make()
-                ->title('Select a supplier first')
+                ->title(__('common.notifications.select_supplier_first'))
                 ->warning()
                 ->send();
 
@@ -188,7 +200,7 @@ class SupplierStatement extends Page
 
         if (! $supplier) {
             Notification::make()
-                ->title('Select a supplier first')
+                ->title(__('common.notifications.select_supplier_first'))
                 ->warning()
                 ->send();
 

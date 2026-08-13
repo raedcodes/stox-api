@@ -137,7 +137,7 @@ trait HasStructuredAiSummary
             $this->aiSummaryError = $e->getMessage();
 
             Notification::make()
-                ->title('Could not generate summary')
+                ->title(__('ai_summary.notifications.cannot_generate'))
                 ->body($e->getMessage())
                 ->danger()
                 ->send();

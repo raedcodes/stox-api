@@ -6,10 +6,14 @@ use App\Enums\SaleStatus;
 use App\Enums\UserRole;
 use App\Models\SaleItem;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Contracts\Support\Htmlable;
 
 class TopProductsChart extends ChartWidget
 {
-    protected ?string $heading = 'Top products by revenue (last 30 days)';
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('dashboard.widgets.top_products_chart_heading');
+    }
 
     public static function canView(): bool
     {
@@ -37,7 +41,7 @@ class TopProductsChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Revenue',
+                    'label' => __('dashboard.chart.revenue'),
                     'data' => $rows->map(fn ($row) => round((float) $row->revenue, 2))->all(),
                     'backgroundColor' => '#f59e0b',
                 ],

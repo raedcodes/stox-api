@@ -41,6 +41,16 @@ class PurchaseOrderResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
+    public static function getModelLabel(): string
+    {
+        return __('purchase_orders.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('purchase_orders.plural_model_label');
+    }
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['po_number', 'supplier.name'];
@@ -49,8 +59,8 @@ class PurchaseOrderResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Supplier' => $record->supplier?->name,
-            'Status' => $record->status->getLabel(),
+            __('common.fields.supplier') => $record->supplier?->name,
+            __('common.fields.status') => $record->status->getLabel(),
         ];
     }
 

@@ -18,17 +18,7 @@ enum StockMovementType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::PurchaseReceipt => 'Purchase receipt',
-            self::Sale => 'Sale',
-            self::SaleReturn => 'Sale return',
-            self::SaleCancelled => 'Sale cancelled',
-            self::PurchaseReturn => 'Purchase return',
-            self::Adjustment => 'Adjustment',
-            self::TransferOut => 'Transfer out',
-            self::TransferIn => 'Transfer in',
-            self::OpeningStock => 'Opening stock',
-        };
+        return __('enums.stock_movement_type.'.$this->value);
     }
 
     public static function options(): array

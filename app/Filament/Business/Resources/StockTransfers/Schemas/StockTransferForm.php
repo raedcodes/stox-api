@@ -20,7 +20,7 @@ class StockTransferForm
         return $schema
             ->components([
                 Select::make('from_location_id')
-                    ->label('From location')
+                    ->label(__('stock_transfers.fields.from_location'))
                     ->relationship('fromLocation', 'name')
                     ->searchable()
                     ->preload()
@@ -28,13 +28,14 @@ class StockTransferForm
                     ->different('to_location_id')
                     ->required(),
                 Select::make('to_location_id')
-                    ->label('To location')
+                    ->label(__('stock_transfers.fields.to_location'))
                     ->relationship('toLocation', 'name')
                     ->searchable()
                     ->preload()
                     ->different('from_location_id')
                     ->required(),
                 Select::make('status')
+                    ->label(__('common.fields.status'))
                     ->options(StockTransferStatus::options())
                     ->default(StockTransferStatus::Draft->value)
                     // Read-only: every transition beyond Draft goes through
@@ -44,15 +45,17 @@ class StockTransferForm
                     ->disabled()
                     ->required(),
                 DatePicker::make('transfer_date')
+                    ->label(__('common.fields.date'))
                     ->required()
                     ->default(now()),
                 Textarea::make('notes')
+                    ->label(__('common.fields.notes'))
                     ->rows(2),
                 Repeater::make('items')
                     ->relationship()
                     ->schema([
                         Select::make('product_id')
-                            ->label('Product')
+                            ->label(__('common.fields.product'))
                             ->relationship('product', 'name')
                             ->searchable()
                             ->preload()
@@ -60,18 +63,19 @@ class StockTransferForm
                             ->live()
                             ->afterStateUpdated(fn ($state, Set $set) => $set('product_variant_id', ProductVariant::soleActiveIdFor($state))),
                         Select::make('product_variant_id')
-                            ->label('Variant')
+                            ->label(__('common.fields.variant'))
                             ->options(fn (Get $get) => ProductVariant::activeOptionsFor($get('product_id')))
                             ->visible(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
                             ->required(fn (Get $get) => ProductVariant::hasMultipleActiveFor($get('product_id')))
                             ->dehydratedWhenHidden(),
                         TextInput::make('quantity')
+                            ->label(__('common.fields.quantity'))
                             ->numeric()
                             ->minValue(0.01)
                             ->required(),
                     ])
                     ->columns(3)
-                    ->addActionLabel('Add product')
+                    ->addActionLabel(__('common.fields.add_product'))
                     ->minItems(1)
                     ->required(),
             ]);

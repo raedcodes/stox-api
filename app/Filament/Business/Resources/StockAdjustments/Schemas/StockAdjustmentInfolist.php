@@ -13,25 +13,28 @@ class StockAdjustmentInfolist
     {
         return $schema
             ->components([
-                Section::make('Adjustment details')
+                Section::make(__('stock_adjustments.section_title'))
                     ->columns(3)
                     ->schema([
                         TextEntry::make('product.name')
-                            ->label('Product'),
+                            ->label(__('common.fields.product')),
                         TextEntry::make('location.name')
-                            ->label('Location'),
+                            ->label(__('common.fields.location')),
                         TextEntry::make('batch.batch_number')
-                            ->label('Batch')
-                            ->placeholder('No batch #'),
+                            ->label(__('common.fields.batch'))
+                            ->placeholder(__('common.fields.no_batch_number')),
                         TextEntry::make('quantity_change')
-                            ->label('Quantity')
+                            ->label(__('common.fields.quantity'))
                             ->color(fn (StockAdjustment $record) => $record->quantity_change >= 0 ? 'success' : 'danger')
                             ->formatStateUsing(fn (StockAdjustment $record) => ($record->quantity_change >= 0 ? '+' : '').rtrim(rtrim(number_format($record->quantity_change, 2), '0'), '.')),
                         TextEntry::make('reason')
+                            ->label(__('common.fields.reason'))
                             ->badge(),
                         TextEntry::make('adjustment_date')
+                            ->label(__('common.fields.date'))
                             ->date(),
                         TextEntry::make('notes')
+                            ->label(__('common.fields.notes'))
                             ->placeholder('—')
                             ->columnSpanFull(),
                     ]),

@@ -27,11 +27,26 @@ class StaffResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $navigationLabel = 'Staff';
+    protected static ?string $navigationLabel = null;
 
-    protected static ?string $modelLabel = 'Staff member';
+    protected static ?string $modelLabel = null;
 
-    protected static ?string $pluralModelLabel = 'Staff';
+    protected static ?string $pluralModelLabel = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('staff.plural_model_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('staff.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('staff.plural_model_label');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 

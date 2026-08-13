@@ -20,46 +20,46 @@ class PurchaseOrderWorkflowActions
     public static function submitForApproval(): Action
     {
         return Action::make('submitForApproval')
-            ->label('Submit for Approval')
+            ->label(__('purchase_orders.actions.submit_for_approval'))
             ->icon('heroicon-o-paper-airplane')
             ->color('gray')
             ->requiresConfirmation()
             ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::Draft)
-            ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->submitForApproval(), 'Submitted for approval', 'Cannot submit'));
+            ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->submitForApproval(), __('purchase_orders.notifications.submitted'), __('purchase_orders.notifications.cannot_submit')));
     }
 
     public static function approve(): Action
     {
         return Action::make('approve')
-            ->label('Approve')
+            ->label(__('purchase_orders.actions.approve'))
             ->icon('heroicon-o-check-circle')
             ->color('success')
             ->requiresConfirmation()
-            ->modalDescription('This places the order with the supplier.')
+            ->modalDescription(__('purchase_orders.approve_description'))
             ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::PendingApproval)
-            ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->approve(), 'Order approved and placed', 'Cannot approve'));
+            ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->approve(), __('purchase_orders.notifications.approved'), __('purchase_orders.notifications.cannot_approve')));
     }
 
     public static function reject(): Action
     {
         return Action::make('reject')
-            ->label('Reject')
+            ->label(__('purchase_orders.actions.reject'))
             ->icon('heroicon-o-x-circle')
             ->color('danger')
             ->requiresConfirmation()
             ->schema([
                 Textarea::make('reason')
-                    ->label('Reason')
+                    ->label(__('common.fields.reason'))
                     ->rows(2),
             ])
             ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::PendingApproval)
-            ->action(fn (array $data, PurchaseOrder $record) => self::run($record, fn () => $record->reject($data['reason'] ?? null), 'Order rejected', 'Cannot reject'));
+            ->action(fn (array $data, PurchaseOrder $record) => self::run($record, fn () => $record->reject($data['reason'] ?? null), __('purchase_orders.notifications.rejected'), __('purchase_orders.notifications.cannot_reject')));
     }
 
     public static function cancel(): Action
     {
         return Action::make('cancel')
-            ->label('Cancel Order')
+            ->label(__('purchase_orders.actions.cancel_order'))
             ->icon('heroicon-o-no-symbol')
             ->color('danger')
             ->requiresConfirmation()
@@ -68,7 +68,7 @@ class PurchaseOrderWorkflowActions
                 PurchaseOrderStatus::PendingApproval,
                 PurchaseOrderStatus::Ordered,
             ], true))
-            ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->cancel(), 'Order cancelled', 'Cannot cancel'));
+            ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->cancel(), __('purchase_orders.notifications.cancelled'), __('purchase_orders.notifications.cannot_cancel')));
     }
 
     protected static function run(PurchaseOrder $record, callable $transition, string $successTitle, string $failureTitle): void

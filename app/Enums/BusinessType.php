@@ -14,13 +14,7 @@ enum BusinessType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Retail => 'Retail',
-            self::Restaurant => 'Restaurant',
-            self::Pharmacy => 'Pharmacy',
-            self::Wholesale => 'Wholesale',
-            self::Other => 'Other',
-        };
+        return __('enums.business_type.'.$this->value);
     }
 
     /**

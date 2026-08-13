@@ -40,7 +40,22 @@ class CashSessionResource extends Resource
 
     protected static ?int $navigationSort = 61;
 
-    protected static ?string $navigationLabel = 'Cash Drawer';
+    protected static ?string $navigationLabel = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('cash_sessions.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('cash_sessions.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('cash_sessions.plural_model_label');
+    }
 
     public static function table(Table $table): Table
     {
@@ -48,31 +63,33 @@ class CashSessionResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with('location'))
             ->columns([
                 TextColumn::make('location.name')
-                    ->label('Location'),
+                    ->label(__('common.fields.location')),
                 TextColumn::make('status')
+                    ->label(__('common.fields.status'))
                     ->badge(),
                 TextColumn::make('opened_at')
-                    ->label('Opened')
+                    ->label(__('cash_sessions.fields.opened'))
                     ->dateTime(),
                 TextColumn::make('opener.name')
-                    ->label('Opened by')
+                    ->label(__('cash_sessions.fields.opened_by'))
                     ->placeholder('—'),
                 TextColumn::make('opening_float')
-                    ->label('Opening float')
+                    ->label(__('cash_sessions.fields.opening_float'))
                     ->money(fn () => tenant('currency')?->value),
                 TextColumn::make('closed_at')
-                    ->label('Closed')
+                    ->label(__('cash_sessions.fields.closed'))
                     ->dateTime()
                     ->placeholder('—'),
                 TextColumn::make('expected_cash')
-                    ->label('Expected')
+                    ->label(__('cash_sessions.fields.expected'))
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—'),
                 TextColumn::make('counted_cash')
-                    ->label('Counted')
+                    ->label(__('cash_sessions.fields.counted'))
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—'),
                 TextColumn::make('variance')
+                    ->label(__('cash_sessions.fields.variance'))
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—')
                     ->color(fn ($state) => $state === null ? null : ((float) $state === 0.0 ? 'success' : 'danger')),
@@ -80,9 +97,10 @@ class CashSessionResource extends Resource
             ->defaultSort('opened_at', 'desc')
             ->filters([
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
                 SelectFilter::make('status')
+                    ->label(__('common.fields.status'))
                     ->options(CashSessionStatus::options()),
                 TrashedFilter::make(),
             ])

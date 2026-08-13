@@ -26,31 +26,33 @@ class ProductBatchesTable
         return $table
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('location.name')
-                    ->label('Location'),
+                    ->label(__('common.fields.location')),
                 TextColumn::make('batch_number')
-                    ->label('Batch #')
+                    ->label(__('product_batches.columns.batch_hash'))
                     ->searchable(),
-                TextColumn::make('quantity'),
+                TextColumn::make('quantity')
+                    ->label(__('common.fields.quantity')),
                 TextColumn::make('unit_cost')
-                    ->label('Unit cost')
+                    ->label(__('product_batches.fields.unit_cost'))
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('manufactured_date')
-                    ->label('Manufactured')
+                    ->label(__('product_batches.columns.manufactured'))
                     ->date()
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('expiry_date')
+                    ->label(__('product_batches.fields.expiry_date'))
                     ->date()
                     ->sortable(query: fn (Builder $query, string $direction) => $query->orderByRaw(
                         'expiry_date IS NULL, expiry_date '.(strtolower($direction) === 'desc' ? 'desc' : 'asc')
                     ))
-                    ->placeholder('No expiry')
+                    ->placeholder(__('product_batches.no_expiry'))
                     ->color(fn (?ProductBatch $record) => match (true) {
                         $record?->expiry_date === null => 'gray',
                         $record->expiry_date->isPast() => 'danger',
@@ -58,23 +60,26 @@ class ProductBatchesTable
                         default => 'success',
                     }),
                 IconColumn::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->boolean(),
             ])
             ->recordUrl(fn (ProductBatch $record) => ProductBatchResource::getUrl('view', ['record' => $record]))
             ->defaultSort('expiry_date', 'asc')
             ->filters([
                 Filter::make('expired')
+                    ->label(__('product_batches.filters.expired'))
                     ->query(fn (Builder $query) => $query->whereDate('expiry_date', '<', now())),
                 Filter::make('expiring_soon')
-                    ->label('Expiring within 30 days')
+                    ->label(__('product_batches.filters.expiring_soon'))
                     ->query(fn (Builder $query) => $query->whereBetween('expiry_date', [now(), now()->addDays(30)])),
                 SelectFilter::make('product_id')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->options(fn () => Product::query()->pluck('name', 'id')),
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
-                TernaryFilter::make('is_active'),
+                TernaryFilter::make('is_active')
+                    ->label(__('common.fields.is_active')),
             ])
             ->recordActions([
                 ActionGroup::make([

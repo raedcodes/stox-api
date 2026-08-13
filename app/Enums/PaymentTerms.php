@@ -16,15 +16,7 @@ enum PaymentTerms: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::DueOnReceipt => 'Due on receipt',
-            self::Cod => 'Cash on delivery',
-            self::Prepaid => 'Prepaid',
-            self::Net15 => 'Net 15',
-            self::Net30 => 'Net 30',
-            self::Net45 => 'Net 45',
-            self::Net60 => 'Net 60',
-        };
+        return __('enums.payment_terms.'.$this->value);
     }
 
     /**

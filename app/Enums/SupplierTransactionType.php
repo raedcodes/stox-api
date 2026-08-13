@@ -13,11 +13,7 @@ enum SupplierTransactionType: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Charge => 'Charge (invoice received)',
-            self::Payment => 'Payment made',
-            self::Return => 'Return (credit)',
-        };
+        return __('enums.supplier_transaction_type.'.$this->value);
     }
 
     public function getColor(): string

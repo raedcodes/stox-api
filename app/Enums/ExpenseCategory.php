@@ -17,16 +17,7 @@ enum ExpenseCategory: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Rent => 'Rent',
-            self::Utilities => 'Utilities',
-            self::Salaries => 'Salaries & wages',
-            self::Marketing => 'Marketing',
-            self::Supplies => 'Supplies',
-            self::Insurance => 'Insurance',
-            self::Maintenance => 'Maintenance',
-            self::Other => 'Other',
-        };
+        return __('enums.expense_category.'.$this->value);
     }
 
     public static function options(): array

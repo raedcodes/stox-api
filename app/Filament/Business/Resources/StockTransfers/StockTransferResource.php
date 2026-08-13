@@ -37,6 +37,16 @@ class StockTransferResource extends Resource
 
     protected static ?int $navigationSort = 43;
 
+    public static function getModelLabel(): string
+    {
+        return __('stock_transfers.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('stock_transfers.plural_model_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return StockTransferForm::configure($schema);

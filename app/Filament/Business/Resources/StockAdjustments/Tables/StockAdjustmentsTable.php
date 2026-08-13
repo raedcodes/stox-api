@@ -18,24 +18,27 @@ class StockAdjustmentsTable
         return $table
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('location.name')
-                    ->label('Location'),
+                    ->label(__('common.fields.location')),
                 TextColumn::make('batch.batch_number')
-                    ->label('Batch')
-                    ->placeholder('No batch #'),
+                    ->label(__('common.fields.batch'))
+                    ->placeholder(__('common.fields.no_batch_number')),
                 TextColumn::make('quantity_change')
-                    ->label('Quantity')
+                    ->label(__('common.fields.quantity'))
                     ->color(fn (StockAdjustment $record) => $record->quantity_change >= 0 ? 'success' : 'danger')
                     ->formatStateUsing(fn (StockAdjustment $record) => ($record->quantity_change >= 0 ? '+' : '').rtrim(rtrim(number_format($record->quantity_change, 2), '0'), '.')),
                 TextColumn::make('reason')
+                    ->label(__('common.fields.reason'))
                     ->badge(),
                 TextColumn::make('adjustment_date')
+                    ->label(__('common.fields.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('notes')
+                    ->label(__('common.fields.notes'))
                     ->placeholder('—')
                     ->limit(40),
             ])
@@ -43,12 +46,13 @@ class StockAdjustmentsTable
             ->defaultSort('adjustment_date', 'desc')
             ->filters([
                 SelectFilter::make('product_id')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->options(fn () => Product::query()->pluck('name', 'id')),
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
                 SelectFilter::make('reason')
+                    ->label(__('common.fields.reason'))
                     ->options(StockAdjustmentReason::options()),
             ])
             ->recordActions([

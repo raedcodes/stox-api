@@ -24,19 +24,22 @@ class StockTransfersTable
         return $table
             ->columns([
                 TextColumn::make('transfer_number')
-                    ->label('Transfer #')
+                    ->label(__('stock_transfers.columns.transfer_number'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('fromLocation.name')
-                    ->label('From'),
+                    ->label(__('stock_transfers.columns.from')),
                 TextColumn::make('toLocation.name')
-                    ->label('To'),
+                    ->label(__('stock_transfers.columns.to')),
                 TextColumn::make('status')
+                    ->label(__('common.fields.status'))
                     ->badge(),
                 TextColumn::make('transfer_date')
+                    ->label(__('common.fields.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('notes')
+                    ->label(__('common.fields.notes'))
                     ->placeholder('—')
                     ->limit(40),
             ])
@@ -44,12 +47,13 @@ class StockTransfersTable
             ->defaultSort('transfer_date', 'desc')
             ->filters([
                 SelectFilter::make('from_location_id')
-                    ->label('From location')
+                    ->label(__('stock_transfers.fields.from_location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
                 SelectFilter::make('to_location_id')
-                    ->label('To location')
+                    ->label(__('stock_transfers.fields.to_location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
                 SelectFilter::make('status')
+                    ->label(__('common.fields.status'))
                     ->options(StockTransferStatus::options()),
             ])
             ->recordActions([

@@ -18,8 +18,6 @@ class TopProductsWidget extends TableWidget
         return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]);
     }
 
-    protected static ?string $heading = 'Top products (last 30 days)';
-
     public function getTableRecordKey(Model|array $record): string
     {
         return (string) $record->product_id;
@@ -28,6 +26,7 @@ class TopProductsWidget extends TableWidget
     public function table(Table $table): Table
     {
         return $table
+            ->heading(__('dashboard.widgets.top_products_heading'))
             ->query(
                 fn (): Builder => SaleItem::query()
                     ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
@@ -38,12 +37,12 @@ class TopProductsWidget extends TableWidget
             )
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable(),
                 TextColumn::make('total_quantity')
-                    ->label('Units sold'),
+                    ->label(__('dashboard.columns.units_sold')),
                 TextColumn::make('gross_revenue')
-                    ->label('Gross revenue')
+                    ->label(__('dashboard.columns.gross_revenue'))
                     ->money(fn () => tenant('currency')?->value),
             ])
             ->defaultSort('total_quantity', 'desc')

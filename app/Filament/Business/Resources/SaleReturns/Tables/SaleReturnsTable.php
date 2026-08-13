@@ -35,22 +35,25 @@ class SaleReturnsTable
                 ) as computed_total'))
             ->columns([
                 TextColumn::make('sale.sale_number')
-                    ->label('Invoice #')
+                    ->label(__('common.fields.invoice_number'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('sale.customer.name')
-                    ->label('Customer'),
+                    ->label(__('common.fields.customer')),
                 TextColumn::make('return_date')
+                    ->label(__('common.fields.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('reason')
+                    ->label(__('common.fields.reason'))
                     ->placeholder('—')
                     ->limit(40),
                 TextColumn::make('total')
+                    ->label(__('common.fields.total'))
                     ->state(fn (SaleReturn $record) => $record->computed_total)
                     ->money(fn () => tenant('currency')?->value),
                 IconColumn::make('processed_at')
-                    ->label('Processed')
+                    ->label(__('common.fields.processed'))
                     ->boolean()
                     ->getStateUsing(fn (SaleReturn $record) => $record->processed_at !== null),
             ])
@@ -58,13 +61,13 @@ class SaleReturnsTable
             ->defaultSort('return_date', 'desc')
             ->filters([
                 SelectFilter::make('sale_id')
-                    ->label('Invoice')
+                    ->label(__('sale_returns.fields.invoice'))
                     ->options(fn () => Sale::query()->pluck('sale_number', 'id')),
             ])
             ->recordActions([
                 ActionGroup::make([
                     Action::make('process')
-                        ->label('Process Return')
+                        ->label(__('common.actions.process_return'))
                         ->icon('heroicon-o-arrow-uturn-left')
                         ->color('success')
                         ->requiresConfirmation()
@@ -74,12 +77,12 @@ class SaleReturnsTable
                                 $record->process();
 
                                 Notification::make()
-                                    ->title('Return processed')
+                                    ->title(__('common.notifications.return_processed'))
                                     ->success()
                                     ->send();
                             } catch (RuntimeException $e) {
                                 Notification::make()
-                                    ->title('Cannot process return')
+                                    ->title(__('common.notifications.cannot_process_return'))
                                     ->body($e->getMessage())
                                     ->danger()
                                     ->send();

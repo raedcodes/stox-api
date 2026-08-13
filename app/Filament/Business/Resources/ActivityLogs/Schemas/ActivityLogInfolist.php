@@ -14,27 +14,29 @@ class ActivityLogInfolist
     {
         return $schema
             ->components([
-                Section::make('Activity details')
+                Section::make(__('activity_logs.section_title'))
                     ->columns(3)
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label('Date')
+                            ->label(__('common.fields.date'))
                             ->dateTime(),
                         TextEntry::make('description')
+                            ->label(__('activity_logs.fields.description'))
                             ->columnSpanFull(),
                         TextEntry::make('subject_type')
-                            ->label('Subject')
+                            ->label(__('activity_logs.fields.subject'))
                             ->state(fn (Activity $record) => $record->subject_type
                                 ? Str::afterLast($record->subject_type, '\\').' #'.$record->subject_id
                                 : null)
                             ->placeholder('—'),
                         TextEntry::make('causer.name')
-                            ->label('By')
-                            ->placeholder('System'),
+                            ->label(__('common.fields.by'))
+                            ->placeholder(__('common.fields.system')),
                         TextEntry::make('log_name')
+                            ->label(__('activity_logs.fields.log_name'))
                             ->badge(),
                         TextEntry::make('properties')
-                            ->label('Properties')
+                            ->label(__('activity_logs.fields.properties'))
                             ->state(fn (Activity $record) => $record->properties->isNotEmpty()
                                 ? json_encode($record->properties->all(), JSON_PRETTY_PRINT)
                                 : null)

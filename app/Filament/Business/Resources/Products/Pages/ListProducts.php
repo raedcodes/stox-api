@@ -18,7 +18,7 @@ class ListProducts extends ListRecords
         return [
             CreateAction::make(),
             Action::make('exportExcel')
-                ->label('Export Excel')
+                ->label(__('common.fields.export_excel'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('gray')
                 ->action(fn () => Excel::download(

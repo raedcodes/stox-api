@@ -59,6 +59,16 @@ class InventoryValuationReport extends Page implements HasTable
 
     protected string $view = 'filament.business.pages.inventory-valuation-report';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('inventory_valuation_report.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('inventory_valuation_report.navigation_label');
+    }
+
     public function getTableRecordKey(Model|array $record): string
     {
         return "{$record->product_id}-{$record->location_id}";
@@ -79,38 +89,38 @@ class InventoryValuationReport extends Page implements HasTable
             ->query(fn (): Builder => $this->baseQuery())
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable(),
                 TextColumn::make('product.sku')
-                    ->label('SKU')
+                    ->label(__('common.fields.sku'))
                     ->searchable(),
                 TextColumn::make('product.brand.name')
-                    ->label('Brand')
+                    ->label(__('common.fields.brand'))
                     ->placeholder('—'),
                 TextColumn::make('product.description')
-                    ->label('Description')
+                    ->label(__('common.fields.description'))
                     ->limit(40)
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('location.name')
-                    ->label('Location'),
+                    ->label(__('common.fields.location')),
                 TextColumn::make('total_quantity')
-                    ->label('On hand'),
+                    ->label(__('dashboard.columns.on_hand')),
                 TextColumn::make('unit_cost')
-                    ->label('Unit cost (avg)')
+                    ->label(__('inventory_valuation_report.fields.unit_cost_avg'))
                     ->state(fn ($record) => (float) $record->total_quantity > 0
                         ? (float) $record->total_value / (float) $record->total_quantity
                         : 0)
                     ->money(fn () => tenant('currency')?->value)
-                    ->tooltip('Weighted average cost across this product\'s batches at this location — batches can have different actual costs (e.g. landed costs vary by shipment).'),
+                    ->tooltip(__('inventory_valuation_report.unit_cost_tooltip')),
                 TextColumn::make('total_value')
-                    ->label('Total Value')
+                    ->label(__('inventory_valuation_report.fields.total_value'))
                     ->money(fn () => tenant('currency')?->value)
                     ->summarize(Sum::make()->money(fn () => tenant('currency')?->value)),
             ])
             ->filters([
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id')),
             ])
             ->defaultSort('total_value', 'desc')
@@ -121,17 +131,17 @@ class InventoryValuationReport extends Page implements HasTable
     {
         return [
             Action::make('generateAiSummary')
-                ->label(fn () => $this->aiSummary ? 'Regenerate AI Summary' : 'Generate AI Summary')
+                ->label(fn () => $this->aiSummary ? __('common.actions.regenerate_ai_summary') : __('common.actions.generate_ai_summary'))
                 ->icon('heroicon-o-sparkles')
                 ->color('gray')
                 ->action(fn () => $this->generateAiSummary()),
             Action::make('exportPdf')
-                ->label('Export PDF')
+                ->label(__('common.actions.export_pdf'))
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
             Action::make('exportExcel')
-                ->label('Export Excel')
+                ->label(__('common.fields.export_excel'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(fn () => Excel::download(
                     new InventoryValuationReportExport($this->getFilteredTableQuery()),
@@ -175,9 +185,9 @@ class InventoryValuationReport extends Page implements HasTable
         $figures = $this->aiSummaryFigures();
 
         return [
-            ['label' => 'Total Stock Value', 'value' => $currency.' '.number_format($figures['totalValue'], 2)],
-            ['label' => 'Products Tracked', 'value' => number_format($figures['productsTracked'])],
-            ['label' => 'Total Units On Hand', 'value' => number_format($figures['totalQuantity'])],
+            ['label' => __('inventory_valuation_report.kpis.total_stock_value'), 'value' => $currency.' '.number_format($figures['totalValue'], 2)],
+            ['label' => __('inventory_valuation_report.kpis.products_tracked'), 'value' => number_format($figures['productsTracked'])],
+            ['label' => __('inventory_valuation_report.kpis.total_units_on_hand'), 'value' => number_format($figures['totalQuantity'])],
         ];
     }
 

@@ -5,10 +5,14 @@ namespace App\Filament\Business\Widgets;
 use App\Enums\UserRole;
 use App\Models\ProductBatch;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Contracts\Support\Htmlable;
 
 class StockExpiryTimelineChart extends ChartWidget
 {
-    protected ?string $heading = 'Stock expiry timeline';
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('dashboard.widgets.stock_expiry_timeline_heading');
+    }
 
     public static function canView(): bool
     {
@@ -46,7 +50,7 @@ class StockExpiryTimelineChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Quantity',
+                    'label' => __('dashboard.chart.quantity'),
                     'data' => [
                         round((float) $row->expired, 2),
                         round((float) $row->within_30, 2),
@@ -57,7 +61,13 @@ class StockExpiryTimelineChart extends ChartWidget
                     'backgroundColor' => ['#991b1b', '#ef4444', '#f59e0b', '#eab308', '#22c55e'],
                 ],
             ],
-            'labels' => ['Already expired', '0–30 days', '31–60 days', '61–90 days', '90+ days'],
+            'labels' => [
+                __('dashboard.chart.already_expired'),
+                __('dashboard.chart.within_30_days'),
+                __('dashboard.chart.within_60_days'),
+                __('dashboard.chart.within_90_days'),
+                __('dashboard.chart.beyond_90_days'),
+            ],
         ];
     }
 }

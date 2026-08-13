@@ -11,10 +11,7 @@ enum DiscountType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Percentage => 'Percentage',
-            self::Fixed => 'Fixed amount',
-        };
+        return __('enums.discount_type.'.$this->value);
     }
 
     public static function options(): array

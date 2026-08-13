@@ -6,12 +6,16 @@ use App\Enums\SaleStatus;
 use App\Enums\UserRole;
 use App\Models\Sale;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Contracts\Support\Htmlable;
 
 class SalesRevenueTrendChart extends ChartWidget
 {
-    protected ?string $heading = 'Revenue vs. cost of goods (last 30 days)';
-
     protected int|string|array $columnSpan = 'full';
+
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('dashboard.widgets.revenue_trend_heading');
+    }
 
     public static function canView(): bool
     {
@@ -52,7 +56,7 @@ class SalesRevenueTrendChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Revenue',
+                    'label' => __('dashboard.chart.revenue'),
                     'data' => $revenue,
                     'borderColor' => '#22c55e',
                     'backgroundColor' => 'rgba(34, 197, 94, 0.1)',
@@ -60,7 +64,7 @@ class SalesRevenueTrendChart extends ChartWidget
                     'tension' => 0.3,
                 ],
                 [
-                    'label' => 'Cost of goods sold',
+                    'label' => __('dashboard.chart.cost_of_goods_sold'),
                     'data' => $cogs,
                     'borderColor' => '#ef4444',
                     'backgroundColor' => 'rgba(239, 68, 68, 0.1)',

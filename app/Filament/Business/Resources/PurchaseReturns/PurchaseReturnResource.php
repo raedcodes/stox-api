@@ -37,6 +37,16 @@ class PurchaseReturnResource extends Resource
 
     protected static ?int $navigationSort = 21;
 
+    public static function getModelLabel(): string
+    {
+        return __('purchase_returns.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('purchase_returns.plural_model_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PurchaseReturnForm::configure($schema);

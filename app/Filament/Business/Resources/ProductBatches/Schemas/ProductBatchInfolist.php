@@ -14,28 +14,30 @@ class ProductBatchInfolist
     {
         return $schema
             ->components([
-                Section::make('Batch details')
+                Section::make(__('product_batches.section_title'))
                     ->columns(3)
                     ->schema([
                         TextEntry::make('product.name')
-                            ->label('Product'),
+                            ->label(__('common.fields.product')),
                         TextEntry::make('location.name')
-                            ->label('Location'),
+                            ->label(__('common.fields.location')),
                         TextEntry::make('batch_number')
-                            ->label('Batch / lot number')
+                            ->label(__('product_batches.fields.batch_number'))
                             ->placeholder('—'),
-                        TextEntry::make('quantity'),
+                        TextEntry::make('quantity')
+                            ->label(__('common.fields.quantity')),
                         TextEntry::make('unit_cost')
-                            ->label('Unit cost')
+                            ->label(__('product_batches.fields.unit_cost'))
                             ->money(fn () => tenant('currency')?->value)
                             ->placeholder('—'),
                         TextEntry::make('manufactured_date')
-                            ->label('Manufactured date')
+                            ->label(__('product_batches.fields.manufactured_date'))
                             ->date()
                             ->placeholder('—'),
                         TextEntry::make('expiry_date')
+                            ->label(__('product_batches.fields.expiry_date'))
                             ->date()
-                            ->placeholder('No expiry')
+                            ->placeholder(__('product_batches.no_expiry'))
                             ->color(fn (?ProductBatch $record) => match (true) {
                                 $record?->expiry_date === null => 'gray',
                                 $record->expiry_date->isPast() => 'danger',
@@ -43,7 +45,7 @@ class ProductBatchInfolist
                                 default => 'success',
                             }),
                         IconEntry::make('is_active')
-                            ->label('Active')
+                            ->label(__('common.fields.is_active'))
                             ->boolean(),
                     ]),
             ]);

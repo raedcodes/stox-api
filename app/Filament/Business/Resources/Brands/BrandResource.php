@@ -46,6 +46,16 @@ class BrandResource extends Resource
 
     protected static ?int $navigationSort = 30;
 
+    public static function getModelLabel(): string
+    {
+        return __('brands.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('brands.plural_model_label');
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
@@ -57,8 +67,10 @@ class BrandResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('common.fields.name'))
                     ->required(),
                 Checkbox::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->default(true),
             ]);
     }
@@ -68,15 +80,17 @@ class BrandResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('common.fields.name'))
                     ->searchable(),
                 IconColumn::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label('Created at')
+                    ->label(__('common.fields.created_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('created_at_since')
-                    ->label('Since')
+                    ->label(__('common.fields.since'))
                     ->state(fn (Brand $record) => $record->created_at)
                     ->since()
                     ->dateTooltip()

@@ -12,10 +12,7 @@ enum CashSessionStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Open => 'Open',
-            self::Closed => 'Closed',
-        };
+        return __('enums.cash_session_status.'.$this->value);
     }
 
     public function getColor(): string

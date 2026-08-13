@@ -11,10 +11,7 @@ enum CustomerType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::B2B => 'Business (B2B)',
-            self::B2C => 'Individual (B2C)',
-        };
+        return __('enums.customer_type.'.$this->value);
     }
 
     /**

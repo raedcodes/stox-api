@@ -36,6 +36,16 @@ class StockAdjustmentResource extends Resource
 
     protected static ?int $navigationSort = 41;
 
+    public static function getModelLabel(): string
+    {
+        return __('stock_adjustments.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('stock_adjustments.plural_model_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return StockAdjustmentForm::configure($schema);

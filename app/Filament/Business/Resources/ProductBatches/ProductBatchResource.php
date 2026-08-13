@@ -37,6 +37,16 @@ class ProductBatchResource extends Resource
 
     protected static ?int $navigationSort = 33;
 
+    public static function getModelLabel(): string
+    {
+        return __('product_batches.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('product_batches.plural_model_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ProductBatchForm::configure($schema);

@@ -19,18 +19,7 @@ enum Currency: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::USD => 'USD - US Dollar',
-            self::EUR => 'EUR - Euro',
-            self::GBP => 'GBP - British Pound',
-            self::AED => 'AED - UAE Dirham',
-            self::SAR => 'SAR - Saudi Riyal',
-            self::EGP => 'EGP - Egyptian Pound',
-            self::JOD => 'JOD - Jordanian Dinar',
-            self::LBP => 'LBP - Lebanese Pound',
-            self::CAD => 'CAD - Canadian Dollar',
-            self::AUD => 'AUD - Australian Dollar',
-        };
+        return __('enums.currency.'.$this->value);
     }
 
     /**

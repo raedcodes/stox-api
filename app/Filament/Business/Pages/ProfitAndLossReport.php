@@ -40,6 +40,16 @@ class ProfitAndLossReport extends Page
 
     protected string $view = 'filament.business.pages.profit-and-loss-report';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('profit_and_loss_report.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('profit_and_loss_report.navigation_label');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -179,17 +189,17 @@ class ProfitAndLossReport extends Page
     {
         return [
             Action::make('generateAiSummary')
-                ->label(fn () => $this->aiSummary ? 'Regenerate AI Summary' : 'Generate AI Summary')
+                ->label(fn () => $this->aiSummary ? __('common.actions.regenerate_ai_summary') : __('common.actions.generate_ai_summary'))
                 ->icon('heroicon-o-sparkles')
                 ->color('gray')
                 ->action(fn () => $this->generateAiSummary()),
             Action::make('exportPdf')
-                ->label('Export PDF')
+                ->label(__('common.actions.export_pdf'))
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
             Action::make('exportExcel')
-                ->label('Export Excel')
+                ->label(__('common.fields.export_excel'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(fn () => $this->exportExcel()),
         ];
@@ -217,9 +227,9 @@ class ProfitAndLossReport extends Page
         $currency = tenant('currency')?->value;
 
         return [
-            ['label' => 'Total Revenue', 'value' => $currency.' '.number_format($this->revenue(), 2)],
-            ['label' => 'Net Profit', 'value' => $currency.' '.number_format($this->netProfit(), 2)],
-            ['label' => 'Net Margin', 'value' => number_format($this->netMarginPercent(), 1).'%'],
+            ['label' => __('sales_report.kpis.total_revenue'), 'value' => $currency.' '.number_format($this->revenue(), 2)],
+            ['label' => __('profit_and_loss_report.kpis.net_profit'), 'value' => $currency.' '.number_format($this->netProfit(), 2)],
+            ['label' => __('profit_and_loss_report.kpis.net_margin'), 'value' => number_format($this->netMarginPercent(), 1).'%'],
         ];
     }
 

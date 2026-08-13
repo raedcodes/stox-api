@@ -41,6 +41,16 @@ class SaleResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
+    public static function getModelLabel(): string
+    {
+        return __('sales.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('sales.plural_model_label');
+    }
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['sale_number', 'customer.name'];
@@ -49,8 +59,8 @@ class SaleResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Customer' => $record->customer?->name,
-            'Status' => $record->status->getLabel(),
+            __('common.fields.customer') => $record->customer?->name,
+            __('common.fields.status') => $record->status->getLabel(),
         ];
     }
 

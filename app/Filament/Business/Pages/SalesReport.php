@@ -65,6 +65,16 @@ class SalesReport extends Page implements HasTable
 
     protected string $view = 'filament.business.pages.sales-report';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('sales_report.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('sales_report.navigation_label');
+    }
+
     protected function baseQuery(): Builder
     {
         return SaleItem::query()
@@ -79,51 +89,52 @@ class SalesReport extends Page implements HasTable
             ->query(fn (): Builder => $this->baseQuery())
             ->columns([
                 TextColumn::make('sale.sale_date')
-                    ->label('Date')
+                    ->label(__('common.fields.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('sale.sale_number')
-                    ->label('Invoice #'),
+                    ->label(__('common.fields.invoice_number')),
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->searchable(),
                 TextColumn::make('product.sku')
-                    ->label('SKU')
+                    ->label(__('common.fields.sku'))
                     ->searchable(),
                 TextColumn::make('product.brand.name')
-                    ->label('Brand')
+                    ->label(__('common.fields.brand'))
                     ->placeholder('—'),
                 TextColumn::make('product.category.name')
-                    ->label('Category')
+                    ->label(__('common.fields.category'))
                     ->placeholder('—'),
                 TextColumn::make('sale.cashier.name')
-                    ->label('Cashier')
+                    ->label(__('common.fields.cashier'))
                     ->placeholder('—'),
                 TextColumn::make('sale.location.name')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->placeholder('—'),
-                TextColumn::make('quantity'),
+                TextColumn::make('quantity')
+                    ->label(__('common.fields.quantity')),
                 TextColumn::make('total')
-                    ->label('Line total')
+                    ->label(__('common.fields.line_total'))
                     ->state(fn (SaleItem $record) => $record->total())
                     ->money(fn () => tenant('currency')?->value),
             ])
             ->groups([
                 Group::make('sale.sale_date')
-                    ->label('Date')
+                    ->label(__('common.fields.date'))
                     ->date(),
                 Group::make('product.name')
-                    ->label('Product'),
+                    ->label(__('common.fields.product')),
                 Group::make('product.category.name')
-                    ->label('Category'),
+                    ->label(__('common.fields.category')),
                 Group::make('sale.cashier.name')
-                    ->label('Cashier'),
+                    ->label(__('common.fields.cashier')),
                 Group::make('sale.location.name')
-                    ->label('Location'),
+                    ->label(__('common.fields.location')),
             ])
             ->filters([
                 Filter::make('date_range')
-                    ->label('Date range')
+                    ->label(__('common.fields.date_range'))
                     ->schema([
                         DatePicker::make('from'),
                         DatePicker::make('until'),
@@ -134,24 +145,24 @@ class SalesReport extends Page implements HasTable
                             ->when($data['until'] ?? null, fn ($q, $date) => $q->whereDate('sales.sale_date', '<=', $date));
                     }),
                 SelectFilter::make('product_id')
-                    ->label('Product')
+                    ->label(__('common.fields.product'))
                     ->options(fn () => Product::query()->pluck('name', 'id')),
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label(__('common.fields.location'))
                     ->options(fn () => Location::query()->pluck('name', 'id'))
                     ->query(fn (Builder $query, array $data) => $query->when(
                         $data['value'] ?? null,
                         fn ($q, $locationId) => $q->where('sales.location_id', $locationId)
                     )),
                 SelectFilter::make('category_id')
-                    ->label('Category')
+                    ->label(__('common.fields.category'))
                     ->options(fn () => Category::query()->pluck('name', 'id'))
                     ->query(fn (Builder $query, array $data) => $query->when(
                         $data['value'] ?? null,
                         fn ($q, $categoryId) => $q->whereHas('product', fn ($q) => $q->where('category_id', $categoryId))
                     )),
                 SelectFilter::make('created_by')
-                    ->label('Cashier')
+                    ->label(__('common.fields.cashier'))
                     // created_by is polymorphic (a staff member or the central
                     // Owner) — a plain id can collide between the two tables,
                     // so options/filtering both carry the type alongside it.
@@ -178,17 +189,17 @@ class SalesReport extends Page implements HasTable
     {
         return [
             Action::make('generateAiSummary')
-                ->label(fn () => $this->aiSummary ? 'Regenerate AI Summary' : 'Generate AI Summary')
+                ->label(fn () => $this->aiSummary ? __('common.actions.regenerate_ai_summary') : __('common.actions.generate_ai_summary'))
                 ->icon('heroicon-o-sparkles')
                 ->color('gray')
                 ->action(fn () => $this->generateAiSummary()),
             Action::make('exportPdf')
-                ->label('Export PDF')
+                ->label(__('common.actions.export_pdf'))
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
             Action::make('exportExcel')
-                ->label('Export Excel')
+                ->label(__('common.fields.export_excel'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(fn () => Excel::download(
                     new SalesReportExport($this->getFilteredTableQuery()),
@@ -242,9 +253,9 @@ class SalesReport extends Page implements HasTable
         $figures = $this->aiSummaryFigures();
 
         return [
-            ['label' => 'Total Revenue', 'value' => $currency.' '.number_format($figures['revenue'], 2)],
-            ['label' => 'Total Sales', 'value' => number_format($figures['salesCount'])],
-            ['label' => 'Total Items Sold', 'value' => number_format($figures['totalQuantity'])],
+            ['label' => __('sales_report.kpis.total_revenue'), 'value' => $currency.' '.number_format($figures['revenue'], 2)],
+            ['label' => __('sales_report.kpis.total_sales'), 'value' => number_format($figures['salesCount'])],
+            ['label' => __('sales_report.kpis.total_items_sold'), 'value' => number_format($figures['totalQuantity'])],
         ];
     }
 

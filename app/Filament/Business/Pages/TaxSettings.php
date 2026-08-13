@@ -32,6 +32,16 @@ class TaxSettings extends Page
 
     protected string $view = 'filament.business.pages.tax-settings';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('settings.tax.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('settings.tax.navigation_label');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -54,7 +64,7 @@ class TaxSettings extends Page
         return $schema
             ->components([
                 TextInput::make('rate')
-                    ->label('Tax / VAT rate')
+                    ->label(__('settings.tax.fields.rate'))
                     ->numeric()
                     ->minValue(0)
                     ->maxValue(100)
@@ -70,7 +80,7 @@ class TaxSettings extends Page
         TaxSetting::current()->update(['rate' => $data['rate']]);
 
         Notification::make()
-            ->title('Tax settings saved')
+            ->title(__('settings.tax.saved'))
             ->success()
             ->send();
     }
@@ -79,7 +89,7 @@ class TaxSettings extends Page
     {
         return [
             Action::make('save')
-                ->label('Save')
+                ->label(__('common.actions.save'))
                 ->submit('save'),
         ];
     }

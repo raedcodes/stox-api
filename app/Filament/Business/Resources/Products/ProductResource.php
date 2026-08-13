@@ -43,6 +43,16 @@ class ProductResource extends Resource
 
     protected static ?int $navigationSort = 32;
 
+    public static function getModelLabel(): string
+    {
+        return __('products.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('products.plural_model_label');
+    }
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'sku', 'barcode'];
@@ -51,8 +61,8 @@ class ProductResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'SKU' => $record->sku,
-            'Category' => $record->category?->name,
+            __('common.fields.sku') => $record->sku,
+            __('common.fields.category') => $record->category?->name,
         ];
     }
 

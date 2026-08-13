@@ -14,13 +14,7 @@ enum BarcodeFormat: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::EAN13 => 'EAN-13',
-            self::EAN8 => 'EAN-8',
-            self::UPCA => 'UPC-A',
-            self::CODE128 => 'Code 128',
-            self::CODE39 => 'Code 39',
-        };
+        return __('enums.barcode_format.'.$this->value);
     }
 
     /**

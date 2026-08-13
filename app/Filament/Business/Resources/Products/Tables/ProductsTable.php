@@ -45,74 +45,79 @@ class ProductsTable
                     ->limit(1)
                     ->circular(false),
                 TextColumn::make('name')
+                    ->label(__('common.fields.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('sku')
-                    ->label('SKU')
+                    ->label(__('common.fields.sku'))
                     ->searchable(),
                 TextColumn::make('stock_on_hand')
-                    ->label('Total stock')
+                    ->label(__('products.fields.total_stock'))
                     ->numeric()
                     ->placeholder('0')
                     ->sortable(),
                 TextColumn::make('active_variants_count')
-                    ->label('Variants')
+                    ->label(__('products.fields.variants'))
                     ->badge()
-                    ->formatStateUsing(fn (int $state) => $state > 1 ? "{$state} Variants" : 'Single')
+                    ->formatStateUsing(fn (int $state) => $state > 1 ? __('products.variants_count', ['count' => $state]) : __('products.single'))
                     ->color(fn (int $state) => $state > 1 ? 'info' : 'gray'),
                 TextColumn::make('description')
-                    ->label('Description')
+                    ->label(__('common.fields.description'))
                     ->limit(40)
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('barcode')
+                    ->label(__('common.fields.barcode'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('category.name')
-                    ->label('Category')
+                    ->label(__('common.fields.category'))
                     ->placeholder('—'),
                 TextColumn::make('brand.name')
-                    ->label('Brand')
+                    ->label(__('common.fields.brand'))
                     ->placeholder('—'),
                 TextColumn::make('unit.abbreviation')
-                    ->label('Unit'),
+                    ->label(__('products.fields.unit')),
                 TextColumn::make('min_stock_level')
-                    ->label('Min stock')
+                    ->label(__('products.fields.min_stock'))
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('reorder_level')
-                    ->label('Reorder at')
+                    ->label(__('products.fields.reorder_at'))
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cost_price')
+                    ->label(__('products.fields.cost_price'))
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('selling_price')
+                    ->label(__('products.fields.selling_price'))
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—'),
                 TextColumn::make('wsp')
-                    ->label('WSP')
+                    ->label(__('products.fields.wsp_short'))
                     ->money(fn () => tenant('currency')?->value)
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cbm')
-                    ->label('CBM (m³)')
+                    ->label(__('products.fields.cbm_short'))
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('tax_inclusive')
-                    ->label('Tax incl.')
+                    ->label(__('products.fields.tax_incl'))
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
+                    ->label(__('common.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label('Created at')
+                    ->label(__('common.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at_since')
-                    ->label('Since')
+                    ->label(__('common.fields.since'))
                     ->state(fn (Product $record) => $record->created_at)
                     ->since()
                     ->dateTooltip()
@@ -122,38 +127,39 @@ class ProductsTable
             ->recordUrl(fn (Product $record) => ProductResource::getUrl('view', ['record' => $record]))
             ->filters([
                 SelectFilter::make('category_id')
-                    ->label('Category')
+                    ->label(__('common.fields.category'))
                     ->options(fn () => Category::query()->pluck('name', 'id')),
                 SelectFilter::make('brand_id')
-                    ->label('Brand')
+                    ->label(__('common.fields.brand'))
                     ->options(fn () => Brand::query()->pluck('name', 'id')),
                 SelectFilter::make('unit_of_measure_id')
-                    ->label('Unit')
+                    ->label(__('products.fields.unit'))
                     ->options(fn () => UnitOfMeasure::query()->pluck('name', 'id')),
-                TernaryFilter::make('is_active'),
+                TernaryFilter::make('is_active')
+                    ->label(__('common.fields.is_active')),
                 TrashedFilter::make(),
             ])
             ->recordActions([
                 Action::make('viewVariants')
-                    ->label('View Variants')
+                    ->label(__('products.actions.view_variants'))
                     ->icon('heroicon-o-squares-2x2')
                     ->color('gray')
                     ->visible(fn (Product $record) => $record->active_variants_count > 1)
                     ->slideOver()
-                    ->modalHeading(fn (Product $record) => "Variants — {$record->name}")
+                    ->modalHeading(fn (Product $record) => __('products.variants_modal_heading', ['name' => $record->name]))
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close')
+                    ->modalCancelActionLabel(__('products.actions.close'))
                     ->schema(fn (Product $record) => [
                         RepeatableEntry::make('variants')
                             ->label('')
                             ->state(fn () => $record->variants()->orderByDesc('is_default')->get())
                             ->table([
-                                TableColumn::make('Size'),
-                                TableColumn::make('Color'),
-                                TableColumn::make('SKU'),
-                                TableColumn::make('Barcode'),
-                                TableColumn::make('Active'),
-                                TableColumn::make('Stock on hand'),
+                                TableColumn::make(__('products.fields.size')),
+                                TableColumn::make(__('products.fields.color')),
+                                TableColumn::make(__('common.fields.sku')),
+                                TableColumn::make(__('common.fields.barcode')),
+                                TableColumn::make(__('common.fields.is_active')),
+                                TableColumn::make(__('products.fields.stock_on_hand')),
                             ])
                             ->schema([
                                 TextEntry::make('size')->placeholder('—'),

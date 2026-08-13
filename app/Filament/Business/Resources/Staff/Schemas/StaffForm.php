@@ -31,9 +31,10 @@ class StaffForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('common.fields.name'))
                     ->required(),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label(__('staff.fields.email_address'))
                     ->email()
                     ->required()
                     // Unique within this tenant's own `staff` table only — two
@@ -41,12 +42,13 @@ class StaffForm
                     // the same email address.
                     ->unique(table: 'staff', column: 'email', ignoreRecord: true),
                 Select::make('role')
-                    ->label('Role')
+                    ->label(__('staff.fields.role'))
                     ->options(self::assignableRoles())
                     ->default(fn (?Staff $record) => $record?->getRoleNames()->first())
-                    ->helperText('Manager: everything except staff management. Cashier: Point of Sale only. Storekeeper: inventory & stock only, no sales or financial data.')
+                    ->helperText(__('staff.role_helper'))
                     ->required(),
                 TextInput::make('password')
+                    ->label(__('staff.fields.password'))
                     ->password()
                     ->revealable()
                     ->autocomplete('new-password')
@@ -54,8 +56,8 @@ class StaffForm
                     ->confirmed()
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->helperText(fn (string $operation): string => $operation === 'create'
-                        ? 'Share this with the staff member securely — they can change it themselves afterwards from their profile page.'
-                        : 'Leave blank to keep the current password.')
+                        ? __('staff.password_helper_create')
+                        : __('staff.password_helper_edit'))
                     ->rules([
                         Password::min(8)
                             ->letters()
@@ -65,15 +67,15 @@ class StaffForm
                             ->uncompromised(),
                     ]),
                 TextInput::make('password_confirmation')
-                    ->label('Confirm password')
+                    ->label(__('staff.fields.password_confirmation'))
                     ->password()
                     ->revealable()
                     ->autocomplete('new-password')
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(false),
                 Toggle::make('is_active')
-                    ->label('Active')
-                    ->helperText('Inactive staff are blocked from logging in immediately. Their sales, stock, and activity history are always preserved.')
+                    ->label(__('common.fields.is_active'))
+                    ->helperText(__('staff.is_active_helper'))
                     ->default(true),
             ]);
     }

@@ -16,20 +16,22 @@ class ActivityLogsTable
         return $table
             ->columns([
                 TextColumn::make('description')
+                    ->label(__('activity_logs.fields.description'))
                     ->wrap(),
                 TextColumn::make('subject_type')
-                    ->label('Subject')
+                    ->label(__('activity_logs.fields.subject'))
                     ->state(fn (Activity $record) => $record->subject_type
                         ? Str::afterLast($record->subject_type, '\\').' #'.$record->subject_id
                         : null)
                     ->placeholder('—'),
                 TextColumn::make('causer.name')
-                    ->label('By')
-                    ->placeholder('System'),
+                    ->label(__('common.fields.by'))
+                    ->placeholder(__('common.fields.system')),
                 TextColumn::make('log_name')
+                    ->label(__('activity_logs.fields.log_name'))
                     ->badge(),
                 TextColumn::make('created_at')
-                    ->label('Date')
+                    ->label(__('common.fields.date'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -37,9 +39,10 @@ class ActivityLogsTable
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('log_name')
+                    ->label(__('activity_logs.fields.log_name'))
                     ->options(fn () => Activity::query()->distinct()->pluck('log_name', 'log_name')->filter()->all()),
                 SelectFilter::make('subject_type')
-                    ->label('Subject type')
+                    ->label(__('activity_logs.fields.subject_type'))
                     ->options(fn () => Activity::query()->distinct()->pluck('subject_type', 'subject_type')
                         ->filter()
                         ->mapWithKeys(fn ($type) => [$type => Str::afterLast($type, '\\')])

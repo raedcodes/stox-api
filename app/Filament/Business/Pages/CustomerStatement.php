@@ -39,6 +39,16 @@ class CustomerStatement extends Page
 
     protected string $view = 'filament.business.pages.customer-statement';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('customer_statement.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('customer_statement.navigation_label');
+    }
+
     /**
      * @var array<string, mixed>|null
      */
@@ -63,15 +73,17 @@ class CustomerStatement extends Page
         return $schema
             ->components([
                 Select::make('customer_id')
-                    ->label('Customer')
+                    ->label(__('common.fields.customer'))
                     ->options(fn () => Customer::query()->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
                     ->live(),
                 DatePicker::make('from')
+                    ->label(__('common.fields.from'))
                     ->required()
                     ->live(),
                 DatePicker::make('until')
+                    ->label(__('common.fields.until'))
                     ->required()
                     ->live(),
             ]);
@@ -148,12 +160,12 @@ class CustomerStatement extends Page
                 ->record($this->customer())
                 ->after(fn () => $this->dispatch('$refresh')),
             Action::make('exportPdf')
-                ->label('Export PDF')
+                ->label(__('common.actions.export_pdf'))
                 ->icon('heroicon-o-document')
                 ->color('gray')
                 ->action(fn () => $this->exportPdf()),
             Action::make('exportExcel')
-                ->label('Export Excel')
+                ->label(__('common.fields.export_excel'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(fn () => $this->exportExcel()),
         ];
@@ -165,7 +177,7 @@ class CustomerStatement extends Page
 
         if (! $customer) {
             Notification::make()
-                ->title('Select a customer first')
+                ->title(__('common.notifications.select_customer_first'))
                 ->warning()
                 ->send();
 
@@ -192,7 +204,7 @@ class CustomerStatement extends Page
 
         if (! $customer) {
             Notification::make()
-                ->title('Select a customer first')
+                ->title(__('common.notifications.select_customer_first'))
                 ->warning()
                 ->send();
 
