@@ -11,7 +11,11 @@
                         {{ $message['role'] === 'user'
                             ? 'bg-indigo-500 text-white'
                             : 'border-s-4 border-indigo-400 bg-indigo-50/60 text-gray-800 dark:border-indigo-500 dark:bg-indigo-500/10 dark:text-gray-200' }}">
-                        {{ $message['content'] }}
+                        @if ($message['role'] === 'user')
+                            {{ $message['content'] }}
+                        @else
+                            {!! $this->formatAssistantMessage($message['content']) !!}
+                        @endif
                     </div>
                 </div>
             @empty

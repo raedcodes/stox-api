@@ -36,6 +36,10 @@ class AiAssistant extends Page
 
     protected static ?string $navigationLabel = 'Ask Stox';
 
+    // Filament otherwise derives the page heading from the class name
+    // ("AiAssistant" -> "Ai Assistant") — set explicitly for correct casing.
+    protected static ?string $title = 'AI Assistant';
+
     protected static UnitEnum|string|null $navigationGroup = null;
 
     protected static ?int $navigationSort = -1;
@@ -72,6 +76,20 @@ class AiAssistant extends Page
     public function suggestedQuestions(): array
     {
         return self::SUGGESTED_QUESTIONS;
+    }
+
+    /**
+     * Gemini's plain-text answers sometimes include basic markdown (mainly
+     * **bold**) even though this chat has no markdown renderer — the raw
+     * asterisks were showing up literally. Escapes first (never trust
+     * AI-echoed content as safe HTML — e.g. a customer name it reads back
+     * from a tool result could contain arbitrary text), then converts only
+     * the fixed **bold** pattern into a real tag. Deliberately not a full
+     * markdown parser — narrow and predictable rather than open-ended.
+     */
+    public function formatAssistantMessage(string $content): string
+    {
+        return preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', e($content));
     }
 
     /**
