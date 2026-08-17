@@ -22,9 +22,11 @@ class CreatePurchaseOrder extends CreateRecord
     {
         $this->callHook('beforeFill');
 
-        $productId = request()->query('product_id');
+        $this->form->fill();
 
-        $this->form->fill($productId ? $this->suggestedReorderData((int) $productId) : []);
+        if ($productId = request()->query('product_id')) {
+            $this->form->rawState($this->suggestedReorderData((int) $productId));
+        }
 
         $this->callHook('afterFill');
     }
