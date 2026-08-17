@@ -3,6 +3,7 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\UserRole;
+use App\Models\AiConversation;
 use App\Services\AiAssistant\StoxAssistantTools;
 use App\Services\Gemini\GeminiClient;
 use BackedEnum;
@@ -20,9 +21,9 @@ use UnitEnum;
  * this panel.
  *
  * $conversation is what the Blade view renders (plain {role, content}
- * pairs); $geminiHistory is the parallel, Gemini-wire-format history
- * (role: user/model, parts: [...]) used only to drive the API round trip —
- * kept separate so the view never has to understand functionCall/
+ * pairs); $history is the parallel, provider-wire-format history (role:
+ * user/model, parts: [...]) used only to drive the API round trip — kept
+ * separate so the view never has to understand functionCall/
  * functionResponse parts.
  */
 class AiAssistant extends Page
@@ -64,9 +65,17 @@ class AiAssistant extends Page
     /**
      * @var array<int, array<string, mixed>>
      */
-    public array $geminiHistory = [];
+    public array $history = [];
 
     public string $question = '';
+
+    public function mount(): void
+    {
+        $conversation = AiConversation::forUser(auth()->user());
+
+        $this->conversation = $conversation->messages;
+        $this->history = $conversation->history;
+    }
 
     /**
      * @var array<int, string>
@@ -135,7 +144,9 @@ class AiAssistant extends Page
     public function clearConversation(): void
     {
         $this->conversation = [];
-        $this->geminiHistory = [];
+        $this->history = [];
+
+        $this->persistConversation();
     }
 
     public function ask(): void
@@ -147,7 +158,7 @@ class AiAssistant extends Page
         }
 
         $this->conversation[] = ['role' => 'user', 'content' => $question];
-        $this->geminiHistory[] = ['role' => 'user', 'parts' => [['text' => $question]]];
+        $this->history[] = ['role' => 'user', 'parts' => [['text' => $question]]];
         $this->question = '';
 
         try {
@@ -156,6 +167,16 @@ class AiAssistant extends Page
         } catch (RuntimeException $e) {
             $this->conversation[] = ['role' => 'assistant', 'content' => __('ai_assistant.error_prefix', ['message' => $e->getMessage()])];
         }
+
+        $this->persistConversation();
+    }
+
+    protected function persistConversation(): void
+    {
+        AiConversation::forUser(auth()->user())->update([
+            'messages' => $this->conversation,
+            'history' => $this->history,
+        ]);
     }
 
     protected function runConversationLoop(): string
@@ -166,8 +187,8 @@ class AiAssistant extends Page
         $systemInstruction = $this->systemInstruction();
 
         for ($round = 0; $round < self::MAX_TOOL_ROUNDS; $round++) {
-            $turn = $client->sendConversation($this->geminiHistory, $systemInstruction, $toolDefinitions);
-            $this->geminiHistory[] = $turn;
+            $turn = $client->sendConversation($this->history, $systemInstruction, $toolDefinitions);
+            $this->history[] = $turn;
 
             $functionCalls = array_values(array_filter(
                 $turn['parts'] ?? [],
@@ -192,7 +213,7 @@ class AiAssistant extends Page
                 $responses[] = ['functionResponse' => ['name' => $call['name'], 'response' => $result]];
             }
 
-            $this->geminiHistory[] = ['role' => 'user', 'parts' => $responses];
+            $this->history[] = ['role' => 'user', 'parts' => $responses];
         }
 
         throw new RuntimeException('This question needed too many lookups to answer — try asking something more specific.');
