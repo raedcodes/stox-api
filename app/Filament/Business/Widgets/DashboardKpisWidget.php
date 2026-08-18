@@ -46,16 +46,7 @@ class DashboardKpisWidget extends StatsOverviewWidget
         $todaysRevenue = $todaysSales->sum(fn (Sale $sale) => $sale->total());
         $yesterdaysRevenue = $yesterdaysSales->sum(fn (Sale $sale) => $sale->total());
 
-        $locationClause = $locationId ? ' and product_batches.location_id = ?' : '';
-
-        $lowStockCount = Product::query()
-            ->where('is_active', true)
-            ->whereRaw(
-                "(select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= 0
-                or (reorder_level is not null and (select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= reorder_level)",
-                $locationId ? [$locationId, $locationId] : []
-            )
-            ->count();
+        $lowStockCount = Product::query()->lowStock($locationId)->count();
 
         return [
             Stat::make(__('dashboard.kpis.todays_sales'), $todaysSales->count())

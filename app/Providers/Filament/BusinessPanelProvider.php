@@ -11,6 +11,9 @@ use App\Filament\Business\Widgets\DashboardKpisWidget;
 use App\Filament\Business\Widgets\ExecutiveKpisWidget;
 use App\Filament\Business\Widgets\ExpiryAlertsWidget;
 use App\Filament\Business\Widgets\LowStockWidget;
+use App\Filament\Business\Widgets\MyRegisterSalesWidget;
+use App\Filament\Business\Widgets\PendingPurchaseOrdersWidget;
+use App\Filament\Business\Widgets\PendingStockTransfersWidget;
 use App\Filament\Business\Widgets\RecentCreditSalesWidget;
 use App\Filament\Business\Widgets\SalesRevenueTrendChart;
 use App\Filament\Business\Widgets\StockExpiryTimelineChart;
@@ -82,6 +85,9 @@ class BusinessPanelProvider extends PanelProvider
                 LowStockWidget::class,
                 ExpiryAlertsWidget::class,
                 RecentCreditSalesWidget::class,
+                MyRegisterSalesWidget::class,
+                PendingPurchaseOrdersWidget::class,
+                PendingStockTransfersWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

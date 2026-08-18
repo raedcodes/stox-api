@@ -26,6 +26,8 @@ return [
         'owed_to_suppliers' => 'Owed to suppliers',
         'inventory_value' => 'Inventory value',
         'inventory_value_description' => 'Current stock, at cost',
+        'my_sales_today' => 'My sales today',
+        'my_revenue_today' => 'My revenue today',
     ],
 
     'widgets' => [
@@ -36,6 +38,8 @@ return [
         'revenue_trend_heading' => 'Revenue vs. cost of goods (last 30 days)',
         'top_products_chart_heading' => 'Top products by revenue (last 30 days)',
         'stock_expiry_timeline_heading' => 'Stock expiry timeline',
+        'pending_purchase_orders_heading' => 'Purchase orders awaiting receipt',
+        'pending_stock_transfers_heading' => 'Stock transfers awaiting receipt',
     ],
 
     'columns' => [

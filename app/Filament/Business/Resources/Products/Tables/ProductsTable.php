@@ -184,6 +184,15 @@ class ProductsTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
+            ])
+            ->emptyStateIcon('heroicon-o-cube')
+            ->emptyStateHeading(__('products.empty_state.heading'))
+            ->emptyStateDescription(__('products.empty_state.description'))
+            ->emptyStateActions([
+                Action::make('emptyStateCreateProduct')
+                    ->label(__('products.actions.create'))
+                    ->icon('heroicon-o-plus')
+                    ->url(fn () => ProductResource::getUrl('create')),
             ]);
     }
 }

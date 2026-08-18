@@ -10,6 +10,7 @@ use App\Filament\Business\Resources\Locations\Pages\ManageLocations;
 use App\Models\Location;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -119,6 +120,12 @@ class LocationResource extends Resource
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
+            ])
+            ->emptyStateIcon('heroicon-o-map-pin')
+            ->emptyStateHeading(__('locations.empty_state.heading'))
+            ->emptyStateDescription(__('locations.empty_state.description'))
+            ->emptyStateActions([
+                CreateAction::make(),
             ]);
     }
 

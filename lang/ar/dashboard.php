@@ -26,6 +26,8 @@ return [
         'owed_to_suppliers' => 'مستحق للموردين',
         'inventory_value' => 'قيمة المخزون',
         'inventory_value_description' => 'المخزون الحالي، بسعر التكلفة',
+        'my_sales_today' => 'مبيعاتي اليوم',
+        'my_revenue_today' => 'إيرادي اليوم',
     ],
 
     'widgets' => [
@@ -36,6 +38,8 @@ return [
         'revenue_trend_heading' => 'الإيراد مقابل تكلفة البضاعة المباعة (آخر 30 يوماً)',
         'top_products_chart_heading' => 'أفضل المنتجات من حيث الإيراد (آخر 30 يوماً)',
         'stock_expiry_timeline_heading' => 'الجدول الزمني لانتهاء المخزون',
+        'pending_purchase_orders_heading' => 'أوامر شراء بانتظار الاستلام',
+        'pending_stock_transfers_heading' => 'تحويلات مخزون بانتظار الاستلام',
     ],
 
     'columns' => [

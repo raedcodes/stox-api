@@ -45,6 +45,12 @@ return [
         'close' => 'Close',
         'import_excel' => 'Import Excel',
         'download_import_template' => 'Download Template',
+        'create' => 'Add product',
+    ],
+
+    'empty_state' => [
+        'heading' => 'No products yet',
+        'description' => 'Add your first product, or import a whole catalog at once using the buttons above.',
     ],
 
     'variant_helper_create' => 'Leave blank to auto-generate from the product SKU and size/color.',
