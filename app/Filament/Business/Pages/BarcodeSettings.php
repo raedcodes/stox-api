@@ -15,6 +15,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
@@ -65,6 +66,21 @@ class BarcodeSettings extends Page
         return $schema->statePath('data');
     }
 
+    /**
+     * How many digits the prefix must leave room for — null for
+     * CODE128/CODE39, which have no fixed length. Mirrors
+     * BarcodeSetting::DATA_DIGITS.
+     */
+    protected static function numericFormatDigits(?string $format): ?int
+    {
+        return match ($format) {
+            BarcodeFormat::EAN13->value => 12,
+            BarcodeFormat::EAN8->value => 7,
+            BarcodeFormat::UPCA->value => 11,
+            default => null,
+        };
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -72,11 +88,21 @@ class BarcodeSettings extends Page
                 Select::make('format')
                     ->label(__('settings.barcode.fields.format'))
                     ->options(BarcodeFormat::options())
-                    ->required(),
+                    ->required()
+                    ->live(),
                 TextInput::make('prefix')
                     ->label(__('settings.barcode.fields.prefix'))
                     ->maxLength(20)
-                    ->helperText(__('settings.barcode.prefix_helper')),
+                    ->helperText(fn (Get $get) => static::numericFormatDigits($get('format'))
+                        ? __('settings.barcode.prefix_numeric_helper', ['digits' => static::numericFormatDigits($get('format')) - 3])
+                        : __('settings.barcode.prefix_helper'))
+                    ->rules(function (Get $get) {
+                        $digits = static::numericFormatDigits($get('format'));
+
+                        return $digits
+                            ? ['nullable', 'regex:/^\d*$/', 'max:'.($digits - 3)]
+                            : [];
+                    }),
                 TextInput::make('next_number')
                     ->label(__('settings.barcode.fields.next_number'))
                     ->numeric()

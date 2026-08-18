@@ -142,6 +142,10 @@ class Product extends Model
             if (blank($product->sku)) {
                 $product->sku = static::generateSku($product->category_id);
             }
+
+            if (blank($product->barcode)) {
+                $product->barcode = BarcodeSetting::current()->next();
+            }
         });
 
         static::created(function (self $product) {

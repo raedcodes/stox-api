@@ -145,6 +145,10 @@ class ProductVariant extends Model
             if (blank($variant->sku)) {
                 $variant->sku = static::generateSku($variant->product, $variant->size, $variant->color);
             }
+
+            if (blank($variant->barcode)) {
+                $variant->barcode = BarcodeSetting::current()->next();
+            }
         });
     }
 }

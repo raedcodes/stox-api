@@ -27,6 +27,7 @@ return [
         'navigation_label' => 'Barcode Settings',
         'saved' => 'Barcode settings saved',
         'prefix_helper' => 'Optional prefix included at the start of every generated barcode.',
+        'prefix_numeric_helper' => 'This format only allows digits, up to :digits of them (the rest is reserved for the sequence number and check digit).',
         'next_number_helper' => 'The sequence number the next generated barcode will use.',
         'fields' => [
             'format' => 'Barcode format',
