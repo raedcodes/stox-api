@@ -3,11 +3,11 @@
 namespace App\Filament\Business\Resources\StockTransfers\Actions;
 
 use App\Enums\StockTransferStatus;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\HasApprovalWorkflowActions;
 use App\Models\StockTransfer;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
-use RuntimeException;
 
 /**
  * The Draft -> PendingApproval -> Approved -> InTransit -> (Partially)
@@ -17,6 +17,8 @@ use RuntimeException;
  */
 class StockTransferWorkflowActions
 {
+    use HasApprovalWorkflowActions;
+
     public static function submitForApproval(): Action
     {
         return Action::make('submitForApproval')
@@ -35,7 +37,8 @@ class StockTransferWorkflowActions
             ->icon('heroicon-o-check-circle')
             ->color('success')
             ->requiresConfirmation()
-            ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::PendingApproval)
+            ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::PendingApproval
+                && auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]))
             ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->approve(), __('stock_transfers.notifications.approved'), __('stock_transfers.notifications.cannot_approve')));
     }
 
@@ -51,7 +54,8 @@ class StockTransferWorkflowActions
                     ->label(__('common.fields.reason'))
                     ->rows(2),
             ])
-            ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::PendingApproval)
+            ->visible(fn (StockTransfer $record) => $record->status === StockTransferStatus::PendingApproval
+                && auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]))
             ->action(fn (array $data, StockTransfer $record) => self::run($record, fn () => $record->reject($data['reason'] ?? null), __('stock_transfers.notifications.rejected'), __('stock_transfers.notifications.cannot_reject')));
     }
 
@@ -80,23 +84,5 @@ class StockTransferWorkflowActions
                 StockTransferStatus::Approved,
             ], true))
             ->action(fn (StockTransfer $record) => self::run($record, fn () => $record->cancel(), __('stock_transfers.notifications.cancelled'), __('stock_transfers.notifications.cannot_cancel')));
-    }
-
-    protected static function run(StockTransfer $record, callable $transition, string $successTitle, string $failureTitle): void
-    {
-        try {
-            $transition();
-
-            Notification::make()
-                ->title($successTitle)
-                ->success()
-                ->send();
-        } catch (RuntimeException $e) {
-            Notification::make()
-                ->title($failureTitle)
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
     }
 }

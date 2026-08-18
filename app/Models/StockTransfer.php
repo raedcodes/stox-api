@@ -266,17 +266,27 @@ class StockTransfer extends Model
                 $item->increment('quantity_received', $quantity);
             }
 
-            $allReceived = $this->items()->get()->every(
-                fn (StockTransferItem $item) => (float) $item->quantity_received >= (float) $item->quantity_shipped
-            );
-
-            $this->update(['status' => $allReceived ? StockTransferStatus::Completed : StockTransferStatus::PartiallyReceived]);
-
-            activity()->causedBy(auth()->user())->performedOn($this)
-                ->withProperties(['transfer_number' => $this->transfer_number])
-                ->log($allReceived
-                    ? "Stock transfer {$this->transfer_number} completed"
-                    : "Stock transfer {$this->transfer_number} partially received");
+            $this->recomputeStatus();
         });
+    }
+
+    /**
+     * Completed once every item's received quantity matches what shipped,
+     * PartiallyReceived otherwise, so a short delivery doesn't silently
+     * look "done." Mirrors PurchaseOrder::recomputeStatus()'s shape.
+     */
+    protected function recomputeStatus(): void
+    {
+        $allReceived = $this->items()->get()->every(
+            fn (StockTransferItem $item) => (float) $item->quantity_received >= (float) $item->quantity_shipped
+        );
+
+        $this->update(['status' => $allReceived ? StockTransferStatus::Completed : StockTransferStatus::PartiallyReceived]);
+
+        activity()->causedBy(auth()->user())->performedOn($this)
+            ->withProperties(['transfer_number' => $this->transfer_number])
+            ->log($allReceived
+                ? "Stock transfer {$this->transfer_number} completed"
+                : "Stock transfer {$this->transfer_number} partially received");
     }
 }

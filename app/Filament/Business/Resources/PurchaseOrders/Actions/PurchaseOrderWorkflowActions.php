@@ -3,11 +3,11 @@
 namespace App\Filament\Business\Resources\PurchaseOrders\Actions;
 
 use App\Enums\PurchaseOrderStatus;
+use App\Enums\UserRole;
+use App\Filament\Business\Concerns\HasApprovalWorkflowActions;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
-use RuntimeException;
 
 /**
  * The Draft -> PendingApproval -> Approved(=Ordered) -> Received chain's
@@ -17,6 +17,8 @@ use RuntimeException;
  */
 class PurchaseOrderWorkflowActions
 {
+    use HasApprovalWorkflowActions;
+
     public static function submitForApproval(): Action
     {
         return Action::make('submitForApproval')
@@ -36,7 +38,8 @@ class PurchaseOrderWorkflowActions
             ->color('success')
             ->requiresConfirmation()
             ->modalDescription(__('purchase_orders.approve_description'))
-            ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::PendingApproval)
+            ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::PendingApproval
+                && auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]))
             ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->approve(), __('purchase_orders.notifications.approved'), __('purchase_orders.notifications.cannot_approve')));
     }
 
@@ -52,7 +55,8 @@ class PurchaseOrderWorkflowActions
                     ->label(__('common.fields.reason'))
                     ->rows(2),
             ])
-            ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::PendingApproval)
+            ->visible(fn (PurchaseOrder $record) => $record->status === PurchaseOrderStatus::PendingApproval
+                && auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager]))
             ->action(fn (array $data, PurchaseOrder $record) => self::run($record, fn () => $record->reject($data['reason'] ?? null), __('purchase_orders.notifications.rejected'), __('purchase_orders.notifications.cannot_reject')));
     }
 
@@ -69,23 +73,5 @@ class PurchaseOrderWorkflowActions
                 PurchaseOrderStatus::Ordered,
             ], true))
             ->action(fn (PurchaseOrder $record) => self::run($record, fn () => $record->cancel(), __('purchase_orders.notifications.cancelled'), __('purchase_orders.notifications.cannot_cancel')));
-    }
-
-    protected static function run(PurchaseOrder $record, callable $transition, string $successTitle, string $failureTitle): void
-    {
-        try {
-            $transition();
-
-            Notification::make()
-                ->title($successTitle)
-                ->success()
-                ->send();
-        } catch (RuntimeException $e) {
-            Notification::make()
-                ->title($failureTitle)
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
     }
 }
