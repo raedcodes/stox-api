@@ -17,6 +17,7 @@ class SaleReturn extends Model
         'sale_id',
         'return_date',
         'reason',
+        'refund_method',
         'processed_at',
     ];
 
@@ -24,6 +25,7 @@ class SaleReturn extends Model
     {
         return [
             'return_date' => 'date',
+            'refund_method' => PaymentMethod::class,
             'processed_at' => 'datetime',
         ];
     }
@@ -48,8 +50,10 @@ class SaleReturn extends Model
     /**
      * Restock returned quantities as a new batch per product (we don't try to
      * reverse the exact FEFO batches the original sale deducted from), and
-     * record a refund against the customer's ledger if they'd been charged
-     * on credit.
+     * record a refund against the customer's ledger if this refund is itself
+     * being issued as credit — refund_method is the cashier's own explicit
+     * choice at refund time, independent of how the original sale was paid
+     * (a split sale doesn't have to be refunded in the same proportions).
      */
     public function process(): void
     {
@@ -79,7 +83,7 @@ class SaleReturn extends Model
                 );
             }
 
-            if ($this->sale->payment_method === PaymentMethod::Credit) {
+            if ($this->refund_method === PaymentMethod::Credit) {
                 $this->sale->customer->transactions()->create([
                     'type' => CustomerTransactionType::Return,
                     'amount' => $this->total(),

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -82,9 +83,66 @@ class Sale extends Model
         return $this->hasMany(SaleReturn::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(SalePayment::class);
+    }
+
     public function cashier(): MorphTo
     {
         return $this->morphTo(name: 'creator', type: 'creator_type', id: 'created_by');
+    }
+
+    /**
+     * The sale's actual tender breakdown: real sale_payments rows if any
+     * exist, else a single line synthesized from the legacy payment_method
+     * column — mirrors SaleItem::taxAmount()/cogsAmount()'s frozen-value-
+     * with-fallback pattern, so a sale created before split payments
+     * existed still reads correctly everywhere this is used.
+     *
+     * @return Collection<int, SalePayment>
+     */
+    public function paymentLines(): Collection
+    {
+        if ($this->payments->isNotEmpty()) {
+            return $this->payments;
+        }
+
+        if (! $this->payment_method) {
+            return collect();
+        }
+
+        return collect([new SalePayment([
+            'payment_method' => $this->payment_method,
+            'amount' => $this->total(),
+        ])]);
+    }
+
+    /**
+     * How much of this sale is on the customer's account — the only
+     * portion that ever touches the customer ledger or a credit-limit
+     * check, since Cash/Card lines settle immediately.
+     */
+    public function creditAmount(): float
+    {
+        return (float) $this->paymentLines()
+            ->where('payment_method', PaymentMethod::Credit)
+            ->sum(fn (SalePayment $payment) => (float) $payment->amount);
+    }
+
+    /**
+     * Short display label for tables/infolists — "Cash", or "Cash + Card"
+     * for a split sale — in place of rendering the (possibly stale once
+     * split) payment_method column directly.
+     */
+    public function paymentSummary(): string
+    {
+        $methods = $this->paymentLines()
+            ->pluck('payment_method')
+            ->unique()
+            ->map(fn (PaymentMethod $method) => $method->getLabel());
+
+        return $methods->isNotEmpty() ? $methods->implode(' + ') : '—';
     }
 
     public function subtotal(): float
@@ -149,10 +207,12 @@ class Sale extends Model
             throw new RuntimeException('Insufficient stock: '.implode(', ', $short));
         }
 
-        if ($this->payment_method === PaymentMethod::Credit) {
+        $creditAmount = $this->creditAmount();
+
+        if ($creditAmount > 0) {
             $creditLimit = $this->customer->credit_limit;
 
-            if ($creditLimit !== null && ($this->customer->balance() + $this->total()) > (float) $creditLimit) {
+            if ($creditLimit !== null && ($this->customer->balance() + $creditAmount) > (float) $creditLimit) {
                 throw new RuntimeException(
                     "This sale would put {$this->customer->name} over their credit limit ".
                     "(currently owed: {$this->customer->balance()}, limit: {$creditLimit})."
@@ -160,7 +220,7 @@ class Sale extends Model
             }
         }
 
-        DB::transaction(function () {
+        DB::transaction(function () use ($creditAmount) {
             $taxRate = (float) TaxSetting::current()->rate;
 
             foreach ($this->items as $item) {
@@ -170,10 +230,10 @@ class Sale extends Model
                 ]);
             }
 
-            if ($this->payment_method === PaymentMethod::Credit) {
+            if ($creditAmount > 0) {
                 $this->customer->transactions()->create([
                     'type' => CustomerTransactionType::CreditSale,
-                    'amount' => $this->total(),
+                    'amount' => $creditAmount,
                     'description' => "Sale {$this->sale_number}",
                     'transaction_date' => $this->sale_date,
                     'reference_type' => $this->getMorphClass(),
@@ -253,10 +313,12 @@ class Sale extends Model
                 );
             }
 
-            if ($this->payment_method === PaymentMethod::Credit) {
+            $creditAmount = $this->creditAmount();
+
+            if ($creditAmount > 0) {
                 $this->customer->transactions()->create([
                     'type' => CustomerTransactionType::SaleCancelled,
-                    'amount' => $this->total(),
+                    'amount' => $creditAmount,
                     'description' => "Cancelled sale {$this->sale_number}",
                     'transaction_date' => now(),
                     'reference_type' => $this->getMorphClass(),

@@ -88,20 +88,27 @@ class CashSession extends Model
 
     protected function computeExpectedCash(\DateTimeInterface $until): float
     {
+        // Summed per sale via paymentLines() rather than filtered at the
+        // query level, since a split sale's cash portion (or a legacy
+        // sale's single payment_method, via that method's fallback) can't
+        // be expressed as a plain column match anymore.
         $cashSales = (float) Sale::query()
             ->where('location_id', $this->location_id)
             ->where('status', SaleStatus::Completed)
-            ->where('payment_method', PaymentMethod::Cash)
             ->whereBetween('sale_date', [$this->opened_at, $until])
+            ->with('payments')
             ->get()
-            ->sum(fn (Sale $sale) => $sale->total());
+            ->sum(fn (Sale $sale) => $sale->paymentLines()
+                ->where('payment_method', PaymentMethod::Cash)
+                ->sum(fn (SalePayment $payment) => (float) $payment->amount));
 
+        // Driven by the refund's own explicit refund_method — chosen by the
+        // cashier at refund time — not the original sale's payment method.
         $cashRefunds = (float) SaleReturn::query()
             ->whereNotNull('processed_at')
             ->whereBetween('processed_at', [$this->opened_at, $until])
-            ->whereHas('sale', fn ($query) => $query
-                ->where('location_id', $this->location_id)
-                ->where('payment_method', PaymentMethod::Cash))
+            ->where('refund_method', PaymentMethod::Cash)
+            ->whereHas('sale', fn ($query) => $query->where('location_id', $this->location_id))
             ->get()
             ->sum(fn (SaleReturn $return) => $return->total());
 

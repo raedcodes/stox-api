@@ -13,5 +13,10 @@ return [
     'no_product_found' => 'لا يوجد منتج مطابق لـ ":term"',
     'cart_empty' => 'السلة فارغة',
     'sale_completed' => 'تم إتمام البيع :number',
+    'payment_lines' => 'الدفع',
+    'add_payment_line' => 'إضافة طريقة دفع أخرى',
+    'payment_lines_must_sum' => 'يجب أن يساوي مجموع الدفعات إجمالي السلة (:total). حالياً: :paid.',
+    'remaining_to_allocate' => 'المبلغ المستحق',
+    'paid_so_far' => 'المدفوع حتى الآن: :amount',
 
 ];

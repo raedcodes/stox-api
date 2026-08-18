@@ -24,9 +24,9 @@ class SaleInfolist
                         TextEntry::make('status')
                             ->label(__('common.fields.status'))
                             ->badge(),
-                        TextEntry::make('payment_method')
+                        TextEntry::make('payment_summary')
                             ->label(__('common.fields.payment_method'))
-                            ->placeholder('—'),
+                            ->state(fn (Sale $record) => $record->paymentSummary()),
                         TextEntry::make('customer.name')
                             ->label(__('common.fields.customer')),
                         TextEntry::make('location.name')

@@ -11,8 +11,11 @@ use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Sale;
+use App\Models\SaleItem;
 use BackedEnum;
+use Closure;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -65,10 +68,10 @@ class PointOfSale extends Page
         $this->form->fill([
             'customer_id' => Customer::walkIn()->id,
             'location_id' => session('current_location_id') ?? Location::query()->where('is_active', true)->first()?->id,
-            'payment_method' => PaymentMethod::Cash->value,
             'discount_type' => null,
             'discount_value' => null,
             'items' => [],
+            'payments' => [['payment_method' => PaymentMethod::Cash->value, 'amount' => null]],
         ]);
 
         $this->lastAddedLabel = null;
@@ -95,17 +98,15 @@ class PointOfSale extends Page
                     ->searchable()
                     ->preload()
                     ->required(),
-                Select::make('payment_method')
-                    ->label(__('common.fields.payment_method'))
-                    ->options(PaymentMethod::options())
-                    ->required(),
                 Select::make('discount_type')
                     ->label(__('sales.fields.invoice_discount_type'))
-                    ->options(DiscountType::options()),
+                    ->options(DiscountType::options())
+                    ->live(onBlur: true),
                 TextInput::make('discount_value')
                     ->label(__('sales.fields.invoice_discount_value'))
                     ->numeric()
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->live(onBlur: true),
                 Repeater::make('items')
                     ->label(__('pos.cart'))
                     ->schema([
@@ -130,25 +131,102 @@ class PointOfSale extends Page
                             ->label(__('common.fields.quantity'))
                             ->numeric()
                             ->minValue(0.01)
-                            ->required(),
+                            ->required()
+                            ->live(onBlur: true),
                         TextInput::make('unit_price')
                             ->label(__('common.fields.unit_price'))
                             ->numeric()
                             ->minValue(0)
                             ->required()
+                            ->live(onBlur: true)
                             ->prefix(fn () => tenant('currency')?->value),
                         Select::make('discount_type')
                             ->label(__('common.fields.discount_type'))
-                            ->options(DiscountType::options()),
+                            ->options(DiscountType::options())
+                            ->live(onBlur: true),
                         TextInput::make('discount_value')
                             ->label(__('common.fields.discount_value'))
                             ->numeric()
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->live(onBlur: true),
                     ])
                     ->columns(7)
                     ->addActionLabel(__('pos.add_product_manually'))
-                    ->reorderable(false),
+                    ->reorderable(false)
+                    ->live(),
+                Repeater::make('payments')
+                    ->label(__('pos.payment_lines'))
+                    ->schema([
+                        Select::make('payment_method')
+                            ->label(__('common.fields.payment_method'))
+                            ->options(PaymentMethod::options())
+                            ->required(),
+                        TextInput::make('amount')
+                            ->label(__('common.fields.amount'))
+                            ->numeric()
+                            ->minValue(0.01)
+                            ->required()
+                            ->live(onBlur: true)
+                            ->prefix(fn () => tenant('currency')?->value),
+                    ])
+                    ->columns(2)
+                    ->addActionLabel(__('pos.add_payment_line'))
+                    ->reorderable(false)
+                    ->minItems(1)
+                    ->required()
+                    ->live()
+                    ->rule(fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get) {
+                        $cartTotal = $this->cartTotal($get('items') ?? [], $get('discount_type'), $get('discount_value'));
+                        $paidTotal = collect($value)->sum(fn ($line) => (float) ($line['amount'] ?? 0));
+
+                        if (abs($paidTotal - $cartTotal) > 0.01) {
+                            $fail(__('pos.payment_lines_must_sum', [
+                                'total' => number_format($cartTotal, 2),
+                                'paid' => number_format($paidTotal, 2),
+                            ]));
+                        }
+                    }),
+                Placeholder::make('payment_remaining')
+                    ->label(__('pos.remaining_to_allocate'))
+                    ->content(function (Get $get) {
+                        $cartTotal = $this->cartTotal($get('items') ?? [], $get('discount_type'), $get('discount_value'));
+                        $paidTotal = collect($get('payments') ?? [])->sum(fn ($line) => (float) ($line['amount'] ?? 0));
+                        $currency = tenant('currency')?->value;
+
+                        return "{$currency} ".number_format($cartTotal, 2).' — '.__('pos.paid_so_far', ['amount' => $currency.' '.number_format($paidTotal, 2)]);
+                    }),
             ]);
+    }
+
+    /**
+     * The cart's total the same way Sale::total() computes it once
+     * persisted — reused via unsaved SaleItem instances (with product
+     * manually attached) rather than re-implementing the subtotal/tax/
+     * discount formulas a second time here.
+     */
+    protected function cartTotal(array $rawItems, ?string $discountType, mixed $discountValue): float
+    {
+        $items = collect($rawItems)->map(function (array $item) {
+            $saleItem = new SaleItem([
+                'quantity' => $item['quantity'] ?? 0,
+                'unit_price' => $item['unit_price'] ?? 0,
+                'discount_type' => $item['discount_type'] ?? null,
+                'discount_value' => $item['discount_value'] ?? null,
+            ]);
+            $saleItem->setRelation('product', ($item['product_id'] ?? null) ? Product::find($item['product_id']) : null);
+
+            return $saleItem;
+        });
+
+        $subtotal = $items->sum(fn (SaleItem $item) => $item->subtotal());
+        $taxTotal = $items->sum(fn (SaleItem $item) => $item->taxAmount());
+        $invoiceDiscount = DiscountType::amount(
+            $discountType,
+            $discountValue !== null && $discountValue !== '' ? (float) $discountValue : null,
+            $subtotal + $taxTotal,
+        );
+
+        return $subtotal + $taxTotal - $invoiceDiscount;
     }
 
     /**
@@ -267,10 +345,15 @@ class PointOfSale extends Page
 
         try {
             $sale = DB::transaction(function () use ($state) {
+                $paymentMethods = collect($state['payments'])->pluck('payment_method')->unique();
+
                 $sale = Sale::create([
                     'customer_id' => $state['customer_id'],
                     'location_id' => $state['location_id'],
-                    'payment_method' => $state['payment_method'],
+                    // Kept for backward-compat display only (SalesTable/
+                    // SaleInfolist now render paymentSummary() instead) —
+                    // sale_payments below is the real source of truth.
+                    'payment_method' => $paymentMethods->count() === 1 ? $paymentMethods->first() : null,
                     'discount_type' => $state['discount_type'] ?? null,
                     'discount_value' => $state['discount_value'] ?? null,
                     'sale_date' => now(),
@@ -285,6 +368,13 @@ class PointOfSale extends Page
                         'unit_price' => $item['unit_price'],
                         'discount_type' => $item['discount_type'] ?? null,
                         'discount_value' => $item['discount_value'] ?? null,
+                    ]);
+                }
+
+                foreach ($state['payments'] as $payment) {
+                    $sale->payments()->create([
+                        'payment_method' => $payment['payment_method'],
+                        'amount' => $payment['amount'],
                     ]);
                 }
 

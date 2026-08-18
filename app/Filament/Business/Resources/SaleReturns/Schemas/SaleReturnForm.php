@@ -2,6 +2,7 @@
 
 namespace App\Filament\Business\Resources\SaleReturns\Schemas;
 
+use App\Enums\PaymentMethod;
 use App\Enums\SaleStatus;
 use App\Models\Product;
 use App\Models\Sale;
@@ -34,6 +35,11 @@ class SaleReturnForm
                 Textarea::make('reason')
                     ->label(__('common.fields.reason'))
                     ->rows(2),
+                Select::make('refund_method')
+                    ->label(__('sale_returns.fields.refund_method'))
+                    ->helperText(__('sale_returns.refund_method_helper'))
+                    ->options(PaymentMethod::options())
+                    ->required(),
                 Repeater::make('items')
                     ->relationship()
                     ->schema([

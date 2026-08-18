@@ -39,9 +39,9 @@ class SalesTable
                 TextColumn::make('status')
                     ->label(__('common.fields.status'))
                     ->badge(),
-                TextColumn::make('payment_method')
+                TextColumn::make('payment_summary')
                     ->label(__('common.fields.payment_method'))
-                    ->placeholder('—'),
+                    ->state(fn (Sale $record) => $record->paymentSummary()),
                 TextColumn::make('sale_date')
                     ->label(__('common.fields.date'))
                     ->dateTime()

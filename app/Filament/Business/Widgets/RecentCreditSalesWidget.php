@@ -31,7 +31,14 @@ class RecentCreditSalesWidget extends TableWidget
             ->query(
                 fn (): Builder => Sale::query()
                     ->where('status', SaleStatus::Completed)
-                    ->where('payment_method', PaymentMethod::Credit)
+                    // Has a sale_payments line that's Credit (a split sale
+                    // with a credit component still counts), or — for a
+                    // sale from before split payments existed, with no
+                    // sale_payments rows at all — falls back to the legacy
+                    // payment_method scalar. Mirrors Sale::paymentLines().
+                    ->where(fn (Builder $query) => $query
+                        ->whereHas('payments', fn (Builder $q) => $q->where('payment_method', PaymentMethod::Credit))
+                        ->orWhere(fn (Builder $q) => $q->doesntHave('payments')->where('payment_method', PaymentMethod::Credit)))
                     // items.product: ->total() reads $this->items/->product.
                     // The two withSums on customer replace calling
                     // ->balance() per row (its own aggregate query every
