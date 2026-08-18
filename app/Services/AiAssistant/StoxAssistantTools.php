@@ -143,7 +143,7 @@ class StoxAssistantTools
             ->get();
 
         $revenue = $items->sum(fn (SaleItem $item) => $item->total());
-        $cogs = $items->sum(fn (SaleItem $item) => (float) $item->quantity * (float) $item->product?->cost_price);
+        $cogs = $items->sum(fn (SaleItem $item) => $item->cogsAmount());
         $grossProfit = $revenue - $cogs;
 
         $expenses = (float) Expense::query()

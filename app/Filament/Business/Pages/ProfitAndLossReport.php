@@ -113,7 +113,7 @@ class ProfitAndLossReport extends Page
 
     public function cogs(): float
     {
-        return $this->saleItemsQuery()->get()->sum(fn (SaleItem $item) => (float) $item->quantity * (float) $item->product->cost_price);
+        return $this->saleItemsQuery()->get()->sum(fn (SaleItem $item) => $item->cogsAmount());
     }
 
     public function grossProfit(): float
@@ -166,7 +166,7 @@ class ProfitAndLossReport extends Page
             ->groupBy(fn (SaleItem $item) => $item->sale->location_id)
             ->map(function (Collection $items) {
                 $revenue = $items->sum(fn (SaleItem $item) => $item->total());
-                $cogs = $items->sum(fn (SaleItem $item) => (float) $item->quantity * (float) $item->product->cost_price);
+                $cogs = $items->sum(fn (SaleItem $item) => $item->cogsAmount());
                 $grossProfit = $revenue - $cogs;
                 $locationId = $items->first()->sale->location_id;
                 $expenses = $locationId ? (float) $this->expensesQuery()->where('location_id', $locationId)->sum('amount') : 0.0;

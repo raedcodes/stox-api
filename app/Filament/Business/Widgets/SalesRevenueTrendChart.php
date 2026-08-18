@@ -46,9 +46,7 @@ class SalesRevenueTrendChart extends ChartWidget
 
             $revenue[] = round($daySales->sum(fn (Sale $sale) => $sale->total()), 2);
             $cogs[] = round(
-                $daySales->sum(fn (Sale $sale) => $sale->items->sum(
-                    fn ($item) => (float) $item->quantity * (float) $item->product?->cost_price
-                )),
+                $daySales->sum(fn (Sale $sale) => $sale->items->sum(fn ($item) => $item->cogsAmount())),
                 2,
             );
         }

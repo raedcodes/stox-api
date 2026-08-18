@@ -164,8 +164,10 @@ class Sale extends Model
             $taxRate = (float) TaxSetting::current()->rate;
 
             foreach ($this->items as $item) {
-                $item->update(['tax_rate' => $taxRate]);
-                $this->deductStock($item);
+                $item->update([
+                    'tax_rate' => $taxRate,
+                    'unit_cost' => $this->deductStock($item),
+                ]);
             }
 
             if ($this->payment_method === PaymentMethod::Credit) {
@@ -189,9 +191,18 @@ class Sale extends Model
         });
     }
 
-    protected function deductStock(SaleItem $item): void
+    /**
+     * Deducts stock FEFO and returns the weighted-average cost of the
+     * batches actually consumed, to be frozen onto the SaleItem — more
+     * accurate than the product's current cost_price alone, since a line's
+     * stock may have been drawn from batches bought at different costs.
+     */
+    protected function deductStock(SaleItem $item): float
     {
         $consumed = ProductBatch::deductFefo($item->product_variant_id, $this->location_id, (float) $item->quantity);
+
+        $totalCost = 0.0;
+        $totalQuantity = 0.0;
 
         foreach ($consumed as $entry) {
             StockMovement::record(
@@ -200,7 +211,12 @@ class Sale extends Model
                 quantityChange: -$entry['quantity'],
                 reference: $this,
             );
+
+            $totalCost += $entry['quantity'] * (float) $entry['batch']->unit_cost;
+            $totalQuantity += $entry['quantity'];
         }
+
+        return $totalQuantity > 0 ? $totalCost / $totalQuantity : (float) $item->product?->cost_price;
     }
 
     /**

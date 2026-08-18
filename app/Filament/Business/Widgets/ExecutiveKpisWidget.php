@@ -102,9 +102,9 @@ class ExecutiveKpisWidget extends StatsOverviewWidget
     }
 
     /**
-     * Cost of goods sold since a given date, using the same live-cost
-     * method as the Profit & Loss report — kept identical on purpose so
-     * this KPI never disagrees with that report's own number.
+     * Cost of goods sold since a given date, via SaleItem::cogsAmount() —
+     * shared with the Profit & Loss report so this KPI never disagrees
+     * with that report's own number.
      */
     protected function cogsSince(Carbon $since): float
     {
@@ -115,7 +115,7 @@ class ExecutiveKpisWidget extends StatsOverviewWidget
             ->select('sale_items.*')
             ->with('product')
             ->get()
-            ->sum(fn (SaleItem $item) => (float) $item->quantity * (float) $item->product->cost_price);
+            ->sum(fn (SaleItem $item) => $item->cogsAmount());
     }
 
     /**

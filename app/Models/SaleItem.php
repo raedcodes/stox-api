@@ -17,6 +17,7 @@ class SaleItem extends Model
         'product_variant_id',
         'quantity',
         'unit_price',
+        'unit_cost',
         'discount_type',
         'discount_value',
         'tax_rate',
@@ -28,6 +29,7 @@ class SaleItem extends Model
             'discount_type' => DiscountType::class,
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:2',
+            'unit_cost' => 'decimal:2',
             'discount_value' => 'decimal:2',
             'tax_rate' => 'decimal:2',
         ];
@@ -97,5 +99,21 @@ class SaleItem extends Model
         return $this->product?->tax_inclusive
             ? $this->subtotal()
             : $this->subtotal() + $this->taxAmount();
+    }
+
+    /**
+     * Cost of goods sold for this line. Uses the unit cost frozen when the
+     * sale was completed (the weighted average of the batches actually
+     * consumed via FEFO — see Sale::deductStock()), so a later change to
+     * the product's cost_price never rewrites the COGS of a sale that
+     * already happened. Falls back to the live product cost only for a
+     * sale that hasn't been completed yet (nothing has happened, so
+     * there's nothing to freeze).
+     */
+    public function cogsAmount(): float
+    {
+        $unitCost = $this->unit_cost !== null ? (float) $this->unit_cost : (float) $this->product?->cost_price;
+
+        return (float) $this->quantity * $unitCost;
     }
 }
