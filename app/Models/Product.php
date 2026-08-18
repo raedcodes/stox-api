@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -87,6 +88,28 @@ class Product extends Model
             ->where('is_active', true)
             ->when($locationId, fn ($query) => $query->where('location_id', $locationId))
             ->sum('quantity');
+    }
+
+    /**
+     * Active products that are out of stock, or at/under their reorder
+     * level (when one is set). Shared by the dashboard's LowStockWidget,
+     * the AI assistant's low-stock tool, and the daily operations digest —
+     * previously copy-pasted identically between the first two.
+     */
+    public function scopeLowStock(Builder $query, ?int $locationId = null): Builder
+    {
+        $locationClause = $locationId ? ' and product_batches.location_id = ?' : '';
+
+        return $query
+            ->where('is_active', true)
+            ->withSum(['batches as stock_on_hand' => fn ($query) => $query
+                ->where('is_active', true)
+                ->when($locationId, fn ($query, $id) => $query->where('location_id', $id))], 'quantity')
+            ->whereRaw(
+                "(select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= 0
+                or (reorder_level is not null and (select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= reorder_level)",
+                $locationId ? [$locationId, $locationId] : []
+            );
     }
 
     /**

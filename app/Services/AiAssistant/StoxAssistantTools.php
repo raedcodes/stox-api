@@ -222,18 +222,8 @@ class StoxAssistantTools
             return $locationError;
         }
 
-        $locationClause = $locationId ? ' and product_batches.location_id = ?' : '';
-
         $products = Product::query()
-            ->where('is_active', true)
-            ->withSum(['batches as stock_on_hand' => fn ($query) => $query
-                ->where('is_active', true)
-                ->when($locationId, fn ($query, $id) => $query->where('location_id', $id))], 'quantity')
-            ->whereRaw(
-                "(select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= 0
-                or (reorder_level is not null and (select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= reorder_level)",
-                $locationId ? [$locationId, $locationId] : []
-            )
+            ->lowStock($locationId)
             ->orderBy('stock_on_hand')
             ->get();
 
@@ -258,10 +248,7 @@ class StoxAssistantTools
         }
 
         $batches = ProductBatch::query()
-            ->where('is_active', true)
-            ->whereNotNull('expiry_date')
-            ->whereDate('expiry_date', '<=', now()->addDays($days))
-            ->when($locationId, fn ($q, $id) => $q->where('location_id', $id))
+            ->expiringWithin($days, $locationId)
             ->with('product')
             ->orderBy('expiry_date')
             ->get();

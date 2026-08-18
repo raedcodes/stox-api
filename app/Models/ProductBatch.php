@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasDefaultProductVariant;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,6 +44,23 @@ class ProductBatch extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class)->withTrashed();
+    }
+
+    /**
+     * Active batches with remaining stock that expire within the given
+     * number of days. Shared by the dashboard's ExpiryAlertsWidget, the AI
+     * assistant's expiring-batches tool, and the daily operations digest —
+     * the AI tool's own prior version didn't filter quantity > 0, which
+     * could report an already-fully-consumed batch as "expiring soon".
+     */
+    public function scopeExpiringWithin(Builder $query, int $days, ?int $locationId = null): Builder
+    {
+        return $query
+            ->where('is_active', true)
+            ->where('quantity', '>', 0)
+            ->whereNotNull('expiry_date')
+            ->where('expiry_date', '<=', now()->addDays($days))
+            ->when($locationId, fn ($q, $id) => $q->where('location_id', $id));
     }
 
     /**

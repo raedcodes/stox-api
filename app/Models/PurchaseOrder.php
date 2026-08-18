@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Enums\PurchaseOrderStatus;
+use App\Enums\UserRole;
+use App\Notifications\PurchaseOrderNeedsApproval;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Notification;
 use RuntimeException;
 
 class PurchaseOrder extends Model
@@ -112,6 +115,22 @@ class PurchaseOrder extends Model
 
         activity()->causedBy(auth()->user())->performedOn($this)
             ->log("Purchase order {$this->po_number} submitted for approval");
+
+        $this->notifyApprovers();
+    }
+
+    /**
+     * Emails whoever can approve this order (Owner is a central User,
+     * Manager is a tenant-local Staff — see App\Models\Staff for why they
+     * can't share a plain foreign key) so approval doesn't sit unnoticed
+     * until someone happens to open the Purchase Orders page.
+     */
+    protected function notifyApprovers(): void
+    {
+        $owners = User::where('tenant_id', tenant('id'))->get()->filter(fn (User $u) => $u->hasRole(UserRole::Owner));
+        $managers = Staff::where('is_active', true)->get()->filter(fn (Staff $s) => $s->hasRole(UserRole::Manager));
+
+        Notification::send($owners->concat($managers), new PurchaseOrderNeedsApproval($this));
     }
 
     /**

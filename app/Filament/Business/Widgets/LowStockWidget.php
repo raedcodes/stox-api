@@ -24,22 +24,10 @@ class LowStockWidget extends TableWidget
         // Null means "All Locations" (the CurrentLocationWidget default) —
         // the query stays unscoped in that case.
         $locationId = session('current_location_id');
-        $locationClause = $locationId ? ' and product_batches.location_id = ?' : '';
 
         return $table
             ->heading(__('dashboard.widgets.low_stock_heading'))
-            ->query(
-                fn (): Builder => Product::query()
-                    ->where('is_active', true)
-                    ->withSum(['batches as stock_on_hand' => fn ($query) => $query
-                        ->where('is_active', true)
-                        ->when($locationId, fn ($query, $locationId) => $query->where('location_id', $locationId))], 'quantity')
-                    ->whereRaw(
-                        "(select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= 0
-                        or (reorder_level is not null and (select coalesce(sum(quantity), 0) from product_batches where product_batches.product_id = products.id and product_batches.is_active = 1{$locationClause}) <= reorder_level)",
-                        $locationId ? [$locationId, $locationId] : []
-                    )
-            )
+            ->query(fn (): Builder => Product::query()->lowStock($locationId))
             ->columns([
                 TextColumn::make('name')
                     ->label(__('common.fields.product'))

@@ -27,11 +27,7 @@ class ExpiryAlertsWidget extends TableWidget
                 // default) — stays unscoped in that case.
                 fn (): Builder => ProductBatch::query()
                     ->with(['product', 'location'])
-                    ->where('is_active', true)
-                    ->where('quantity', '>', 0)
-                    ->whereNotNull('expiry_date')
-                    ->where('expiry_date', '<=', now()->addDays(30))
-                    ->when(session('current_location_id'), fn ($query, $locationId) => $query->where('location_id', $locationId))
+                    ->expiringWithin(30, session('current_location_id'))
             )
             ->columns([
                 TextColumn::make('product.name')
