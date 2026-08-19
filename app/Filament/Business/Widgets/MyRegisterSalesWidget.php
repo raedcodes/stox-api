@@ -15,12 +15,17 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
  * picker. Scoped to sales *they* rang up (created_by/creator_type), not
  * the whole location, so it reads as "my shift" rather than a KPI they
  * don't have authority over.
+ *
+ * Cashier-only, deliberately not Owner/Manager too: they already see the
+ * tenant-wide "Today's sales"/"Today's revenue" via DashboardKpisWidget,
+ * so a second, personally-scoped copy of the same numbers would just be a
+ * confusing near-duplicate on their dashboard rather than useful signal.
  */
 class MyRegisterSalesWidget extends StatsOverviewWidget
 {
     public static function canView(): bool
     {
-        return (bool) auth()->user()?->hasAnyRole([UserRole::Owner, UserRole::Manager, UserRole::Cashier]);
+        return (bool) auth()->user()?->hasRole(UserRole::Cashier);
     }
 
     protected function getStats(): array
