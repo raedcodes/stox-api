@@ -3,7 +3,6 @@
 namespace App\Filament\Business\Pages;
 
 use App\Enums\NavigationGroup;
-use App\Enums\PaymentTerms;
 use App\Enums\SupplierTransactionType;
 use App\Enums\UserRole;
 use App\Exports\AccountsPayableAgingExport;
@@ -55,23 +54,6 @@ class AccountsPayableAging extends Page
     }
 
     /**
-     * Days added to a charge's transaction_date to get its due date, per
-     * the supplier's own payment_terms — the PaymentTerms enum existed
-     * before this report but nothing ever actually consulted it to compute
-     * a due date until now.
-     */
-    protected function netDays(?PaymentTerms $terms): int
-    {
-        return match ($terms) {
-            PaymentTerms::Net15 => 15,
-            PaymentTerms::Net30 => 30,
-            PaymentTerms::Net45 => 45,
-            PaymentTerms::Net60 => 60,
-            PaymentTerms::Cod, PaymentTerms::Prepaid, PaymentTerms::DueOnReceipt, null => 0,
-        };
-    }
-
-    /**
      * @return Collection<int, array{supplier: Supplier, buckets: array}>
      */
     public function rows(): Collection
@@ -83,7 +65,7 @@ class AccountsPayableAging extends Page
             ->get()
             ->map(function (Supplier $supplier) use ($asOf) {
                 $transactions = $supplier->transactions->sortBy([['transaction_date', 'asc'], ['id', 'asc']])->values();
-                $netDays = $this->netDays($supplier->payment_terms);
+                $netDays = $supplier->payment_terms?->netDays() ?? 0;
 
                 $buckets = AgingCalculator::bucket(
                     $transactions,

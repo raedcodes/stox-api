@@ -20,6 +20,22 @@ enum PaymentTerms: string implements HasLabel
     }
 
     /**
+     * Days added to a charge's transaction_date to get its due date —
+     * shared by AccountsPayableAging and the AI assistant's aging tool so
+     * both age suppliers' outstanding charges identically.
+     */
+    public function netDays(): int
+    {
+        return match ($this) {
+            self::Net15 => 15,
+            self::Net30 => 30,
+            self::Net45 => 45,
+            self::Net60 => 60,
+            self::Cod, self::Prepaid, self::DueOnReceipt => 0,
+        };
+    }
+
+    /**
      * All payment terms selectable for a supplier, value => label.
      */
     public static function options(): array
